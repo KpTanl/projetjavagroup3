@@ -568,18 +568,6 @@ git commit -m "fix: resolve merge conflicts"
 
 ---
 
-## 12. État du projet
-
-| Élément | Statut |
-|---------|--------|
-| Projet Spring Boot | ✅ Initialisé |
-| Java 17 | ✅ Configuré |
-| Maven | ✅ Synchronisé |
-| Tests | ✅ Prêt |
-| Développement métier | 🔄 En cours |
-
----
-
 ## 📞 Besoin d'aide ?
 
 - Demandez de l'aide sur le groupe de discussion de l'équipe
@@ -665,3 +653,120 @@ User user = userRepository.findById(userId).orElseThrow();
 ```
 
 > 💡 **En résumé** : Maven + Spring Boot = un projet portable, maintenable et productif !
+
+---
+
+## 14. Synchroniser la branche principale avec votre branche personnelle
+
+> 📥 Ce guide explique comment récupérer les dernières modifications de la branche `main` et les fusionner dans votre branche personnelle.
+
+### Pourquoi synchroniser ?
+
+Quand d'autres membres de l'équipe fusionnent leurs modifications dans `main`, votre branche personnelle devient obsolète. Pour éviter les conflits majeurs, il est recommandé de synchroniser régulièrement.
+
+### Étapes pour synchroniser
+
+```bash
+# 1. Sauvegarder vos modifications en cours (si nécessaire)
+git add .
+git commit -m "wip: sauvegarde avant synchronisation"
+
+# 2. Récupérer les dernières modifications du dépôt distant
+git fetch origin
+
+# 3. Basculer sur la branche main
+git checkout main
+
+# 4. Mettre à jour votre branche main locale avec le dépôt distant
+git pull origin main
+
+# 5. Retourner sur votre branche personnelle
+git checkout votre-branche-personnelle
+exp: git checkout kepeng
+
+# 6. Fusionner les modifications de main dans votre branche
+git merge main
+
+# 7. Résoudre les conflits s'il y en a (voir section 11)
+
+# 8. Pousser votre branche mise à jour sur GitHub
+git push origin votre-branche-personnelle
+exp: git push origin kepeng
+```
+
+### Schéma visuel du flux
+
+```
+        main (distant)
+           │
+           ▼
+    ┌──────────────┐
+    │  git fetch   │  ← Récupère les infos du dépôt distant
+    └──────────────┘
+           │
+           ▼
+    ┌──────────────┐
+    │  git pull    │  ← Met à jour main locale
+    └──────────────┘
+           │
+           ▼
+    ┌──────────────┐
+    │  git merge   │  ← Fusionne main dans votre branche
+    └──────────────┘
+           │
+           ▼
+    ┌──────────────┐
+    │  git push    │  ← Pousse votre branche mise à jour
+    └──────────────┘
+```
+
+### Commandes raccourcies (une fois maîtrisé)
+
+```bash
+# Version courte pour synchroniser rapidement
+git checkout main && git pull origin main && git checkout - && git merge main && git push
+```
+
+> ⚠️ **Conseil** : Synchronisez votre branche avec `main` au moins une fois par jour pour minimiser les conflits.
+
+---
+
+## 15. État actuel du projet
+
+### Fonctionnalités implémentées
+
+| Module | Description | Statut |
+|--------|-------------|--------|
+| **Structure du projet** | Architecture Spring Boot MVC | ✅ Terminé |
+| **Base de données** | Configuration SQLite avec Spring Data JPA | ✅ Terminé |
+| **Entités** | `Utilisateur`, `Agent`, `Loueur` avec héritage | ✅ Terminé |
+| **Authentification** | Système de connexion avec rôles | ✅ Terminé |
+| **Repository** | `UtilisateurRepository` avec opérations CRUD | ✅ Terminé |
+| **Contrôleur** | `AppController` pour la gestion des utilisateurs | ✅ Terminé |
+
+### Détails des composants
+
+#### Entités (`entity/`)
+
+- **`Utilisateur.java`** : Classe de base pour tous les utilisateurs
+  - Attributs : `id`, `nom`, `prenom`, `email`, `motDePasse`, `role`
+  - Enum `Role` : `AGENT`, `LOUEUR`
+
+- **`Agent.java`** : Hérite de `Utilisateur`
+  - Représente un agent de l'agence de location
+
+- **`Loueur.java`** : Hérite de `Utilisateur`
+  - Représente un client qui loue des véhicules
+
+#### Repository (`repository/`)
+
+- **`UtilisateurRepository.java`** : Interface d'accès aux données
+  - Méthode `connecter(email, motDePasse)` : Authentification des utilisateurs
+
+#### Contrôleur (`controller/`)
+
+- **`AppController.java`** : Point d'entrée de l'application
+  - Gestion de la connexion et de la session utilisateur
+---
+
+> 📅 **Dernière mise à jour** : 6 janvier 2026
