@@ -8,12 +8,15 @@
 2. [Installation avec IntelliJ IDEA](#2-installation-avec-intellij-idea-recommandé)
 3. [Lancer le projet sans IDE](#3-lancer-le-projet-sans-ide-optionnel)
 4. [Organisation du projet](#4-organisation-du-projet)
-5. [Guide Git pour débutants](#5-guide-git-pour-débutants)
-6. [Règles de branches (très important)](#6-règles-de-branches-très-important)
-7. [Convention de commits](#7-convention-de-commits-obligatoire)
-8. [Workflow complet pas à pas](#8-workflow-complet-pas-à-pas)
-9. [Problèmes courants et solutions](#9-problèmes-courants-et-solutions)
-10. [État du projet](#10-état-du-projet)
+5. [Spring Data JPA et SQLite](#5-spring-data-jpa-et-sqlite)
+6. [Créer un compte GitHub](#6-créer-un-compte-github)
+7. [Guide Git pour débutants](#7-guide-git-pour-débutants)
+8. [Règles de branches](#8-règles-de-branches-très-important)
+9. [Convention de commits](#9-convention-de-commits-obligatoire)
+10. [Workflow complet pas à pas](#10-workflow-complet-pas-à-pas)
+11. [Problèmes courants et solutions](#11-problèmes-courants-et-solutions)
+12. [État du projet](#12-état-du-projet)
+13. [Pourquoi Maven + Spring Boot ?](#13-pourquoi-maven--spring-boot-)
 
 ---
 
@@ -30,6 +33,8 @@ IntelliJ IDEA gère automatiquement :
 - ✅ L'exécution du serveur
 
 > 💡 **Conseil** : Si vous êtes débutant, utilisez IntelliJ IDEA. Vous n'aurez pratiquement rien à configurer manuellement.
+>
+> 💡 **Alternative** : **VS Code** est également supporté ! Installez les extensions [Extension Pack for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack) et [Spring Boot Extension Pack](https://marketplace.visualstudio.com/items?itemName=vmware.vscode-boot-dev-pack) pour une expérience similaire.
 
 ---
 
@@ -91,11 +96,10 @@ Ou bien cliquez sur l'icône 🔄 (Reload) dans la fenêtre Maven (à droite).
 
 Si tout fonctionne, vous verrez dans la console :
 ```
-Tomcat started on port 8080
 Started Projetjavagroup3Application
 ```
 
-🎉 **Le backend est accessible sur** : http://localhost:8080
+🎉 **L'application est maintenant lancée !**
 
 ---
 
@@ -140,7 +144,7 @@ src/
 
 ---
 
-## 4.1 Spring Data JPA et SQLite
+## 5. Spring Data JPA et SQLite
 
 > Ce projet utilise **Spring Data JPA** avec une base de données **SQLite**.
 
@@ -293,7 +297,43 @@ public class UserController {
 
 ---
 
-## 5. Guide Git pour débutants
+## 6. Créer un compte GitHub
+
+> 🆕 **Nouveau sur GitHub ?** Suivez ces étapes pour créer votre compte.
+
+### Étape 1 : Créer un compte
+
+1. Aller sur [github.com](https://github.com)
+2. Cliquer sur **Sign up** (en haut à droite)
+3. Entrer votre adresse email
+4. Créer un mot de passe sécurisé
+5. Choisir un nom d'utilisateur (sera visible par tous)
+6. Vérifier votre email en cliquant sur le lien envoyé
+
+### Étape 2 : Configurer Git sur votre ordinateur
+
+Après avoir créé votre compte, ouvrez un terminal et configurez Git :
+
+```bash
+# Configurer votre nom (utilisez le même que sur GitHub)
+git config --global user.name "VotreNom"
+
+# Configurer votre email (utilisez le même que sur GitHub)
+git config --global user.email "votre@email.com"
+```
+
+### Étape 3 : Demander l'accès au dépôt
+
+1. Envoyez votre **nom d'utilisateur GitHub** au responsable du projet
+2. Attendez l'invitation par email
+3. Acceptez l'invitation dans l'email ou sur [github.com/notifications](https://github.com/notifications)
+4. Une fois accepté, vous pourrez pousser votre code sur le dépôt
+
+> 💡 **Conseil** : Choisissez un nom d'utilisateur professionnel car il apparaîtra dans tous vos commits.
+
+---
+
+## 7. Guide Git pour débutants
 
 > 🆕 **Nouveau sur Git ?** Cette section vous explique les commandes essentielles.
 
@@ -346,7 +386,7 @@ git push origin nom-de-ma-branche
 
 ---
 
-## 6. Règles de branches (très important)
+## 8. Règles de branches (très important)
 
 ### ⛔ Règle n°1 : Ne jamais travailler directement sur `main`
 
@@ -398,7 +438,7 @@ git branch -d feature/ma-fonctionnalite
 
 ---
 
-## 7. Convention de commits (obligatoire)
+## 9. Convention de commits (obligatoire)
 
 Pour garder un historique clair et lisible, **chaque commit doit suivre ce format** :
 
@@ -437,7 +477,7 @@ git commit -m "refactor: extract validation to separate method"
 
 ---
 
-## 8. Workflow complet pas à pas
+## 10. Workflow complet pas à pas
 
 > 📋 Suivez ces étapes à chaque fois que vous travaillez sur le projet.
 
@@ -489,7 +529,7 @@ git push origin feature/nom-de-ma-feature
 
 ---
 
-## 9. Problèmes courants et solutions
+## 11. Problèmes courants et solutions
 
 ### ❌ Erreur : "Your branch is behind 'origin/main'"
 
@@ -528,7 +568,7 @@ git commit -m "fix: resolve merge conflicts"
 
 ---
 
-## 10. État du projet
+## 12. État du projet
 
 | Élément | Statut |
 |---------|--------|
@@ -549,3 +589,79 @@ git commit -m "fix: resolve merge conflicts"
 ---
 
 > ⚠️ **Rappel final** : Toujours `git pull` avant de travailler, toujours créer une branche, toujours suivre la convention de commits !
+
+---
+
+## 13. Pourquoi Maven + Spring Boot ?
+
+### Maven
+
+**Maven** résout les problèmes de compatibilité entre différents environnements de développement (IDE). Que vous utilisiez IntelliJ IDEA, Eclipse, VS Code ou un autre éditeur, Maven garantit que :
+
+- ✅ Les dépendances sont toujours les mêmes pour tout le monde
+- ✅ La structure du projet est standardisée
+- ✅ Le build fonctionne de manière identique sur tous les environnements
+- ✅ Aucune configuration spécifique à un IDE n'est nécessaire
+
+### Spring Boot
+
+**Spring Boot** simplifie considérablement le développement en fournissant :
+
+- ✅ **Connexion SQL facile** : Spring Data JPA permet de se connecter à la base de données avec une configuration minimale
+- ✅ **Génération automatique des getters/setters** : Grâce à **Lombok** (annotation `@Data`), plus besoin d'écrire manuellement les méthodes getters et setters
+- ✅ **Auto-configuration** : Spring Boot configure automatiquement la plupart des composants
+- ✅ **Moins de code boilerplate** : Concentrez-vous sur la logique métier, pas sur la configuration
+
+#### Exemple Lombok : Avant vs Après
+
+**❌ Sans Lombok (code verbeux) :**
+```java
+public class User {
+    private Long id;
+    private String name;
+    private String email;
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+}
+```
+
+**✅ Avec Lombok (code simplifié) :**
+```java
+@Data  // Génère automatiquement tous les getters, setters, toString, equals, hashCode
+public class User {
+    private Long id;
+    private String name;
+    private String email;
+}
+```
+
+#### Exemple SQLite : Configuration simplifiée
+
+**❌ Configuration traditionnelle JDBC (complexe) :**
+```java
+// Connexion manuelle, gestion des exceptions, fermeture des ressources...
+Connection conn = DriverManager.getConnection("jdbc:sqlite:database.db");
+PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE id = ?");
+stmt.setLong(1, userId);
+ResultSet rs = stmt.executeQuery();
+// ... traitement manuel des résultats
+```
+
+**✅ Avec Spring Data JPA (simplifié) :**
+```java
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+    // C'est tout ! Spring génère automatiquement :
+    // - findById(), findAll(), save(), delete(), count()...
+}
+
+// Utilisation dans un service :
+User user = userRepository.findById(userId).orElseThrow();
+```
+
+> 💡 **En résumé** : Maven + Spring Boot = un projet portable, maintenable et productif !
