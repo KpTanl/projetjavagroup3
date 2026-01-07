@@ -26,4 +26,16 @@ public class Utilisateur {
         this.role = role;
     }
 
+    public void seConnecter() {
+
+    }
+
+    public void modifierProfil() {
+
+    }
+
+    public void signerContrat() {
+
+    }
+
 }
