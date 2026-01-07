@@ -10,7 +10,7 @@ import lombok.Data;
 @Entity
 @Table(name = "utilisateurs")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-// (Lombok) Generate getters setters et toString automatically
+@DiscriminatorColumn(name = "user_type")
 public class Utilisateur {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -3,7 +3,10 @@ package com.group3.carrental.entity;
 import java.util.Date;
 import java.util.List;
 import com.group3.carrental.service.NoteVehicule;
+import jakarta.persistence.*;
 
+@Entity
+@DiscriminatorValue("Loueur")
 public class Loueur extends Utilisateur {
     private List<String> historiqueLocations;
     private List<Integer> notesRecues;

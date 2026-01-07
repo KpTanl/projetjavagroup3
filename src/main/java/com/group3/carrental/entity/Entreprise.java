@@ -1,6 +1,10 @@
 package com.group3.carrental.entity;
+import jakarta.persistence.*;
 
+@Entity
+@DiscriminatorValue("Entreprise")
 public class Entreprise {
+    private @Id @GeneratedValue Long id;
     private String nom;
     private String catalogueTarifs;
 
@@ -19,6 +23,6 @@ public class Entreprise {
     }
 
     public void seConnecter() {
-        
+
     }
 }

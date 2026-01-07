@@ -1,10 +1,11 @@
 package com.group3.carrental.entity;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
-import com.group3.carrental.service.NoteAgent;
+import jakarta.persistence.*;
 
+@Entity
+@DiscriminatorValue("AgentPro")
 public class AgentPro extends Agent {
     private long nSiret;
     private String nomSociete;
