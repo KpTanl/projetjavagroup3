@@ -1,15 +1,26 @@
 package com.group3.carrental.entity;
 
+import jakarta.persistence.*;
+import lombok.NoArgsConstructor;
 import lombok.Data;
 
 @Data
+@NoArgsConstructor
+// Requis par Hibernate/JPA
+@Entity
+@Table(name = "utilisateurs")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 // (Lombok) Generate getters setters et toString automatically
 public class Utilisateur {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String nom;
     private String prenom;
+    @Column(unique = true, nullable = false)
     private String email;
     private String motDePasse;
+    @Enumerated(EnumType.STRING)
     protected Role role;
 
     public enum Role {
