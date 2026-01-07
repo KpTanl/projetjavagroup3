@@ -1,10 +1,14 @@
 package com.group3.carrental.entity;
 
 import lombok.Data;
+import jakarta.persistence.*;
 
 @Data
-// (Lombok) Generate getters setters et toString automatically
+@Entity
+@DiscriminatorColumn(name = "user_type")
 public class Utilisateur {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String nom;
     private String prenom;

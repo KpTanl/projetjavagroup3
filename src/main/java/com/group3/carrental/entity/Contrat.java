@@ -1,17 +1,24 @@
 package com.group3.carrental.entity;
 
 import java.util.Date;
+import jakarta.persistence.*;
 
+@Entity
+@DiscriminatorValue("Contrat")
 public class Contrat {
-    private String id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private Date dateDeb;
     private Date DateFin;
+    @ManyToOne
     private Agent agent;
+    @ManyToOne
     private Loueur loueur;
     private double prixTotal;
 
 
-    public Contrat(String id, Date dateDeb, Date dateFin, Agent agent, Loueur loueur, double prixTotal) {
+    public Contrat(Long id, Date dateDeb, Date dateFin, Agent agent, Loueur loueur, double prixTotal) {
         this.id = id;
         this.dateDeb = dateDeb;
         DateFin = dateFin;
@@ -21,7 +28,7 @@ public class Contrat {
     }
 
     public void genererPdf() {
-        
+
     }
 
 }
