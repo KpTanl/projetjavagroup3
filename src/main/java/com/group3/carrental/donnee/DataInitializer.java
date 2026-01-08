@@ -78,8 +78,8 @@ public class DataInitializer implements CommandLineRunner {
 
                 AgentPro agentPro1 = new AgentPro(0, "Société", "Admin", "admin@rentcar.com", "admin123",
                                 new ArrayList<>(), LocalDate.now(), 12345678901234L, "RentCar Pro");
-                agentPro1.ajouterNote(new NoteAgent("Service", "Très bon service", 4, agentPro1));
-                agentPro1.ajouterNote(new NoteAgent("Service", "Suuuper", 5, agentPro1));
+                agentPro1.ajouterNote(new NoteAgent(4, 5, 4, "Très bon service", 4.33, agentPro1));
+                agentPro1.ajouterNote(new NoteAgent(5, 5, 5, "Suuuper", 5.0, agentPro1));
                 utilisateurRepository.save(agentPro1);
 
                 System.out.println("    Données de démonstration initialisées :");

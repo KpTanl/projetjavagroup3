@@ -15,5 +15,5 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Intege
 
     Optional<Utilisateur> findByEmailAndMotDePasse(String email, String motDePasse);
 
-    Optional<List<Vehicule>> findByAgent(Utilisateur agent);
+    
 }

@@ -36,11 +36,8 @@ public abstract class Agent extends Utilisateur {
     }
 
     public void ajouterVehicule(Vehicule v) {
-        /* ... */ }
-    // public void souscrireOption(OptionPayante opt) {
-    // this.optionsActives.add(opt);
-    // }
-    // public abstract void accepterContrat(Contrat c);
+        v.setAgent(this);
+    }
 
     public void souscrireOption() {
 

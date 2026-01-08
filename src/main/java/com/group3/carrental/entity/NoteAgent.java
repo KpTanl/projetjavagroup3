@@ -12,13 +12,13 @@ public class NoteAgent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private double noteGestionVehicule;
-    private double noteBienveillance;
-    private double noteReactivite;
+    private int noteGestionVehicule;
+    private int noteBienveillance;
+    private int noteReactivite;
     private String commentaire;
 
     @Column(name = "note_globale")
-    private int noteGlobale;
+    private double noteGlobale = (noteGestionVehicule + noteBienveillance + noteReactivite) / 3.0;
 
     @ManyToOne
     @JoinColumn(name = "agent_id")
@@ -27,8 +27,11 @@ public class NoteAgent {
     public NoteAgent() {
     }
 
-    public NoteAgent(String critere, String commentaire, int noteGlobale, Agent agent) {
-        this.critere = critere;
+    public NoteAgent(int noteGestionVehicule, int noteBienveillance, int noteReactivite, String commentaire,
+            double noteGlobale, Agent agent) {
+        this.noteGestionVehicule = noteGestionVehicule;
+        this.noteBienveillance = noteBienveillance;
+        this.noteReactivite = noteReactivite;
         this.commentaire = commentaire;
         this.noteGlobale = noteGlobale;
         this.agent = agent;

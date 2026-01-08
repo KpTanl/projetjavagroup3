@@ -18,7 +18,7 @@ public class NoteVehicule {
     private String commentaire;
 
     @Column(name = "note_globale")
-    private double noteGlobale;
+    private double noteGlobale = (noteProprete + noteUsure + noteConfort) / 3.0;
 
     @ManyToOne
     @JoinColumn(name = "vehicule_id")

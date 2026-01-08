@@ -12,13 +12,13 @@ public class NoteLoueur {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private double noteTraitementVehicule;
-    private double noteEngagement;
-    private double noteResponsabilite;
+    private int noteTraitementVehicule;
+    private int noteEngagement;
+    private int noteResponsabilite;
     private String commentaire;
 
     @Column(name = "note_globale")
-    private double noteGlobale;
+    private double noteGlobale =  (noteTraitementVehicule + noteEngagement + noteResponsabilite) / 3.0;
 
     @ManyToOne
     @JoinColumn(name = "loueur_id")
@@ -26,7 +26,4 @@ public class NoteLoueur {
 
     public NoteLoueur() {}
 
-    public double calculerMoyenne() {
-        return (noteTraitementVehicule + noteEngagement + noteResponsabilite) / 3.0;
-    }
 }
