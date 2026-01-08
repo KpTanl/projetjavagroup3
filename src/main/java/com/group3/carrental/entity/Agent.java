@@ -9,10 +9,9 @@ import jakarta.persistence.*;
 @DiscriminatorValue("Agent")
 public abstract class Agent extends Utilisateur {
 
-    @ElementCollection
-    @CollectionTable(name = "agent_notes", joinColumns = @JoinColumn(name = "agent_id", referencedColumnName = "id"))
-    @Column(name = "note")
-    private List<Integer> notesRecues;
+    @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NoteAgent> notesRecues;
+
 
     @Column(name = "date_recu_facture")
     private LocalDate dateRecuFacture;
@@ -29,7 +28,7 @@ public abstract class Agent extends Utilisateur {
     protected Agent() {
     }
 
-    public Agent(int id, String nom, String prenom, String email, String motDePasse, List<Integer> notesRecues,
+    public Agent(int id, String nom, String prenom, String email, String motDePasse, List<NoteAgent> notesRecues,
             LocalDate dateRecuFacture2) {
         super(id, nom, prenom, email, motDePasse, Role.Agent);
         this.notesRecues = notesRecues;
