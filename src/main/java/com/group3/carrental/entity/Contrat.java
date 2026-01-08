@@ -2,9 +2,13 @@ package com.group3.carrental.entity;
 
 import java.util.Date;
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @DiscriminatorValue("Contrat")
+@Data
+@NoArgsConstructor
 public class Contrat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,22 +19,24 @@ public class Contrat {
     private Agent agent;
     @ManyToOne
     private Loueur loueur;
+    @ManyToOne
+    private Vehicule vehicule;
     private double prixTotal;
 
-    public Contrat() {
-    }
-
-    public Contrat(Long id, Date dateDeb, Date dateFin, Agent agent, Loueur loueur, double prixTotal) {
-        this.id = id;
+    public Contrat(Date dateDeb, Date dateFin, Agent agent, Loueur loueur, Vehicule vehicule, double prixTotal) {
         this.dateDeb = dateDeb;
-        DateFin = dateFin;
+        this.DateFin = dateFin;
         this.agent = agent;
         this.loueur = loueur;
+        this.vehicule = vehicule;
         this.prixTotal = prixTotal;
     }
 
     public void genererPdf() {
 
+    }
+
+    public class StatutContrat {
     }
 
 }
