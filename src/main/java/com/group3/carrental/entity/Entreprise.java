@@ -22,15 +22,15 @@ public class Entreprise {
     }
 
     public double definirTarif(String type, String modele) {
-        // TODO: 实现定价逻辑
+        // TODO : Implémenter la logique de tarification
         return 0.0;
     }
 
     public void importerFichierTarifs() {
-        // TODO: 实现导入文件逻辑
+        // TODO : Implémenter la logique d'importation de fichiers
     }
 
     public void seConnecter() {
-        // TODO: 实现连接逻辑
+        // TODO : Implémenter la logique de connexion
     }
 }

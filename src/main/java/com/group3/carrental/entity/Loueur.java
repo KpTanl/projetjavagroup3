@@ -15,17 +15,31 @@ public class Loueur extends Utilisateur {
     @Transient
     private List<Contrat> historiqueLocations;
 
-    @OneToMany(mappedBy = "loueur", cascade = CascadeType.ALL, orphanRemoval = true)
+    // EAGER: charger immediatement pour eviter LazyInitializationException
+    @OneToMany(mappedBy = "loueur", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<NoteLoueur> notesRecues;
 
     public Loueur(int id, String nom, String prenom, String email, String motDePasse,
-                  List<Contrat> historiqueLocations, List<NoteLoueur> notesRecues) {
+            List<Contrat> historiqueLocations, List<NoteLoueur> notesRecues) {
         super(id, nom, prenom, email, motDePasse, Role.Loueur);
         this.historiqueLocations = historiqueLocations;
         this.notesRecues = notesRecues;
     }
 
-    public Vehicule rechercherVehicule() { return null; }
-    public void choisirDate(List<Date> d) {}
-    public void choisirAssurance(List<Assurance> a) {}
+    public Vehicule rechercherVehicule() {
+        return null;
+    }
+
+    public NoteVehicule noterVehicule() {
+        return null;
+    }
+
+    public void choisirDate(List<Date> d) {
+
+    }
+
+    public void choisirAssurance(List<Assurance> a) {
+
+    }
+
 }

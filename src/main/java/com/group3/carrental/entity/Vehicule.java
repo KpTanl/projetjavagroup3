@@ -27,8 +27,9 @@ public class Vehicule {
     @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<NoteVehicule> notesRecues = new ArrayList<>();
 
-    // Disponibilités
-    @ElementCollection
+    // Disponibilites - EAGER: charger immediatement pour eviter
+    // LazyInitializationException
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "vehicule_disponibilites", joinColumns = @JoinColumn(name = "vehicule_id"))
     @Column(name = "date_disponible")
     private List<LocalDate> datesDisponibles = new ArrayList<>();
@@ -86,9 +87,11 @@ public class Vehicule {
         if (notesRecues == null || notesRecues.isEmpty()) {
             return 0.0;
         }
-        return notesRecues.stream()
+        double noteMoyenne = notesRecues.stream()
                 .mapToDouble(NoteVehicule::calculerNoteGlobale)
                 .average()
                 .orElse(0.0);
+        noteMoyenne = Math.round(noteMoyenne * 100.0) / 100.0;
+        return noteMoyenne;
     }
 }

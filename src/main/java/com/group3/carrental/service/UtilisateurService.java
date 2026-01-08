@@ -7,8 +7,6 @@ import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.entity.Vehicule.EtatVehicule;
 import com.group3.carrental.entity.Vehicule.TypeVehicule;
-import com.group3.carrental.entity.Agent;
-
 import com.group3.carrental.repository.UtilisateurRepository;
 import com.group3.carrental.repository.VehiculeRepository;
 
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class UtilisateurService {
@@ -101,8 +98,8 @@ public class UtilisateurService {
         Vehicule vehicule = new Vehicule(type, inputMarque, inputModele,
                 inputCouleur, etat, rue, codePostal, ville);
         vehicule.ajouterDisponibilite(LocalDate.now().plusDays(1));
+        vehicule.setAgent(agent); // Associer l'agent avant de sauvegarder
         vehiculeRepository.save(vehicule);
-        agent.ajouterVehicule(vehicule);
         System.out.println("Vehicule ajoute reussi !!");
 
     }
@@ -121,7 +118,12 @@ public class UtilisateurService {
         afficherLesVehiculesDeAgent(agent);
         System.out.println("ID du vehicule a supprimer: ");
         int id = scanner.nextInt();
-        vehiculeRepository.deleteById(id);
+        Vehicule vehicule = vehiculeRepository.findById(id).orElse(null);
+        if (vehicule == null || vehicule.getAgent() == null || vehicule.getAgent().getId() != agent.getId()) {
+            System.out.println("Erreur: Vehicule non trouve ou ne vous appartient pas.");
+            return;
+        }
+        vehiculeRepository.delete(vehicule);
         System.out.println("Vehicule supprime reussi !!");
     }
 
@@ -131,8 +133,8 @@ public class UtilisateurService {
         System.out.println("ID du vehicule a modifier: ");
         int id = scanner.nextInt();
         Vehicule vehicule = vehiculeRepository.findById(id).orElse(null);
-        if (vehicule == null) {
-            System.out.println("Vehicule non trouve !!");
+        if (vehicule == null || vehicule.getAgent() == null || vehicule.getAgent().getId() != agent.getId()) {
+            System.out.println("Erreur: Vehicule non trouve ou ne vous appartient pas.");
             return;
         }
         System.out.println("Type (Voiture(1) / Camion(2) / Moto(3)): ");

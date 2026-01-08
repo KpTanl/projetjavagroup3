@@ -9,7 +9,8 @@ import jakarta.persistence.*;
 @DiscriminatorValue("Agent")
 public abstract class Agent extends Utilisateur {
 
-    @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, orphanRemoval = true)
+    // EAGER: charger immediatement pour eviter LazyInitializationException
+    @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<NoteAgent> notesRecues;
 
     @Column(name = "date_recu_facture")
@@ -33,10 +34,6 @@ public abstract class Agent extends Utilisateur {
         this.notesRecues = notesRecues;
         this.dateRecuFacture = dateRecuFacture2;
         // TODO Auto-generated constructor stub
-    }
-
-    public void ajouterVehicule(Vehicule v) {
-        v.setAgent(this);
     }
 
     public void souscrireOption() {

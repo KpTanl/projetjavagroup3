@@ -47,12 +47,56 @@ public class VehiculeService {
         System.out.println("Total vehicules en base: " + vehicules.size());
     }
 
-    // Retourne tous les véhicules.
+    /**
+     * Affiche uniquement les véhicules disponibles (etat = Non_loué).
+     */
+    public void afficherVehiculesDisponibles() {
+        List<Vehicule> disponibles = vehiculeRepository.findByEtat(Vehicule.EtatVehicule.Non_loué);
+
+        System.out.println("\n--- Véhicules disponibles (non loués) ---");
+        if (disponibles.isEmpty()) {
+            System.out.println("Aucun véhicule disponible pour le moment.");
+        } else {
+            for (Vehicule v : disponibles) {
+                System.out.println("------------------------------------");
+                System.out.println("ID: " + v.getId());
+                System.out.println("Type: " + v.getType());
+                System.out.println("Vehicule: " + v.getMarque() + " " + v.getModele());
+                System.out.println("Lieu: " + v.getLocalisationComplete());
+                System.out.println("Etat: " + v.getEtat());
+                System.out.println("Note moyenne: " + v.calculerNoteMoyenne() + "/5");
+                System.out.println("------------------------------------");
+            }
+        }
+        System.out.println("Total véhicules disponibles: " + disponibles.size());
+    }
+
+    /**
+     * Retourne tous les véhicules.
+     */
     public List<Vehicule> getTousLesVehicules() {
         return vehiculeRepository.findAll();
     }
 
-        // Ajouter un véhicule pour agent
+    /**
+     * Récupère un véhicule par son ID.
+     */
+    public Vehicule getVehiculeById(int id) {
+        return vehiculeRepository.findById(id).orElse(null);
+    }
+
+    /**
+     * Récupère un véhicule disponible (etat = Non_loué) par son ID.
+     * Retourne null si le véhicule n'existe pas ou n'est pas disponible.
+     */
+    public Vehicule getVehiculeDisponibleById(int id) {
+        Vehicule v = getVehiculeById(id);
+        if (v == null)
+            return null;
+        return v.getEtat() == Vehicule.EtatVehicule.Non_loué ? v : null;
+    }
+
+    // Ajouter un véhicule pour agent
     public void ajouterVehicule() {
         System.out.println("\n--- Ajout d'un vehicule ---");
         System.out.println("Type (Voiture(1) / Camion(2) / Moto(3)): ");
@@ -107,7 +151,6 @@ public class VehiculeService {
         vehicule.ajouterDisponibilite(LocalDate.now().plusDays(1));
         vehiculeRepository.save(vehicule);
         System.out.println("Vehicule ajoute reussi !!");
-
     }
 
     // Supprimer un véhicule pour agent
@@ -115,4 +158,59 @@ public class VehiculeService {
         vehiculeRepository.deleteById(id);
     }
 
+    // Filtrer les vehicules
+    public void filtrerVehicules() {
+        List<Vehicule> vehicules = vehiculeRepository.findAll();
+        if (vehicules.isEmpty()) {
+            System.out.println("Aucun vehicule disponible.");
+            return;
+        }
+
+        String villesPossibles = vehicules.stream()
+                .map(Vehicule::getVilleLocalisation)
+                .distinct()
+                .collect(java.util.stream.Collectors.joining(" / "));
+        System.out.println("Dans quelle ville cherchez-vous ? (Disponibles : " + villesPossibles + ")");
+        String villeSaisie = scanner.nextLine();
+
+        String marquesPossibles = vehicules.stream()
+                .map(Vehicule::getMarque)
+                .distinct()
+                .collect(java.util.stream.Collectors.joining(" / "));
+        System.out.println("Quelle marque ? (Disponibles : " + marquesPossibles + ")");
+        String marqueSaisie = scanner.nextLine();
+
+        String couleursPossibles = vehicules.stream()
+                .map(Vehicule::getCouleur)
+                .distinct()
+                .collect(java.util.stream.Collectors.joining(" / "));
+        System.out.println("Quelle couleur ? (Disponibles : " + couleursPossibles + ")");
+        String couleurSaisie = scanner.nextLine();
+
+        System.out.println("Note minimale souhaitee (ex: 4.0 ou Entree pour 0) :");
+        String noteInput = scanner.nextLine();
+        double noteSaisie = noteInput.isEmpty() ? 0.0 : Double.parseDouble(noteInput);
+
+        LocalDate demain = LocalDate.now().plusDays(1);
+        List<Vehicule> resultats = vehicules.stream()
+                .filter(v -> v.getVilleLocalisation().equalsIgnoreCase(villeSaisie))
+                .filter(v -> v.getDatesDisponibles().contains(demain))
+                .filter(v -> v.getMarque().equalsIgnoreCase(marqueSaisie))
+                .filter(v -> v.calculerNoteMoyenne() >= noteSaisie)
+                .filter(v -> v.getCouleur().equalsIgnoreCase(couleurSaisie))
+                .collect(java.util.stream.Collectors.toList());
+
+        System.out.println("\n--- RESULTATS CORRESPONDANTS ---");
+        if (resultats.isEmpty()) {
+            System.out.println("Aucun vehicule ne correspond a vos criteres.");
+        } else {
+            for (Vehicule v : resultats) {
+                System.out.println("------------------------------------");
+                System.out.println("Vehicule : " + v.getMarque() + " " + v.getModele() + " (" + v.getCouleur() + ")");
+                System.out.println("Lieu : " + v.getLocalisationComplete());
+                System.out.println("Note : " + v.calculerNoteMoyenne() + "/5");
+                System.out.println("------------------------------------");
+            }
+        }
+    }
 }
