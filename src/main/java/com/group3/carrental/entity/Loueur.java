@@ -30,9 +30,16 @@ public class Loueur extends Utilisateur {
         return null;
     }
 
+    public NoteVehicule noterVehicule() {
+        return null;
+    }
+
     public void choisirDate(List<Date> d) {
+
     }
 
     public void choisirAssurance(List<Assurance> a) {
+
     }
+
 }
