@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 
 import com.group3.carrental.entity.AgentPro;
 import com.group3.carrental.entity.Loueur;
+import com.group3.carrental.entity.NoteVehicule;
 import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.repository.UtilisateurRepository;
 import com.group3.carrental.repository.VehiculeRepository;
-import com.group3.carrental.service.NoteVehicule;
 
 /**
  * Initialise les données de démonstration au démarrage de l'application.

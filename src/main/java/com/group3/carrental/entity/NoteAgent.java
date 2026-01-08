@@ -1,7 +1,9 @@
 package com.group3.carrental.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
+@Data
 @Entity
 @Table(name = "note_agent")
 public class NoteAgent {
@@ -10,7 +12,9 @@ public class NoteAgent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String critere;
+    private double noteGestionVehicule;
+    private double noteBienveillance;
+    private double noteReactivite;
     private String commentaire;
 
     @Column(name = "note_globale")
