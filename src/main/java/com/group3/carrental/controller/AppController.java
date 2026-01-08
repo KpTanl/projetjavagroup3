@@ -59,8 +59,9 @@ public class AppController {
         System.out.println("\nMenu de Visitor : ");
         System.out.println("1. Se connecter");
         System.out.println("2. Pas de compte ? S'inscrire");
-        System.out.println("3. afficher les voitures");
-        System.out.println("4. afficher les agents");
+        System.out.println("3. Afficher les voitures");
+        System.out.println("4. Filtrer les voitures");
+        System.out.println("5. Afficher les agents");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         switch (choice) {
@@ -116,6 +117,9 @@ public class AppController {
                 vehiculeService.afficherTousLesVehicules();
                 break;
             case 4:
+                vehiculeService.filtrerVehicules();
+                break;
+            case 5:
                 break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
@@ -133,6 +137,7 @@ public class AppController {
         System.out.println("2. Supprimer une voiture");
         System.out.println("3. Modifier une voiture");
         System.out.println("4. Afficher les voitures");
+        System.out.println("5. Filtrer les voitures");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         switch (choice) {
@@ -143,6 +148,10 @@ public class AppController {
             case 3:
                 break;
             case 4:
+                vehiculeService.afficherTousLesVehicules();
+                break;
+            case 5:
+                vehiculeService.filtrerVehicules();
                 break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
@@ -160,6 +169,7 @@ public class AppController {
         System.out.println("2. Supprimer mes vehicules");
         System.out.println("3. Modifier mes vehicules");
         System.out.println("4. Afficher mes vehicules");
+        System.out.println("5. Filtrer les voitures");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         switch (choice) {
@@ -174,6 +184,9 @@ public class AppController {
                 break;
             case 4:
                 utilisateurService.afficherLesVehiculesDeAgent(currentUser);
+                break;
+            case 5:
+                vehiculeService.filtrerVehicules();
                 break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");

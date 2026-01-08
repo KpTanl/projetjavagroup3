@@ -52,7 +52,7 @@ public class VehiculeService {
         return vehiculeRepository.findAll();
     }
 
-        // Ajouter un véhicule pour agent
+    // Ajouter un véhicule pour agent
     public void ajouterVehicule() {
         System.out.println("\n--- Ajout d'un vehicule ---");
         System.out.println("Type (Voiture(1) / Camion(2) / Moto(3)): ");
@@ -113,6 +113,62 @@ public class VehiculeService {
     // Supprimer un véhicule pour agent
     public void supprimerVehicule(int id) {
         vehiculeRepository.deleteById(id);
+    }
+
+    // Filtrer les vehicules
+    public void filtrerVehicules() {
+        List<Vehicule> vehicules = vehiculeRepository.findAll();
+        if (vehicules.isEmpty()) {
+            System.out.println("Aucun vehicule disponible.");
+            return;
+        }
+
+        String villesPossibles = vehicules.stream()
+                .map(Vehicule::getVilleLocalisation)
+                .distinct()
+                .collect(java.util.stream.Collectors.joining(" / "));
+        System.out.println("Dans quelle ville cherchez-vous ? (Disponibles : " + villesPossibles + ")");
+        String villeSaisie = scanner.nextLine();
+
+        String marquesPossibles = vehicules.stream()
+                .map(Vehicule::getMarque)
+                .distinct()
+                .collect(java.util.stream.Collectors.joining(" / "));
+        System.out.println("Quelle marque ? (Disponibles : " + marquesPossibles + ")");
+        String marqueSaisie = scanner.nextLine();
+
+        String couleursPossibles = vehicules.stream()
+                .map(Vehicule::getCouleur)
+                .distinct()
+                .collect(java.util.stream.Collectors.joining(" / "));
+        System.out.println("Quelle couleur ? (Disponibles : " + couleursPossibles + ")");
+        String couleurSaisie = scanner.nextLine();
+
+        System.out.println("Note minimale souhaitee (ex: 4.0 ou Entree pour 0) :");
+        String noteInput = scanner.nextLine();
+        double noteSaisie = noteInput.isEmpty() ? 0.0 : Double.parseDouble(noteInput);
+
+        LocalDate demain = LocalDate.now().plusDays(1);
+        List<Vehicule> resultats = vehicules.stream()
+                .filter(v -> v.getVilleLocalisation().equalsIgnoreCase(villeSaisie))
+                .filter(v -> v.getDatesDisponibles().contains(demain))
+                .filter(v -> v.getMarque().equalsIgnoreCase(marqueSaisie))
+                .filter(v -> v.calculerNoteMoyenne() >= noteSaisie)
+                .filter(v -> v.getCouleur().equalsIgnoreCase(couleurSaisie))
+                .collect(java.util.stream.Collectors.toList());
+
+        System.out.println("\n--- RESULTATS CORRESPONDANTS ---");
+        if (resultats.isEmpty()) {
+            System.out.println("Aucun vehicule ne correspond a vos criteres.");
+        } else {
+            for (Vehicule v : resultats) {
+                System.out.println("------------------------------------");
+                System.out.println("Vehicule : " + v.getMarque() + " " + v.getModele() + " (" + v.getCouleur() + ")");
+                System.out.println("Lieu : " + v.getLocalisationComplete());
+                System.out.println("Note : " + v.calculerNoteMoyenne() + "/5");
+                System.out.println("------------------------------------");
+            }
+        }
     }
 
 }
