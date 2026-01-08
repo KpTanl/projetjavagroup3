@@ -6,7 +6,6 @@ import java.util.List;
 import java.time.LocalDate;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.group3.carrental.service.NoteVehicule;
 
 @Data
 @NoArgsConstructor
@@ -24,14 +23,17 @@ public class Vehicule {
     private String villeLocalisation;
 
     // Notes reçues - stockées dans une table séparée vehicule_notes
+    // Notes reçues
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "vehicule_notes", joinColumns = @JoinColumn(name = "vehicule_id"))
     private List<NoteVehicule> notesRecues = new ArrayList<>();
 
-    // Assurance enlevée - relation gérée côté Assurance (une assurance couvre
-    // plusieurs véhicules)
-
+    // Disponibilités
+    @ElementCollection
+    @CollectionTable(name = "vehicule_disponibilites", joinColumns = @JoinColumn(name = "vehicule_id"))
+    @Column(name = "date_disponible")
     private List<LocalDate> datesDisponibles = new ArrayList<>();
+
 
     @Enumerated(EnumType.STRING)
     private EtatVehicule etat;
