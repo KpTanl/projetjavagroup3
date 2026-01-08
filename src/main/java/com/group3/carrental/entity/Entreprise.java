@@ -1,24 +1,36 @@
 package com.group3.carrental.entity;
 
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@Entity
+@Table(name = "Entreprise")
 public class Entreprise {
-    private String nom;
+    @Id
+    private String Nsiret;
+    private String RaisonSoc;
+    @Column(columnDefinition = "TEXT")
     private String catalogueTarifs;
 
-
-    public Entreprise(String nom, String catalogueTarifs) {
-        this.nom = nom;
+    public Entreprise(String Nsiret, String RaisonSoc, String catalogueTarifs) {
+        this.Nsiret = Nsiret;
+        this.RaisonSoc = RaisonSoc;
         this.catalogueTarifs = catalogueTarifs;
     }
 
     public double definirTarif(String type, String modele) {
-        return (Double) null;
+        // TODO: 实现定价逻辑
+        return 0.0;
     }
 
     public void importerFichierTarifs() {
-
+        // TODO: 实现导入文件逻辑
     }
 
     public void seConnecter() {
-        
+        // TODO: 实现连接逻辑
     }
 }
