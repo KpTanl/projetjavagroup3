@@ -71,7 +71,6 @@ public class AppController {
         System.out.println("3. Afficher les voitures");
         System.out.println("4. Filtrer les voitures");
         System.out.println("5. Afficher les agents");
-        System.out.println("6. Consulter les assurances");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         switch (choice) {
@@ -131,9 +130,6 @@ public class AppController {
                 break;
             case 5:
                 // TODO: Afficher les agents
-                break;
-            case 6:
-                afficherAssurances();
                 break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
