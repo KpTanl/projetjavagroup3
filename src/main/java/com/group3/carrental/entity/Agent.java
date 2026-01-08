@@ -12,7 +12,6 @@ public abstract class Agent extends Utilisateur {
     @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NoteAgent> notesRecues;
 
-
     @Column(name = "date_recu_facture")
     private LocalDate dateRecuFacture;
 
@@ -37,11 +36,8 @@ public abstract class Agent extends Utilisateur {
     }
 
     public void ajouterVehicule(Vehicule v) {
-        /* ... */ }
-    // public void souscrireOption(OptionPayante opt) {
-    // this.optionsActives.add(opt);
-    // }
-    // public abstract void accepterContrat(Contrat c);
+        v.setAgent(this);
+    }
 
     public void souscrireOption() {
 
@@ -57,5 +53,10 @@ public abstract class Agent extends Utilisateur {
 
     public void proposerLieuDepose() {
 
+    }
+
+    public void ajouterNote(NoteAgent note) {
+        this.notesRecues.add(note);
+        note.setAgent(this);
     }
 }

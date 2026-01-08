@@ -13,6 +13,7 @@ import com.group3.carrental.service.VehiculeService;
 public class AppController {
     private static final Scanner sc = new Scanner(System.in);
     private static UserRole currentUserRole = UserRole.Visitor;
+    private Utilisateur currentUser = null; // Utilisateur connecté
 
     private final UtilisateurService utilisateurService;
     private final VehiculeService vehiculeService;
@@ -70,6 +71,7 @@ public class AppController {
                 String motDePasse = sc.next();
                 Utilisateur utilisateur = utilisateurService.login(email, motDePasse).orElse(null);
                 if (utilisateur != null) {
+                    currentUser = utilisateur; // Sauvegarder l'utilisateur
                     System.out.println("Connexion reussie !");
                     switch (utilisateur.getRole()) {
                         case Loueur:
@@ -154,20 +156,24 @@ public class AppController {
 
     private void displayMenuAgent() {
         System.out.println("\nMenu de Agent : ");
-        System.out.println("1. Ajouter une voiture");
-        System.out.println("2. Supprimer une voiture");
-        System.out.println("3. Modifier une voiture");
-        System.out.println("4. Afficher les voitures");
+        System.out.println("1. Ajouter mes vehicules");
+        System.out.println("2. Supprimer mes vehicules");
+        System.out.println("3. Modifier mes vehicules");
+        System.out.println("4. Afficher mes vehicules");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         switch (choice) {
             case 1:
+                utilisateurService.ajouterVehicule(currentUser);
                 break;
             case 2:
+                utilisateurService.supprimerVehicule(currentUser);
                 break;
             case 3:
+                utilisateurService.modifierVehicule(currentUser);
                 break;
             case 4:
+                utilisateurService.afficherLesVehiculesDeAgent(currentUser);
                 break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
