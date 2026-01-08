@@ -24,5 +24,14 @@ public class NoteAgent {
     @JoinColumn(name = "agent_id")
     private Agent agent;
 
-    public NoteAgent() {}
+    public NoteAgent() {
+    }
+
+    public NoteAgent(String critere, String commentaire, int noteGlobale, Agent agent) {
+        this.critere = critere;
+        this.commentaire = commentaire;
+        this.noteGlobale = noteGlobale;
+        this.agent = agent;
+    }
+
 }
