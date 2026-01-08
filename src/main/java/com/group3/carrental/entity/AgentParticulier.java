@@ -8,11 +8,13 @@ import jakarta.persistence.*;
 @DiscriminatorValue("AgentParticulier")
 public class AgentParticulier extends Agent {
 
+    public AgentParticulier() {
+    }
+
     public AgentParticulier(int id, String nom, String prenom, String email, String motDePasse,
             List<Integer> notesRecues, LocalDate dateRecuFacture) {
         super(id, nom, prenom, email, motDePasse, notesRecues, dateRecuFacture);
-        //TODO Auto-generated constructor stub
+        // TODO Auto-generated constructor stub
     }
 
-    
 }

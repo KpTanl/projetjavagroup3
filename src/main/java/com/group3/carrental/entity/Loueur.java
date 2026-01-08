@@ -11,7 +11,11 @@ public class Loueur extends Utilisateur {
     private List<String> historiqueLocations;
     private List<Integer> notesRecues;
 
-    public Loueur(int id, String nom, String prenom, String email, String motDePasse, List<String> historiqueLocations, List<Integer> notesRecues) {
+    public Loueur() {
+    }
+
+    public Loueur(int id, String nom, String prenom, String email, String motDePasse, List<String> historiqueLocations,
+            List<Integer> notesRecues) {
         super(id, nom, prenom, email, motDePasse, Role.Loueur);
         this.historiqueLocations = historiqueLocations;
         this.notesRecues = notesRecues;

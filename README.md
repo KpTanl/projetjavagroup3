@@ -119,7 +119,7 @@ Ou bien cliquez sur l'icône 🔄 (Reload) dans la fenêtre Maven (à droite).
 
 ```bash
 # Windows
-./mvnw.cmd spring-boot:run
+.\mvnw.cmd spring-boot:run
 
 # Mac/Linux
 ./mvnw spring-boot:run
@@ -413,6 +413,156 @@ User user = userRepository.findById(userId).orElseThrow();
 ```
 
 > 💡 **En résumé** : Maven + Spring Boot = un projet portable, maintenable et productif !
+
+### Comprendre Spring : IoC et Injection de Dépendances
+
+> 🎓 **Section éducative** : Cette partie explique les concepts fondamentaux de Spring pour mieux comprendre le code du projet.
+
+#### Qu'est-ce que l'Inversion de Contrôle (IoC) ?
+
+En programmation traditionnelle, **vous** créez les objets :
+```java
+// ❌ Approche traditionnelle : création manuelle
+UserRepository userRepo = new UserRepository();
+UserService userService = new UserService(userRepo);
+```
+
+Avec Spring, le **framework** crée et gère les objets pour vous :
+```java
+// ✅ Approche Spring : le framework s'en charge
+@Service
+public class UserService {
+    @Autowired
+    private UserRepository userRepository; // Injecté automatiquement par Spring
+}
+```
+
+> 💡 **IoC (Inversion of Control)** = Vous ne créez plus les objets vous-même, Spring s'en charge.
+
+#### Qu'est-ce que l'Injection de Dépendances (DI) ?
+
+L'**injection de dépendances** est le mécanisme par lequel Spring fournit automatiquement les objets nécessaires.
+
+```java
+@Component
+public class AppController {
+    
+    private final UtilisateurRepository utilisateurRepository;
+    private final VehiculeService vehiculeService;
+    
+    // Spring "injecte" automatiquement les dépendances via le constructeur
+    @Autowired
+    public AppController(UtilisateurRepository utilisateurRepository, 
+                         VehiculeService vehiculeService) {
+        this.utilisateurRepository = utilisateurRepository;
+        this.vehiculeService = vehiculeService;
+    }
+}
+```
+
+**Pourquoi c'est utile ?**
+- ✅ Pas besoin de créer manuellement les objets
+- ✅ Les dépendances (comme la connexion à la base de données) sont configurées automatiquement
+- ✅ Le code est plus modulaire et testable
+
+#### Pourquoi `context.getBean()` au lieu de `new` ?
+
+Dans `CarRentalApplication.java`, vous verrez :
+
+```java
+// ❌ IMPOSSIBLE : AppController a besoin de dépendances !
+AppController app = new AppController(); // Erreur : pas de constructeur sans paramètre
+
+// ✅ CORRECT : Récupérer l'instance gérée par Spring
+ApplicationContext context = SpringApplication.run(...);
+AppController app = context.getBean(AppController.class);
+```
+
+**Explication simple** :
+1. `AppController` a besoin de `UtilisateurRepository` et `VehiculeService` pour fonctionner
+2. Ces dépendances sont connectées à la base de données et configurées par Spring
+3. Si on faisait `new AppController()`, ces dépendances seraient `null` → `NullPointerException`
+4. En utilisant `getBean()`, on récupère une instance **déjà configurée** avec toutes ses dépendances
+
+#### Les annotations Spring importantes
+
+| Annotation | Rôle | Exemple |
+|------------|------|---------|
+| `@SpringBootApplication` | Point d'entrée de l'application, active l'auto-configuration | Classe principale |
+| `@Component` | Marque une classe comme "bean" géré par Spring | `@Component public class AppController` |
+| `@Service` | Spécialisation de `@Component` pour la logique métier | `@Service public class VehiculeService` |
+| `@Repository` | Spécialisation de `@Component` pour l'accès aux données | `@Repository public interface VehiculeRepository` |
+| `@Autowired` | Demande à Spring d'injecter la dépendance | Sur constructeur ou champ |
+| `@Entity` | Marque une classe comme table de base de données | `@Entity public class Vehicule` |
+
+### Comprendre JPA : Mapping Objet-Relationnel
+
+#### Qu'est-ce que JPA ?
+
+**JPA (Java Persistence API)** permet de sauvegarder des objets Java directement dans une base de données, sans écrire de requêtes SQL manuellement.
+
+```java
+// Votre classe Java
+@Entity
+public class Vehicule {
+    @Id
+    @GeneratedValue
+    private Long id;
+    private String marque;
+    private String modele;
+}
+
+// Correspond automatiquement à cette table SQL :
+// CREATE TABLE vehicule (
+//     id BIGINT PRIMARY KEY AUTO_INCREMENT,
+//     marque VARCHAR(255),
+//     modele VARCHAR(255)
+// );
+```
+
+#### Le Repository : Accès simplifié aux données
+
+```java
+@Repository
+public interface VehiculeRepository extends JpaRepository<Vehicule, Long> {
+    
+    // ✅ Méthodes CRUD automatiques (pas besoin de les écrire !) :
+    // - save(Vehicule v)        → INSERT ou UPDATE
+    // - findById(Long id)       → SELECT WHERE id = ?
+    // - findAll()               → SELECT *
+    // - deleteById(Long id)     → DELETE WHERE id = ?
+    // - count()                 → SELECT COUNT(*)
+    
+    // ✅ Méthodes personnalisées (Spring génère le SQL automatiquement) :
+    List<Vehicule> findByMarque(String marque);        // → WHERE marque = ?
+    List<Vehicule> findByVilleLocalisation(String v);  // → WHERE ville_localisation = ?
+}
+```
+
+> 💡 **Magie de Spring Data JPA** : Vous déclarez juste le nom de la méthode, Spring génère automatiquement la requête SQL !
+
+#### Flux complet : De l'objet à la base de données
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Controller    │ ──▶ │    Service      │ ──▶ │   Repository    │ ──▶ │   Base de       │
+│  (AppController)│     │(VehiculeService)│     │(VehiculeRepo)   │     │   données       │
+└─────────────────┘     └─────────────────┘     └─────────────────┘     └─────────────────┘
+        │                       │                       │                       │
+        │  Reçoit les          │  Logique              │  Accès aux            │  Stockage
+        │  entrées             │  métier               │  données              │  persistant
+        │  utilisateur         │                       │  (CRUD)               │
+```
+
+#### Résumé : Pourquoi utiliser Spring + JPA ?
+
+| Sans Spring + JPA | Avec Spring + JPA |
+|-------------------|-------------------|
+| Créer manuellement toutes les connexions DB | Configuration automatique |
+| Écrire des requêtes SQL à la main | Méthodes CRUD générées automatiquement |
+| Gérer manuellement les transactions | Gestion automatique des transactions |
+| Code répétitif (boilerplate) | Code concis et lisible |
+| Dépendances créées manuellement | Injection de dépendances automatique |
 
 ---
 
@@ -906,40 +1056,823 @@ git commit -m "fix: resolve merge conflicts"
 
 ## 15. État actuel du projet
 
+> 📅 **Dernière mise à jour** : 8 janvier 2026
+
 ### Fonctionnalités implémentées
 
 | Module | Description | Statut |
 |--------|-------------|--------|
 | **Structure du projet** | Architecture Spring Boot MVC | ✅ Terminé |
 | **Base de données** | Configuration SQLite avec Spring Data JPA | ✅ Terminé |
-| **Entités** | `Utilisateur`, `Agent`, `Loueur` avec héritage | ✅ Terminé |
-| **Authentification** | Système de connexion avec rôles | ✅ Terminé |
-| **Repository** | `UtilisateurRepository` avec opérations CRUD | ✅ Terminé |
-| **Contrôleur** | `AppController` pour la gestion des utilisateurs | ✅ Terminé |
+| **Entités utilisateurs** | `Utilisateur`, `Agent`, `AgentPro`, `AgentParticulier`, `Loueur` | ✅ Terminé |
+| **Entités métier** | `Vehicule`, `Contrat`, `Assurance`, `Entreprise` | ✅ Terminé |
+| **Repositories** | `UtilisateurRepository`, `VehiculeRepository` | ✅ Terminé |
+| **Services** | `VehiculeService`, `UtilisateurService` | ✅ Terminé |
+| **Données de démo** | `DataInitializer` pour initialisation automatique | ✅ Terminé |
 
-### Détails des composants
+---
 
-#### Entités (`entity/`)
+### Structure des entités
 
-- **`Utilisateur.java`** : Classe de base pour tous les utilisateurs
-  - Attributs : `id`, `nom`, `prenom`, `email`, `motDePasse`, `role`
-  - Enum `Role` : `AGENT`, `LOUEUR`
+```
+entity/
+├── Utilisateur.java          ← Classe de base (SINGLE_TABLE inheritance)
+│   ├── Agent.java            ← Classe abstraite pour les agents
+│   │   ├── AgentPro.java         ← Agent professionnel (SIRET, société)
+│   │   └── AgentParticulier.java ← Agent particulier
+│   └── Loueur.java           ← Client qui loue des véhicules
+├── Vehicule.java             ← Véhicule avec notes et disponibilités
+├── Contrat.java              ← Contrat de location
+├── Assurance.java            ← Assurance pour véhicules
+├── Entreprise.java           ← Entreprise de location
+└── GestionCatalogue.java     ← Gestion du catalogue
+```
 
-- **`Agent.java`** : Hérite de `Utilisateur`
-  - Représente un agent de l'agence de location
+---
 
-- **`Loueur.java`** : Hérite de `Utilisateur`
-  - Représente un client qui loue des véhicules
+### 🔍 JPA dans notre code : Explications détaillées
 
-#### Repository (`repository/`)
+#### Qu'est-ce que JPA fait concrètement ?
 
-- **`UtilisateurRepository.java`** : Interface d'accès aux données
-  - Méthode `connecter(email, motDePasse)` : Authentification des utilisateurs
+JPA (Java Persistence API) transforme automatiquement vos **objets Java** en **tables de base de données**. Voici comment cela fonctionne dans notre projet :
 
-#### Contrôleur (`controller/`)
+#### 1️⃣ `@Entity` et `@Table` : Définir une table
 
-- **`AppController.java`** : Point d'entrée de l'application
-  - Gestion de la connexion et de la session utilisateur
+```java
+@Entity                        // Cette classe = une table dans la BD
+@Table(name = "vehicule")      // Nom de la table (optionnel)
+public class Vehicule {
+    // ...
+}
+```
+
+**Résultat dans SQLite :**
+```sql
+CREATE TABLE vehicule (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    marque TEXT,
+    modele TEXT,
+    ...
+);
+```
+
+#### 2️⃣ `@Id` et `@GeneratedValue` : Clé primaire auto-générée
+
+```java
+@Id                                              // Clé primaire
+@GeneratedValue(strategy = GenerationType.IDENTITY)  // Auto-incrémentation
+private int id;
+```
+
+**Résultat :** La BD génère automatiquement l'ID (1, 2, 3, ...)
+
+#### 3️⃣ `@Enumerated` : Stocker les énumérations
+
+```java
+@Enumerated(EnumType.STRING)   // Stocke "Voiture" au lieu de 0
+private TypeVehicule type;
+
+public enum TypeVehicule {
+    Voiture,    // Stocké comme texte "Voiture"
+    Camion,     // Stocké comme texte "Camion"
+    Moto        // Stocké comme texte "Moto"
+}
+```
+
+**Sans `EnumType.STRING` :** Les valeurs seraient stockées comme 0, 1, 2 (difficile à comprendre dans la BD)
+
+#### 4️⃣ `@ElementCollection` : Collections de valeurs simples
+
+```java
+// Dans Agent.java
+@ElementCollection
+@CollectionTable(
+    name = "agent_notes",                        // Nom de la table séparée
+    joinColumns = @JoinColumn(name = "agent_id") // Colonne de lien
+)
+@Column(name = "note")
+private List<Integer> notesRecues;
+```
+
+**Résultat :** JPA crée une table séparée `agent_notes` :
+
+| agent_id | note |
+|----------|------|
+| 1 | 4 |
+| 1 | 5 |
+| 2 | 3 |
+
+#### 5️⃣ `@ManyToOne` : Relation plusieurs-à-un
+
+```java
+// Dans Contrat.java
+@ManyToOne
+private Agent agent;   // Plusieurs contrats peuvent avoir le même agent
+
+@ManyToOne
+private Loueur loueur; // Plusieurs contrats peuvent avoir le même loueur
+```
+
+**Résultat dans la table `contrat` :**
+
+| id | date_deb | date_fin | agent_id | loueur_id | prix_total |
+|-----|----------|----------|----------|-----------|------------|
+| 1 | 2026-01-01 | 2026-01-05 | 1 | 2 | 250.00 |
+
+#### 6️⃣ `@Inheritance` : Héritage de classes
+
+```java
+// Dans Utilisateur.java
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)  // Une seule table pour toute la hiérarchie
+@DiscriminatorColumn(name = "user_type")               // Colonne pour distinguer les types
+public class Utilisateur { ... }
+
+// Dans Agent.java
+@Entity
+@DiscriminatorValue("Agent")  // Valeur dans la colonne user_type
+public abstract class Agent extends Utilisateur { ... }
+
+// Dans AgentPro.java
+@Entity
+@DiscriminatorValue("AgentPro")
+public class AgentPro extends Agent { ... }
+```
+
+**Résultat : Une seule table `utilisateurs` contient tous les types :**
+
+| id | user_type | nom | prenom | email | n_siret | nom_societe |
+|----|-----------|-----|--------|-------|---------|-------------|
+| 1 | AgentPro | Martin | Jean | jean@mail.com | 123456789 | RentCar |
+| 2 | AgentParticulier | Dupont | Marie | marie@mail.com | NULL | NULL |
+| 3 | Loueur | Bernard | Pierre | pierre@mail.com | NULL | NULL |
+
+#### 7️⃣ `@Transient` : Ne PAS sauvegarder un champ
+
+```java
+@Transient  // Ce champ n'est PAS sauvegardé dans la BD
+private double prixCalcule;  // Valeur calculée à la volée
+```
+
+**⚠️ Attention :** Si vous mettez `@Transient` sur une relation importante (comme `agent` dans `Contrat`), cette information sera **perdue** après redémarrage !
+
+---
+
+### Détails des entités
+
+#### `Utilisateur.java` - Classe de base
+
+| Attribut | Type | JPA Annotation | Description |
+|----------|------|----------------|-------------|
+| id | int | `@Id @GeneratedValue` | Clé primaire auto-générée |
+| nom | String | - | Nom de famille |
+| prenom | String | - | Prénom |
+| email | String | `@Column(unique=true)` | Email unique |
+| motDePasse | String | - | Mot de passe |
+| role | Role | `@Enumerated(STRING)` | Rôle (Loueur/Agent) |
+
+#### `Agent.java` - Agent de location
+
+| Attribut | Type | JPA Annotation | Description |
+|----------|------|----------------|-------------|
+| notesRecues | List\<Integer\> | `@ElementCollection` | Notes reçues des clients |
+| dateRecuFacture | LocalDate | `@Column` | Date de réception facture |
+| role | RoleAgent | `@Enumerated(STRING)` | Type d'agent |
+
+#### `Vehicule.java` - Véhicule
+
+| Attribut | Type | JPA Annotation | Description |
+|----------|------|----------------|-------------|
+| id | int | `@Id @GeneratedValue` | Clé primaire |
+| type | TypeVehicule | `@Enumerated(STRING)` | Voiture/Camion/Moto |
+| marque | String | - | Marque du véhicule |
+| modele | String | - | Modèle |
+| couleur | String | - | Couleur |
+| etat | EtatVehicule | `@Enumerated(STRING)` | Loué/Non_loué |
+| notesRecues | List\<NoteVehicule\> | `@ElementCollection` | Évaluations |
+| datesDisponibles | List\<LocalDate\> | - | Dates disponibles |
+
+#### `Contrat.java` - Contrat de location
+
+| Attribut | Type | JPA Annotation | Description |
+|----------|------|----------------|-------------|
+| id | Long | `@Id @GeneratedValue` | Clé primaire |
+| dateDeb | Date | `@Temporal` | Date début |
+| dateFin | Date | `@Temporal` | Date fin |
+| agent | Agent | `@ManyToOne` | Agent responsable |
+| loueur | Loueur | `@ManyToOne` | Client |
+| prixTotal | double | - | Prix total |
+
+---
+
+### Repository (`repository/`)
+
+- **`UtilisateurRepository.java`** : Accès aux utilisateurs
+  - Méthodes CRUD automatiques via `JpaRepository`
+  - `findByEmail(String email)` : Recherche par email
+
+- **`VehiculeRepository.java`** : Accès aux véhicules
+  - Méthodes CRUD automatiques
+  - `findByType(TypeVehicule type)` : Filtrer par type
+
+---
+
+### Service (`service/`)
+
+- **`VehiculeService.java`** : Logique métier véhicules
+  - `afficherTousLesVehicules()` : Liste tous les véhicules
+  - `ajouterVehicule(Vehicule v)` : Ajoute un véhicule
+
+- **`UtilisateurService.java`** : Logique métier utilisateurs
+  - `connecter(email, mdp)` : Authentification
+  - `inscrire(Utilisateur u)` : Inscription
+
+---
+
+### Initialisation des données (`donnee/`)
+
+- **`DataInitializer.java`** : Initialise les données de démonstration
+  - S'exécute au démarrage si la BD est vide
+  - Crée 2 véhicules (Paris, Toulouse)
+  - Crée 2 loueurs + 1 agent professionnel
+
+---
+
+### 📚 JPA Repository API : Guide d'utilisation
+
+#### Qu'est-ce que JpaRepository ?
+
+`JpaRepository` est une interface Spring Data qui fournit automatiquement des méthodes pour manipuler la base de données. **Vous n'avez pas besoin d'écrire de SQL !**
+
+```java
+// Définition d'un Repository
+@Repository
+public interface VehiculeRepository extends JpaRepository<Vehicule, Integer> {
+    // JpaRepository<TypeEntité, TypeClePrimaire>
+    // Toutes les méthodes CRUD sont automatiquement disponibles !
+}
+```
+
+---
+
+#### 🔧 Méthodes CRUD automatiques
+
+Ces méthodes sont **disponibles sans aucun code** dès que vous créez un Repository :
+
+| Méthode | Description | Exemple |
+|---------|-------------|---------|
+| `save(entity)` | Créer ou mettre à jour | `vehiculeRepository.save(v)` |
+| `findById(id)` | Trouver par ID | `vehiculeRepository.findById(1)` |
+| `findAll()` | Récupérer tous | `vehiculeRepository.findAll()` |
+| `deleteById(id)` | Supprimer par ID | `vehiculeRepository.deleteById(1)` |
+| `count()` | Compter le nombre total | `vehiculeRepository.count()` |
+| `existsById(id)` | Vérifier si existe | `vehiculeRepository.existsById(1)` |
+
+---
+
+#### 📝 Exemples de code concrets
+
+##### 1. Créer / Sauvegarder une entité
+
+```java
+// Créer un nouveau véhicule
+Vehicule v = new Vehicule(
+    Vehicule.TypeVehicule.Voiture,
+    "Renault", "Clio", "Bleu",
+    Vehicule.EtatVehicule.Non_loué,
+    "Rue de la Paix", "75000", "Paris"
+);
+
+// Sauvegarder dans la base de données
+vehiculeRepository.save(v);  // INSERT INTO vehicule ...
+
+// L'ID est automatiquement généré !
+System.out.println("ID généré : " + v.getId());  // Ex: "ID généré : 1"
+```
+
+##### 2. Rechercher par ID
+
+```java
+// findById retourne un Optional<Vehicule> (peut être vide si non trouvé)
+Optional<Vehicule> optVehicule = vehiculeRepository.findById(1);
+
+// Méthode 1 : Vérifier si présent
+if (optVehicule.isPresent()) {
+    Vehicule v = optVehicule.get();
+    System.out.println("Trouvé : " + v.getMarque());
+}
+
+// Méthode 2 : Avec valeur par défaut
+Vehicule v = vehiculeRepository.findById(1).orElse(null);
+
+// Méthode 3 : Lancer une exception si non trouvé
+Vehicule v = vehiculeRepository.findById(1)
+    .orElseThrow(() -> new RuntimeException("Véhicule non trouvé !"));
+```
+
+##### 3. Récupérer tous les éléments
+
+```java
+// Récupérer tous les véhicules
+List<Vehicule> tousLesVehicules = vehiculeRepository.findAll();
+
+// Afficher
+for (Vehicule v : tousLesVehicules) {
+    System.out.println(v.getMarque() + " " + v.getModele());
+}
+
+// Ou avec Java Stream
+vehiculeRepository.findAll().forEach(v -> 
+    System.out.println(v.getMarque())
+);
+```
+
+##### 4. Mettre à jour une entité
+
+```java
+// Récupérer l'entité existante
+Vehicule v = vehiculeRepository.findById(1).orElseThrow();
+
+// Modifier les champs
+v.setCouleur("Rouge");
+v.setEtat(Vehicule.EtatVehicule.Loué);
+
+// Sauvegarder (UPDATE car l'ID existe déjà)
+vehiculeRepository.save(v);  // UPDATE vehicule SET couleur='Rouge' WHERE id=1
+```
+
+##### 5. Supprimer une entité
+
+```java
+// Supprimer par ID
+vehiculeRepository.deleteById(1);
+
+// Ou supprimer l'objet directement
+Vehicule v = vehiculeRepository.findById(1).orElseThrow();
+vehiculeRepository.delete(v);
+
+// Supprimer tous
+vehiculeRepository.deleteAll();  // ⚠️ Attention !
+```
+
+---
+
+#### 🔍 Méthodes de requête personnalisées
+
+Spring Data peut **générer automatiquement** des requêtes SQL à partir du **nom de la méthode** !
+
+```java
+@Repository
+public interface VehiculeRepository extends JpaRepository<Vehicule, Integer> {
+    
+    // Spring génère : SELECT * FROM vehicule WHERE marque = ?
+    List<Vehicule> findByMarque(String marque);
+    
+    // SELECT * FROM vehicule WHERE type = ?
+    List<Vehicule> findByType(TypeVehicule type);
+    
+    // SELECT * FROM vehicule WHERE ville_localisation = ?
+    List<Vehicule> findByVilleLocalisation(String ville);
+    
+    // SELECT * FROM vehicule WHERE marque = ? AND couleur = ?
+    List<Vehicule> findByMarqueAndCouleur(String marque, String couleur);
+    
+    // SELECT * FROM vehicule WHERE etat = ? ORDER BY marque ASC
+    List<Vehicule> findByEtatOrderByMarqueAsc(EtatVehicule etat);
+    
+    // SELECT COUNT(*) FROM vehicule WHERE etat = ?
+    long countByEtat(EtatVehicule etat);
+    
+    // SELECT * FROM vehicule WHERE marque LIKE '%keyword%'
+    List<Vehicule> findByMarqueContaining(String keyword);
+}
+```
+
+##### Mots-clés supportés dans les noms de méthode
+
+| Mot-clé | Exemple | SQL généré |
+|---------|---------|------------|
+| `And` | `findByMarqueAndCouleur` | `WHERE marque = ? AND couleur = ?` |
+| `Or` | `findByMarqueOrCouleur` | `WHERE marque = ? OR couleur = ?` |
+| `Between` | `findByPrixBetween` | `WHERE prix BETWEEN ? AND ?` |
+| `LessThan` | `findByPrixLessThan` | `WHERE prix < ?` |
+| `GreaterThan` | `findByPrixGreaterThan` | `WHERE prix > ?` |
+| `Like` | `findByMarqueLike` | `WHERE marque LIKE ?` |
+| `Containing` | `findByMarqueContaining` | `WHERE marque LIKE '%?%'` |
+| `OrderBy` | `findByTypeOrderByMarqueAsc` | `ORDER BY marque ASC` |
+| `Not` | `findByEtatNot` | `WHERE etat != ?` |
+| `In` | `findByTypeIn(List)` | `WHERE type IN (?, ?, ?)` |
+
+---
+
+#### 🏗️ Utilisation dans un Service
+
+Voici comment utiliser le Repository dans une classe Service :
+
+```java
+@Service
+public class VehiculeService {
+    
+    private final VehiculeRepository vehiculeRepository;
+    
+    // Injection de dépendance via constructeur
+    @Autowired
+    public VehiculeService(VehiculeRepository vehiculeRepository) {
+        this.vehiculeRepository = vehiculeRepository;
+    }
+    
+    // --- MÉTHODES MÉTIER ---
+    
+    public List<Vehicule> afficherTousLesVehicules() {
+        return vehiculeRepository.findAll();
+    }
+    
+    public Vehicule trouverParId(int id) {
+        return vehiculeRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Véhicule ID " + id + " non trouvé"));
+    }
+    
+    public void ajouterVehicule(Vehicule v) {
+        vehiculeRepository.save(v);
+    }
+    
+    public List<Vehicule> rechercherParVille(String ville) {
+        return vehiculeRepository.findByVilleLocalisation(ville);
+    }
+    
+    public List<Vehicule> vehiculesDisponibles() {
+        return vehiculeRepository.findByEtat(Vehicule.EtatVehicule.Non_loué);
+    }
+    
+    public void supprimerVehicule(int id) {
+        if (!vehiculeRepository.existsById(id)) {
+            throw new RuntimeException("Véhicule non trouvé !");
+        }
+        vehiculeRepository.deleteById(id);
+    }
+}
+```
+
+---
+
+#### 🎯 Exemple complet : Flux de données
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│  Controller  │────▶│   Service    │────▶│  Repository  │────▶│   Database   │
+│              │     │              │     │              │     │   (SQLite)   │
+└──────────────┘     └──────────────┘     └──────────────┘     └──────────────┘
+     
+   Utilisateur        Logique métier      Accès aux données     Stockage
+   
+   // Ex: AppController demande la liste
+   vehiculeService.afficherTousLesVehicules()
+                           │
+                           ▼
+                   vehiculeRepository.findAll()
+                           │
+                           ▼
+                   SELECT * FROM vehicule
+                           │
+                           ▼
+                   List<Vehicule> retournée
+```
+
+---
+
+#### ⚡ Récapitulatif rapide
+
+| Besoin | Code |
+|--------|------|
+| Créer/Modifier | `repository.save(entity)` |
+| Lire par ID | `repository.findById(id).orElseThrow()` |
+| Lire tous | `repository.findAll()` |
+| Supprimer | `repository.deleteById(id)` |
+| Compter | `repository.count()` |
+| Recherche custom | Créer méthode `findByXxx()` dans Repository |
+
+---
+
+### 💉 Injection de Dépendances (Dependency Injection)
+
+#### 📖 Qu'est-ce qu'une "dépendance" ?
+
+Une **dépendance** est un objet dont votre classe a besoin pour fonctionner.
+
+**Exemple concret :**
+```java
+public class VehiculeService {
+    // VehiculeService a BESOIN de VehiculeRepository pour accéder à la BD
+    // → VehiculeRepository est une DÉPENDANCE de VehiculeService
+    private VehiculeRepository vehiculeRepository;
+    
+    public List<Vehicule> getAll() {
+        return vehiculeRepository.findAll();  // Sans repository, impossible !
+    }
+}
+```
+
+**Autre exemple du quotidien :**
+- Une voiture a besoin d'un moteur → Le moteur est une **dépendance** de la voiture
+- Un service a besoin d'un repository → Le repository est une **dépendance** du service
+
+---
+
+#### 🤔 Pourquoi l'injection de dépendances ?
+
+**❌ Problème : Créer les dépendances soi-même**
+
+```java
+public class VehiculeService {
+    // ❌ Création manuelle avec "new"
+    private VehiculeRepository vehiculeRepository = new VehiculeRepository();
+}
+```
+
+**Pourquoi ça ne marche pas ?**
+1. `VehiculeRepository` est une **interface**, on ne peut pas faire `new` dessus
+2. Même si on pouvait, l'objet ne serait pas connecté à la base de données
+3. Spring gère la configuration JPA, pas nous
+
+**✅ Solution : Laisser Spring créer et fournir les dépendances**
+
+```java
+@Service
+public class VehiculeService {
+    private final VehiculeRepository vehiculeRepository;
+    
+    // ✅ Spring fournit automatiquement un repository configuré et fonctionnel
+    public VehiculeService(VehiculeRepository vehiculeRepository) {
+        this.vehiculeRepository = vehiculeRepository;
+    }
+}
+```
+
+---
+
+#### 📝 Comment écrire l'injection de dépendances ? (Étape par étape)
+
+##### Étape 1 : Annoter votre classe
+
+Ajoutez une annotation pour que Spring reconnaisse votre classe :
+
+```java
+@Service    // Pour les classes de logique métier
+// ou @Component  // Pour les classes génériques
+// ou @Repository // Pour les classes d'accès aux données
+public class VehiculeService {
+    // ...
+}
+```
+
+##### Étape 2 : Déclarer les dépendances comme champs `final`
+
+```java
+@Service
+public class VehiculeService {
+    
+    // Déclarer les dépendances dont vous avez besoin
+    private final VehiculeRepository vehiculeRepository;      // Dépendance 1
+    private final UtilisateurRepository utilisateurRepository; // Dépendance 2
+}
+```
+
+> 💡 `final` = la dépendance ne peut pas être changée après création (plus sûr)
+
+##### Étape 3 : Créer un constructeur qui reçoit les dépendances
+
+```java
+@Service
+public class VehiculeService {
+    
+    private final VehiculeRepository vehiculeRepository;
+    private final UtilisateurRepository utilisateurRepository;
+    
+    // Constructeur : Spring appelle ce constructeur et fournit les objets
+    public VehiculeService(VehiculeRepository vehiculeRepository,
+                           UtilisateurRepository utilisateurRepository) {
+        this.vehiculeRepository = vehiculeRepository;
+        this.utilisateurRepository = utilisateurRepository;
+    }
+}
+```
+
+##### Étape 4 : Utiliser les dépendances dans vos méthodes
+
+```java
+@Service
+public class VehiculeService {
+    
+    private final VehiculeRepository vehiculeRepository;
+    private final UtilisateurRepository utilisateurRepository;
+    
+    public VehiculeService(VehiculeRepository vehiculeRepository,
+                           UtilisateurRepository utilisateurRepository) {
+        this.vehiculeRepository = vehiculeRepository;
+        this.utilisateurRepository = utilisateurRepository;
+    }
+    
+    // ✅ Maintenant vous pouvez utiliser les dépendances !
+    public List<Vehicule> afficherTousLesVehicules() {
+        return vehiculeRepository.findAll();
+    }
+    
+    public Utilisateur trouverUtilisateur(int id) {
+        return utilisateurRepository.findById(id).orElse(null);
+    }
+}
+```
+
+---
+
+#### 🎯 Modèle complet à copier-coller
+
+```java
+import org.springframework.stereotype.Service;
+// import des repositories nécessaires
+
+@Service  // ← Étape 1 : Annoter la classe
+public class MonService {
+    
+    // ← Étape 2 : Déclarer les dépendances (final)
+    private final MonRepository monRepository;
+    private final AutreRepository autreRepository;
+    
+    // ← Étape 3 : Constructeur avec les dépendances en paramètres
+    public MonService(MonRepository monRepository, AutreRepository autreRepository) {
+        this.monRepository = monRepository;
+        this.autreRepository = autreRepository;
+    }
+    
+    // ← Étape 4 : Utiliser les dépendances
+    public List<MonEntite> getAll() {
+        return monRepository.findAll();
+    }
+}
+```
+
+---
+
+#### ✨ Résumé : Comment ça marche ?
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                  AU DÉMARRAGE DE L'APPLICATION                  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. Spring scanne le code et trouve @Service, @Repository...   │
+│                          ↓                                      │
+│  2. Spring crée les objets dans le bon ordre :                  │
+│     - D'abord VehiculeRepository (pas de dépendance)            │
+│     - Ensuite VehiculeService (dépend de VehiculeRepository)    │
+│                          ↓                                      │
+│  3. Spring injecte automatiquement les dépendances              │
+│     via les constructeurs                                       │
+│                          ↓                                      │
+│  4. Vos classes sont prêtes à l'emploi !                        │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+
+
+#### 🎯 Exemple concret dans notre projet
+
+##### DataInitializer.java
+
+```java
+@Component  // Marque cette classe comme un bean Spring
+public class DataInitializer implements CommandLineRunner {
+
+    // Dépendances déclarées
+    private final VehiculeRepository vehiculeRepository;
+    private final UtilisateurRepository utilisateurRepository;
+
+    // ✅ Spring injecte les repositories automatiquement
+    public DataInitializer(VehiculeRepository vehiculeRepository, 
+                           UtilisateurRepository utilisateurRepository) {
+        this.vehiculeRepository = vehiculeRepository;
+        this.utilisateurRepository = utilisateurRepository;
+    }
+
+    @Override
+    public void run(String... args) {
+        // On peut utiliser les repositories directement !
+        vehiculeRepository.save(new Vehicule(...));
+        utilisateurRepository.save(new Loueur(...));
+    }
+}
+```
+
+##### AppController.java
+
+```java
+@Component
+public class AppController {
+
+    private final UtilisateurRepository utilisateurRepository;
+    private final VehiculeService vehiculeService;
+
+    // Spring injecte les deux dépendances
+    @Autowired
+    public AppController(UtilisateurRepository utilisateurRepository,
+                         VehiculeService vehiculeService) {
+        this.utilisateurRepository = utilisateurRepository;
+        this.vehiculeService = vehiculeService;
+    }
+
+    public void startApp() {
+        // Utilisation des dépendances injectées
+        vehiculeService.afficherTousLesVehicules();
+    }
+}
+```
+
+---
+
+#### 🔄 Comment Spring sait quoi injecter ?
+
+Spring scanne les classes annotées et crée automatiquement des instances :
+
+```
+Au démarrage de l'application :
+┌─────────────────────────────────────────────────────────────────┐
+│ 1. Spring scanne toutes les classes                             │
+│                                                                 │
+│ 2. Trouve les annotations :                                     │
+│    @Component, @Service, @Repository, @Controller               │
+│                                                                 │
+│ 3. Crée UNE instance de chaque (Singleton par défaut)           │
+│                                                                 │
+│ 4. Analyse les constructeurs pour trouver les dépendances       │
+│                                                                 │
+│ 5. Injecte les bonnes instances dans les bons constructeurs     │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Exemple de chaîne d'injection :**
+
+```
+VehiculeRepository (créé par Spring)
+        │
+        ▼
+VehiculeService (reçoit VehiculeRepository)
+        │
+        ▼
+AppController (reçoit VehiculeService + UtilisateurRepository)
+        │
+        ▼
+CarRentalApplication (récupère AppController via context.getBean())
+```
+
+---
+
+#### ❓ Pourquoi `context.getBean()` dans main() ?
+
+Dans `CarRentalApplication.java` :
+
+```java
+public static void main(String[] args) {
+    // Spring démarre et crée tous les beans
+    ApplicationContext context = SpringApplication.run(CarRentalApplication.class, args);
+    
+    // ❌ IMPOSSIBLE : new AppController() 
+    // → Le constructeur demande des dépendances qu'on n'a pas !
+    
+    // ✅ CORRECT : Récupérer le bean géré par Spring
+    AppController app = context.getBean(AppController.class);
+    app.startApp();
+}
+```
+
+**Explication :**
+- La méthode `main()` est statique et n'est pas gérée par Spring
+- On doit donc demander à Spring de nous donner l'instance d'`AppController`
+- Cette instance a TOUTES ses dépendances déjà injectées et configurées
+
+---
+
+#### 📋 Annotations importantes pour l'injection
+
+| Annotation | Usage | Exemple |
+|------------|-------|---------|
+| `@Component` | Classe générique gérée par Spring | Utilitaires, helpers |
+| `@Service` | Logique métier | `VehiculeService` |
+| `@Repository` | Accès aux données | `VehiculeRepository` |
+| `@Controller` | Contrôleur web (MVC) | Endpoints REST |
+| `@Autowired` | Demande l'injection d'une dépendance | Sur constructeur/champ |
+
+---
+
+#### ⚡ Récapitulatif DI
+
+| Concept | Explication |
+|---------|-------------|
+| **DI** | Spring crée et fournit les objets automatiquement |
+| **Bean** | Objet géré par Spring (classe annotée @Component, etc.) |
+| **@Autowired** | "Donne-moi cette dépendance s'il te plaît" |
+| **Constructeur** | Meilleure façon d'injecter (final + testable) |
+| **context.getBean()** | Récupérer un bean depuis le code non-géré |
 
 ---
 

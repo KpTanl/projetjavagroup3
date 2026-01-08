@@ -4,10 +4,14 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDate;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import com.group3.carrental.service.NoteVehicule;
 
+@Data
+@NoArgsConstructor
 @Entity
-@DiscriminatorValue("Vehicule")
+@Table(name = "vehicule")
 public class Vehicule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,10 +22,15 @@ public class Vehicule {
     private String rueLocalisation;
     private String cPostalLocalisation;
     private String villeLocalisation;
-    @OneToMany
+
+    // Notes reçues - stockées dans une table séparée vehicule_notes
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "vehicule_notes", joinColumns = @JoinColumn(name = "vehicule_id"))
     private List<NoteVehicule> notesRecues = new ArrayList<>();
-    @OneToMany
-    private Assurance assurance;
+
+    // Assurance enlevée - relation gérée côté Assurance (une assurance couvre
+    // plusieurs véhicules)
+
     private List<LocalDate> datesDisponibles = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
@@ -41,10 +50,8 @@ public class Vehicule {
         Moto
     }
 
-    public Vehicule(int id, TypeVehicule type, String marque, String modele, String couleur, EtatVehicule etat,
-            String rueLocalisation,
-            String cPostalLocalisation, String villeLocalisation, List<NoteVehicule> notesRecues, Assurance assurance) {
-        this.id = id;
+    public Vehicule(TypeVehicule type, String marque, String modele, String couleur, EtatVehicule etat,
+            String rueLocalisation, String cPostalLocalisation, String villeLocalisation) {
         this.type = type;
         this.marque = marque;
         this.modele = modele;
@@ -53,51 +60,32 @@ public class Vehicule {
         this.rueLocalisation = rueLocalisation;
         this.cPostalLocalisation = cPostalLocalisation;
         this.villeLocalisation = villeLocalisation;
-        this.notesRecues = (notesRecues != null) ? notesRecues : new ArrayList<>();
-        this.assurance = assurance;
     }
 
-    // --- METHODES DE CONSULTATION ---
-
-    // public double getNoteMoyenne() {
-    // if (notesRecues == null || notesRecues.isEmpty()) return 0.0;
-    // return notesRecues.stream()
-    // .mapToDouble(NoteVehicule::getNoteGlobale)
-    // .average()
-    // .orElse(0.0);
-    // }
+    // --- METHODES ---
 
     public String getLocalisationComplete() {
         return rueLocalisation + ", " + cPostalLocalisation + " " + villeLocalisation;
-    }
-
-    public List<LocalDate> getDatesDisponibles() {
-        return datesDisponibles;
     }
 
     public void ajouterDisponibilite(LocalDate date) {
         this.datesDisponibles.add(date);
     }
 
-    // --- GETTERS ---
-    public String getMarque() {
-        return marque;
+    public void ajouterNote(NoteVehicule note) {
+        this.notesRecues.add(note);
     }
 
-    public String getModele() {
-        return modele;
-    }
-
-    public String getCouleur() {
-        return couleur;
-    }
-
-    public String getVilleLocalisation() {
-        return villeLocalisation;
-    }
-
-    public String getNoteMoyenne() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getNoteMoyenne'");
+    /**
+     * Calcule la note moyenne de toutes les évaluations
+     */
+    public double calculerNoteMoyenne() {
+        if (notesRecues == null || notesRecues.isEmpty()) {
+            return 0.0;
+        }
+        return notesRecues.stream()
+                .mapToDouble(NoteVehicule::calculerNoteGlobale)
+                .average()
+                .orElse(0.0);
     }
 }

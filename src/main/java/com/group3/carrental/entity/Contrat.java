@@ -17,6 +17,8 @@ public class Contrat {
     private Loueur loueur;
     private double prixTotal;
 
+    public Contrat() {
+    }
 
     public Contrat(Long id, Date dateDeb, Date dateFin, Agent agent, Loueur loueur, double prixTotal) {
         this.id = id;
