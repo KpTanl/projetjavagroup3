@@ -200,14 +200,19 @@ public class AppController {
         System.out.println("\n=== Location de Véhicule ===");
         
         try {
-            // Étape 1: Afficher et choisir un véhicule
-            vehiculeService.afficherTousLesVehicules();
-            System.out.print("\nEntrez l'ID du véhicule à louer : ");
+            // Étape 1: Afficher et choisir un véhicule (uniquement les non loués)
+            vehiculeService.afficherVehiculesDisponibles();
+            System.out.print("\nEntrez l'ID du véhicule à louer (disponible) : ");
             int vehiculeId = sc.nextInt();
             sc.nextLine(); // Consommer retour ligne
-            
-            // Récupérer le véhicule (pour l'instant on simule, à améliorer)
-            System.out.println("Véhicule sélectionné (ID: " + vehiculeId + ")");
+
+            // Vérifier que le véhicule sélectionné est disponible (Non_loué)
+            com.group3.carrental.entity.Vehicule vehiculeSelectionne = vehiculeService.getVehiculeDisponibleById(vehiculeId);
+            if (vehiculeSelectionne == null) {
+                System.out.println("Le véhicule choisi n'est pas disponible (non loué) ou n'existe pas.");
+                return;
+            }
+            System.out.println("Véhicule sélectionné: " + vehiculeSelectionne.getMarque() + " " + vehiculeSelectionne.getModele() + " (ID: " + vehiculeId + ")");
             
             // Étape 2: Choisir les dates
             System.out.print("Nombre de jours de location : ");

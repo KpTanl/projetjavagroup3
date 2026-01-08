@@ -83,9 +83,11 @@ public class Vehicule {
         if (notesRecues == null || notesRecues.isEmpty()) {
             return 0.0;
         }
-        return notesRecues.stream()
+        double noteMoyenne = notesRecues.stream()
                 .mapToDouble(NoteVehicule::calculerNoteGlobale)
                 .average()
                 .orElse(0.0);
+        noteMoyenne = Math.round(noteMoyenne * 100.0) / 100.0;
+        return noteMoyenne;
     }
 }

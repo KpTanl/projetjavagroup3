@@ -46,9 +46,50 @@ public class VehiculeService {
     }
 
     /**
+     * Affiche uniquement les véhicules disponibles (etat = Non_loué).
+     */
+    public void afficherVehiculesDisponibles() {
+        List<Vehicule> disponibles = vehiculeRepository.findByEtat(Vehicule.EtatVehicule.Non_loué);
+
+        System.out.println("\n--- Véhicules disponibles (non loués) ---");
+        if (disponibles.isEmpty()) {
+            System.out.println("Aucun véhicule disponible pour le moment.");
+        } else {
+            for (Vehicule v : disponibles) {
+                System.out.println("------------------------------------");
+                System.out.println("ID: " + v.getId());
+                System.out.println("Type: " + v.getType());
+                System.out.println("Vehicule: " + v.getMarque() + " " + v.getModele());
+                System.out.println("Lieu: " + v.getLocalisationComplete());
+                System.out.println("Etat: " + v.getEtat());
+                System.out.println("Note moyenne: " + v.calculerNoteMoyenne() + "/5");
+                System.out.println("------------------------------------");
+            }
+        }
+        System.out.println("Total véhicules disponibles: " + disponibles.size());
+    }
+
+    /**
      * Retourne tous les véhicules.
      */
     public List<Vehicule> getTousLesVehicules() {
         return vehiculeRepository.findAll();
+    }
+
+    /**
+     * Récupère un véhicule par son ID.
+     */
+    public Vehicule getVehiculeById(int id) {
+        return vehiculeRepository.findById(id).orElse(null);
+    }
+
+    /**
+     * Récupère un véhicule disponible (etat = Non_loué) par son ID.
+     * Retourne null si le véhicule n'existe pas ou n'est pas disponible.
+     */
+    public Vehicule getVehiculeDisponibleById(int id) {
+        Vehicule v = getVehiculeById(id);
+        if (v == null) return null;
+        return v.getEtat() == Vehicule.EtatVehicule.Non_loué ? v : null;
     }
 }
