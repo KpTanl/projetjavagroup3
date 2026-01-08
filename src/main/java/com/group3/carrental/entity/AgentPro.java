@@ -14,7 +14,7 @@ public class AgentPro extends Agent {
     }
 
     public AgentPro(int id, String nom, String prenom, String email, String motDePasse,
-            List<Integer> notesRecues, LocalDate dateRecuFacture,
+            List<NoteAgent> notesRecues, LocalDate dateRecuFacture,
             long nSiret, String nomSociete) {
 
         super(id, nom, prenom, email, motDePasse, notesRecues, dateRecuFacture);
