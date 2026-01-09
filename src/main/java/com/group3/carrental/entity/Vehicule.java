@@ -1,20 +1,23 @@
 package com.group3.carrental.entity;
 
 import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.time.LocalDate;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @Entity
 @Table(name = "vehicule")
 public class Vehicule {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     private String marque;
     private String modele;
     private String couleur;
@@ -22,18 +25,13 @@ public class Vehicule {
     private String cPostalLocalisation;
     private String villeLocalisation;
 
-    // Notes reçues - stockées dans une table séparée vehicule_notes
-    // Notes reçues
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "vehicule_notes", joinColumns = @JoinColumn(name = "vehicule_id"))
+    @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NoteVehicule> notesRecues = new ArrayList<>();
 
-    // Disponibilités
     @ElementCollection
     @CollectionTable(name = "vehicule_disponibilites", joinColumns = @JoinColumn(name = "vehicule_id"))
     @Column(name = "date_disponible")
     private List<LocalDate> datesDisponibles = new ArrayList<>();
-
 
     @Enumerated(EnumType.STRING)
     private EtatVehicule etat;
@@ -52,8 +50,12 @@ public class Vehicule {
         Moto
     }
 
+    @ManyToOne
+    @JoinColumn(name = "agent_id")
+    private Agent agent;
+
     public Vehicule(TypeVehicule type, String marque, String modele, String couleur, EtatVehicule etat,
-            String rueLocalisation, String cPostalLocalisation, String villeLocalisation) {
+                   String rueLocalisation, String cPostalLocalisation, String villeLocalisation) {
         this.type = type;
         this.marque = marque;
         this.modele = modele;
@@ -64,8 +66,6 @@ public class Vehicule {
         this.villeLocalisation = villeLocalisation;
     }
 
-    // --- METHODES ---
-
     public String getLocalisationComplete() {
         return rueLocalisation + ", " + cPostalLocalisation + " " + villeLocalisation;
     }
@@ -75,12 +75,11 @@ public class Vehicule {
     }
 
     public void ajouterNote(NoteVehicule note) {
+        if (note == null) return;
         this.notesRecues.add(note);
+        note.setVehicule(this);
     }
 
-    /**
-     * Calcule la note moyenne de toutes les évaluations
-     */
     public double calculerNoteMoyenne() {
         if (notesRecues == null || notesRecues.isEmpty()) {
             return 0.0;
