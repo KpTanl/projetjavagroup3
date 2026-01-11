@@ -23,11 +23,6 @@ import com.group3.carrental.repository.NoteLoueurRepository;
 import com.group3.carrental.repository.NoteVehiculeRepository;
 import com.group3.carrental.repository.EntrepriseRepository;
 
-
-/**
- * Initialise les données de démonstration au démarrage de l'application.
- * Vérifie si la base de données est vide avant d'insérer les données.
- */
 @Component
 public class DataInitializer implements CommandLineRunner {
 
@@ -58,7 +53,6 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Vérifier si des données existent déjà
         if (vehiculeRepository.count() > 0 || utilisateurRepository.count() > 0) {
             System.out.println("Données existantes détectées, initialisation ignorée.");
             return;
