@@ -41,6 +41,12 @@ public class VehiculeService {
                 System.out.println("Lieu: " + v.getLocalisationComplete());
                 System.out.println("Etat: " + v.getEtat());
                 System.out.println("Note moyenne: " + v.calculerNoteMoyenne() + "/5");
+                // System.out.print("Dates disponibles: ");
+                // if (v.getDatesDisponibles().isEmpty()) {
+                //     System.out.println("Aucune");
+                // } else {
+                //     System.out.println(v.getDatesDisponibles());
+                // }
                 System.out.println("------------------------------------");
             }
         }
@@ -52,6 +58,11 @@ public class VehiculeService {
      */
     public void afficherVehiculesDisponibles() {
         List<Vehicule> disponibles = vehiculeRepository.findByEtat(Vehicule.EtatVehicule.Non_loué);
+        
+        // Filtrer pour garder seulement les véhicules avec des dates disponibles
+        // disponibles = disponibles.stream()
+        //         .filter(v -> !v.getDatesDisponibles().isEmpty())
+        //         .toList();
 
         System.out.println("\n--- Véhicules disponibles (non loués) ---");
         if (disponibles.isEmpty()) {
@@ -65,6 +76,7 @@ public class VehiculeService {
                 System.out.println("Lieu: " + v.getLocalisationComplete());
                 System.out.println("Etat: " + v.getEtat());
                 System.out.println("Note moyenne: " + v.calculerNoteMoyenne() + "/5");
+                // System.out.println("Dates disponibles: " + v.getDatesDisponibles());
                 System.out.println("------------------------------------");
             }
         }
