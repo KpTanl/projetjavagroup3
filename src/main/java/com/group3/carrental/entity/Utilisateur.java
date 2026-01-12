@@ -9,9 +9,9 @@ import lombok.Data;
 // Requis par Hibernate/JPA
 @Entity
 @Table(name = "utilisateurs")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "user_type")
-public class Utilisateur {
+public abstract class Utilisateur {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;

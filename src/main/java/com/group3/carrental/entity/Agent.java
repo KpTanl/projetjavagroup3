@@ -3,11 +3,14 @@ package com.group3.carrental.entity;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+
+import com.group3.carrental.repository.Commun;
+
 import jakarta.persistence.*;
 
 @Entity
 @DiscriminatorValue("Agent")
-public abstract class Agent extends Utilisateur {
+public abstract class Agent extends Utilisateur implements Commun{
 
     // EAGER: charger immediatement pour eviter LazyInitializationException
     @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)

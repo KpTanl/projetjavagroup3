@@ -2,39 +2,35 @@ package com.group3.carrental.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
-@Data
+import lombok.NoArgsConstructor;
 @Entity
-@Table(name = "vehicule_notes")
+@Data
+@NoArgsConstructor
+@Embeddable
 public class NoteVehicule {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    
+    // Critères de notation
     private int noteProprete;
     private int noteUsure;
     private int noteConfort;
     private String commentaire;
 
-    @Column(name = "note_globale")
-    private double noteGlobale = (noteProprete + noteUsure + noteConfort) / 3.0;
-
-    @ManyToOne
-    @JoinColumn(name = "vehicule_id")
-    private Vehicule vehicule;
-
-
-    public NoteVehicule() {}
-
     public NoteVehicule(int noteProprete, int noteUsure, int noteConfort, String commentaire) {
-    this.noteProprete = noteProprete;
-    this.noteUsure = noteUsure;
-    this.noteConfort = noteConfort;
-    this.commentaire = commentaire;
+        this.noteProprete = noteProprete;
+        this.noteUsure = noteUsure;
+        this.noteConfort = noteConfort;
+        this.commentaire = commentaire;
     }
 
+    /**
+     * Calcule la moyenne des critères pour obtenir la note globale
+     */
     public double calculerNoteGlobale() {
         return (noteProprete + noteUsure + noteConfort) / 3.0;
+    }
+
+    public void setVehicule(Vehicule vehicule) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setVehicule'");
     }
 }
