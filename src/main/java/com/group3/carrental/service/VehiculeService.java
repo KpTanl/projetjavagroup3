@@ -60,21 +60,21 @@ public class VehiculeService {
     }
 
     /**
-     * Affiche uniquement les véhicules disponibles (etat = Non_loué et avec des dates disponibles).
+     * Affiche uniquement les véhicules disponibles (etat = Non_loué).
      */
     public void afficherVehiculesDisponibles() {
         List<Vehicule> disponibles = vehiculeRepository.findByEtat(Vehicule.EtatVehicule.Non_loué);
         
         // Filtrer pour garder seulement les véhicules avec des dates disponibles
-        List<Vehicule> disponiblesAvecDates = disponibles.stream()
+        disponibles = disponibles.stream()
                 .filter(v -> !v.getDatesDisponibles().isEmpty())
                 .toList();
 
-        System.out.println("\n--- Véhicules disponibles (non loués avec dates) ---");
-        if (disponiblesAvecDates.isEmpty()) {
+        System.out.println("\n--- Véhicules disponibles (non loués) ---");
+        if (disponibles.isEmpty()) {
             System.out.println("Aucun véhicule disponible pour le moment.");
         } else {
-            for (Vehicule v : disponiblesAvecDates) {
+            for (Vehicule v : disponibles) {
                 System.out.println("------------------------------------");
                 System.out.println("ID: " + v.getId());
                 System.out.println("Type: " + v.getType());
@@ -86,7 +86,7 @@ public class VehiculeService {
                 System.out.println("------------------------------------");
             }
         }
-        System.out.println("Total véhicules disponibles: " + disponiblesAvecDates.size());
+        System.out.println("Total véhicules disponibles: " + disponibles.size());
     }
 
     /**
