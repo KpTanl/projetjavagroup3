@@ -85,7 +85,7 @@ public class Vehicule {
             return 0.0;
         }
         return notesRecues.stream()
-                .mapToDouble(NoteVehicule::calculerNoteGlobale)
+                .mapToDouble(NoteVehicule::calculerNoteMoyenne)
                 .average()
                 .orElse(0.0);
     }

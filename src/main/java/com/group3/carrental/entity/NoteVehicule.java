@@ -8,45 +8,34 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name = "vehicule_notes")
-public class NoteVehicule {
+public class NoteVehicule extends Note {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "note_proprete", nullable = false)
+    @Column(nullable = false)
     private int noteProprete;
 
-    @Column(name = "note_usure", nullable = false)
+    @Column(nullable = false)
     private int noteUsure;
 
-    @Column(name = "note_confort", nullable = false)
+    @Column(nullable = false)
     private int noteConfort;
 
+    @Column(length = 2000)
     private String commentaire;
-
-    @Column(name = "note_globale", nullable = false)
-    private double noteGlobale;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "vehicule_id", nullable = false)
     private Vehicule vehicule;
 
-    public NoteVehicule(int noteProprete, int noteUsure, int noteConfort, String commentaire) {
+    public NoteVehicule(int noteProprete, int noteUsure, int noteConfort, String commentaire,Vehicule vehicule) {
         this.noteProprete = noteProprete;
         this.noteUsure = noteUsure;
         this.noteConfort = noteConfort;
         this.commentaire = commentaire;
-        this.noteGlobale = calculerNoteGlobale();
+        this.vehicule = vehicule;
     }
 
-    public double calculerNoteGlobale() {
+    @Override
+    public double calculerNoteMoyenne() {
         return (noteProprete + noteUsure + noteConfort) / 3.0;
-    }
-
-    @PrePersist
-    @PreUpdate
-    private void updateNoteGlobale() {
-        this.noteGlobale = calculerNoteGlobale();
     }
 }

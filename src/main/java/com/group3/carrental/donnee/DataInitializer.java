@@ -71,7 +71,7 @@ public class DataInitializer implements CommandLineRunner {
                 "75000",
                 "Paris");
         v1.ajouterDisponibilite(LocalDate.now().plusDays(1));
-        v1.ajouterNote(new NoteVehicule(4, 5, 4, "Très bon véhicule"));
+        v1.ajouterNote(new NoteVehicule(4, 5, 4, "Très bon véhicule", v1));
         vehiculeRepository.save(v1);
 
         Vehicule v2 = new Vehicule(
@@ -84,7 +84,7 @@ public class DataInitializer implements CommandLineRunner {
                 "31000",
                 "Toulouse");
         v2.ajouterDisponibilite(LocalDate.now().plusDays(2));
-        v2.ajouterNote(new NoteVehicule(5, 5, 5, "Moto excellente"));
+        v2.ajouterNote(new NoteVehicule(5, 5, 5, "Moto excellente", v2));
         vehiculeRepository.save(v2);
 
         Vehicule v3 = new Vehicule(
@@ -97,7 +97,7 @@ public class DataInitializer implements CommandLineRunner {
                 "59000",
                 "Lille");
         v3.ajouterDisponibilite(LocalDate.now().plusDays(3));
-        v3.ajouterNote(new NoteVehicule(4, 4, 5, "Voiture confortable"));
+        v3.ajouterNote(new NoteVehicule(4, 4, 5, "Voiture confortable", v3));
         vehiculeRepository.save(v3);
 
         Vehicule v4 = new Vehicule(
@@ -110,7 +110,7 @@ public class DataInitializer implements CommandLineRunner {
                 "59800",
                 "Lille");
         v4.ajouterDisponibilite(LocalDate.now().plusDays(5));
-        v4.ajouterNote(new NoteVehicule(3, 4, 4, "Utile pour déménagement"));
+        v4.ajouterNote(new NoteVehicule(3, 4, 4, "Utile pour déménagement", v4));
         vehiculeRepository.save(v4);
 
         Vehicule v5 = new Vehicule(
@@ -264,17 +264,13 @@ public class DataInitializer implements CommandLineRunner {
         Vehicule vehicule1 = vehiculeRepository.findAll().get(0);
         Vehicule vehicule2 = vehiculeRepository.findAll().get(1);
         Vehicule vehicule3 = vehiculeRepository.findAll().get(2);
-        NoteVehicule nv1 = new NoteVehicule(4, 5, 4, "Très propre");
-        nv1.setVehicule(vehicule1);
+        NoteVehicule nv1 = new NoteVehicule(4, 5, 4, "Très propre", vehicule1);
 
-        NoteVehicule nv2 = new NoteVehicule(5, 5, 5, "Parfait état");
-        nv2.setVehicule(vehicule1);
+        NoteVehicule nv2 = new NoteVehicule(5, 5, 5, "Parfait état", vehicule1);
 
-        NoteVehicule nv3 = new NoteVehicule(3, 4, 4, "Correct");
-        nv3.setVehicule(vehicule2);
+        NoteVehicule nv3 = new NoteVehicule(3, 4, 4, "Correct", vehicule2);
 
-        NoteVehicule nv4 = new NoteVehicule(4, 4, 3, "Confort moyen");
-        nv4.setVehicule(vehicule3);
+        NoteVehicule nv4 = new NoteVehicule(4, 4, 3, "Confort moyen", vehicule3);
 
         noteVehiculeRepository.save(nv1);
         noteVehiculeRepository.save(nv2);
@@ -290,15 +286,13 @@ public class DataInitializer implements CommandLineRunner {
         nl1.setNoteResponsabilite(4);
         nl1.setCommentaire("Loueur sérieux");
         nl1.setLoueur(l1);
-        nl1.setNoteGlobale(nl1.calculerMoyenne());
-
+        
         NoteLoueur nl2 = new NoteLoueur();
         nl2.setNoteTraitementVehicule(5);
         nl2.setNoteEngagement(5);
         nl2.setNoteResponsabilite(5);
         nl2.setCommentaire("Excellent service");
         nl2.setLoueur(l1);
-        nl2.setNoteGlobale(nl2.calculerMoyenne());
 
         NoteLoueur nl3 = new NoteLoueur();
         nl3.setNoteTraitementVehicule(3);
@@ -306,25 +300,25 @@ public class DataInitializer implements CommandLineRunner {
         nl3.setNoteResponsabilite(3);
         nl3.setCommentaire("Correct");
         nl3.setLoueur(l2);
-        nl3.setNoteGlobale(nl3.calculerMoyenne());
 
         noteLoueurRepository.save(nl1);
         noteLoueurRepository.save(nl2);
         noteLoueurRepository.save(nl3);
 
-        AgentPro a5 = (AgentPro) utilisateurRepository.findById(5).orElseThrow();
-        AgentPro a6 = (AgentPro) utilisateurRepository.findById(6).orElseThrow();
-        AgentPro a7 = (AgentPro) utilisateurRepository.findById(7).orElseThrow();
-        AgentParticulier a8 = (AgentParticulier) utilisateurRepository.findById(8).orElseThrow();
-        AgentParticulier a9 = (AgentParticulier) utilisateurRepository.findById(9).orElseThrow();
-        AgentParticulier a10 = (AgentParticulier) utilisateurRepository.findById(10).orElseThrow();
+        AgentPro a5 = agentPro;
+        AgentPro a6 = agentPro2;
+        AgentPro a7 = agentPro3;
+
+        AgentParticulier a8 = agentParticulier1;
+        AgentParticulier a9 = agentParticulier2;
+        AgentParticulier a10 = agentParticulier3;
+
 
         NoteAgent na1 = new NoteAgent();
         na1.setNoteGestionVehicule(4);
         na1.setNoteBienveillance(5);
         na1.setNoteReactivite(4);
         na1.setCommentaire("Agent professionnel et réactif");
-        na1.setNoteGlobale(4);
         na1.setAgent(a5);
 
         NoteAgent na2 = new NoteAgent();
@@ -332,7 +326,6 @@ public class DataInitializer implements CommandLineRunner {
         na2.setNoteBienveillance(5);
         na2.setNoteReactivite(5);
         na2.setCommentaire("Service excellent");
-        na2.setNoteGlobale(5);
         na2.setAgent(a6);
 
         NoteAgent na3 = new NoteAgent();
@@ -340,7 +333,6 @@ public class DataInitializer implements CommandLineRunner {
         na3.setNoteBienveillance(4);
         na3.setNoteReactivite(3);
         na3.setCommentaire("Correct mais peut mieux faire");
-        na3.setNoteGlobale(3);
         na3.setAgent(a7);
 
         NoteAgent na4 = new NoteAgent();
@@ -348,7 +340,6 @@ public class DataInitializer implements CommandLineRunner {
         na4.setNoteBienveillance(4);
         na4.setNoteReactivite(5);
         na4.setCommentaire("Très bonne réactivité");
-        na4.setNoteGlobale(4);
         na4.setAgent(a8);
 
         NoteAgent na5 = new NoteAgent();
@@ -356,7 +347,6 @@ public class DataInitializer implements CommandLineRunner {
         na5.setNoteBienveillance(4);
         na5.setNoteReactivite(4);
         na5.setCommentaire("Agent fiable");
-        na5.setNoteGlobale(4);
         na5.setAgent(a9);
 
         NoteAgent na6 = new NoteAgent();
@@ -364,7 +354,6 @@ public class DataInitializer implements CommandLineRunner {
         na6.setNoteBienveillance(5);
         na6.setNoteReactivite(5);
         na6.setCommentaire("Très apprécié par les clients");
-        na6.setNoteGlobale(5);
         na6.setAgent(a10);
 
         noteAgentRepository.save(na1);
