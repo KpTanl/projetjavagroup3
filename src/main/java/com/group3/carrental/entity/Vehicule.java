@@ -24,6 +24,9 @@ public class Vehicule {
     private String rueLocalisation;
     private String cPostalLocalisation;
     private String villeLocalisation;
+    @ManyToOne
+    @JoinColumn(name = "parking_id")
+    private Parking parkingPartenaire;
 
     // Notes reçues - stockées dans une table séparée vehicule_notes
     @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -81,6 +84,13 @@ public class Vehicule {
         return rueLocalisation + ", " + cPostalLocalisation + " " + villeLocalisation;
     }
 
+    public void setParkingPartenaire(Parking parking) {
+    this.parkingPartenaire = parking;
+}
+    public Parking getParkingPartenaire() {
+    return this.parkingPartenaire;
+}
+
     public void ajouterDisponibilite(LocalDate date) {
         this.datesDisponibles.add(date);
     }
@@ -104,4 +114,12 @@ public class Vehicule {
         noteMoyenne = Math.round(noteMoyenne * 100.0) / 100.0;
         return noteMoyenne;
     }
+    public String getInfosRetourParking() {
+    if (this.parkingPartenaire == null) return "Retour classique en rue.";
+
+    Parking p = this.parkingPartenaire;
+    // On utilise getLocalisationComplete() au lieu de tout réécrire
+   // 3. Retour de la chaîne concaténée (bien fermer la ligne)
+    return "DEPOSER AU : " + p.getLocalisationComplete() + "\nCONTRAINTES : " + p.getContraintes();
+}
 }
