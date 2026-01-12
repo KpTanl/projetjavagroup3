@@ -22,12 +22,15 @@ public class Entreprise {
     }
 
     public double definirTarif(String type, String modele) {
+        // TODO : Implémenter la logique de tarification
         return 0.0;
     }
 
     public void importerFichierTarifs() {
+        // TODO : Implémenter la logique d'importation de fichiers
     }
 
     public void seConnecter() {
+        // TODO : Implémenter la logique de connexion
     }
 }

@@ -564,6 +564,33 @@ public interface VehiculeRepository extends JpaRepository<Vehicule, Long> {
 | Code répétitif (boilerplate) | Code concis et lisible |
 | Dépendances créées manuellement | Injection de dépendances automatique |
 
+#### Règle EAGER / LAZY (important)
+
+> ⚠️ **Règle simple à retenir** :
+> - **"ToMany"** = LAZY par défaut → **ajouter `fetch = FetchType.EAGER`**
+> - **"ToOne"** = EAGER par défaut → **pas besoin de modifier**
+
+| Annotation | Chargement par défaut | Action requise |
+|------------|----------------------|----------------|
+| `@OneToMany` | LAZY | Ajouter `fetch = FetchType.EAGER` |
+| `@ManyToMany` | LAZY | Ajouter `fetch = FetchType.EAGER` |
+| `@ElementCollection` | LAZY | Ajouter `fetch = FetchType.EAGER` |
+| `@ManyToOne` | EAGER | Aucune |
+| `@OneToOne` | EAGER | Aucune |
+
+**Exemple :**
+```java
+// ❌ Peut provoquer LazyInitializationException
+@OneToMany(mappedBy = "agent", cascade = CascadeType.ALL)
+private List<NoteAgent> notesRecues;
+
+// ✅ Correct : données chargées immédiatement
+@OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+private List<NoteAgent> notesRecues;
+```
+
+> 💡 **Conseil** : Pour éviter les erreurs `LazyInitializationException`, ajoutez `fetch = FetchType.EAGER` à toutes les annotations `@OneToMany`, `@ManyToMany` et `@ElementCollection`.
+
 ---
 
 ## 7. Créer un compte GitHub

@@ -6,7 +6,6 @@ import java.util.List;
 import java.time.LocalDate;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.group3.carrental.service.NoteVehicule;
 
 @Data
 @NoArgsConstructor
@@ -24,13 +23,15 @@ public class Vehicule {
     private String villeLocalisation;
 
     // Notes reçues - stockées dans une table séparée vehicule_notes
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "vehicule_notes", joinColumns = @JoinColumn(name = "vehicule_id"))
+    // Notes reçues
+    @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<NoteVehicule> notesRecues = new ArrayList<>();
 
-    // Assurance enlevée - relation gérée côté Assurance (une assurance couvre
-    // plusieurs véhicules)
-
+    // Disponibilites - EAGER: charger immediatement pour eviter
+    // LazyInitializationException
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "vehicule_disponibilites", joinColumns = @JoinColumn(name = "vehicule_id"))
+    @Column(name = "date_disponible")
     private List<LocalDate> datesDisponibles = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
@@ -38,7 +39,7 @@ public class Vehicule {
 
     public enum EtatVehicule {
         Loué,
-        Non_loué
+        Non_loué, Loue
     }
 
     @Enumerated(EnumType.STRING)
@@ -49,6 +50,10 @@ public class Vehicule {
         Camion,
         Moto
     }
+
+    @ManyToOne
+    @JoinColumn(name = "agent_id")
+    private Agent agent;
 
     public Vehicule(TypeVehicule type, String marque, String modele, String couleur, EtatVehicule etat,
             String rueLocalisation, String cPostalLocalisation, String villeLocalisation) {
@@ -74,11 +79,10 @@ public class Vehicule {
 
     public void ajouterNote(NoteVehicule note) {
         this.notesRecues.add(note);
+        note.setVehicule(this);
     }
 
-    /**
-     * Calcule la note moyenne de toutes les évaluations
-     */
+    // Calcule la note moyenne de toutes les évaluations
     public double calculerNoteMoyenne() {
         if (notesRecues == null || notesRecues.isEmpty()) {
             return 0.0;

@@ -2,28 +2,44 @@ package com.group3.carrental.entity;
 
 import java.util.Date;
 import java.util.List;
-import com.group3.carrental.service.NoteVehicule;
+
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
 @Entity
-@DiscriminatorValue("Loueur")
+@NoArgsConstructor
 public class Loueur extends Utilisateur {
-    private List<String> historiqueLocations;
-    private List<Integer> notesRecues;
 
-    public Loueur() {
-    }
+    @Transient
+    private List<Contrat> historiqueLocations;
 
-    public Loueur(int id, String nom, String prenom, String email, String motDePasse, List<String> historiqueLocations,
-            List<Integer> notesRecues) {
+    // EAGER: charger immediatement pour eviter LazyInitializationException
+    @OneToMany(mappedBy = "loueur", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private List<NoteLoueur> notesRecues;
+
+    public Loueur(int id, String nom, String prenom, String email, String motDePasse,
+            List<Contrat> historiqueLocations, List<NoteLoueur> notesRecues) {
         super(id, nom, prenom, email, motDePasse, Role.Loueur);
         this.historiqueLocations = historiqueLocations;
         this.notesRecues = notesRecues;
-        // TODO Auto-generated constructor stub
+    }
+
+    public Vehicule rechercherVehicule() {
+        return null;
     }
 
     public NoteVehicule noterVehicule() {
         return null;
+    }
+
+    public void choisirDate(List<Date> d) {
+
+    }
+
+    public void choisirAssurance(List<Assurance> a) {
+
     }
 
 }

@@ -9,10 +9,9 @@ import jakarta.persistence.*;
 @DiscriminatorValue("Agent")
 public abstract class Agent extends Utilisateur {
 
-    @ElementCollection
-    @CollectionTable(name = "agent_notes", joinColumns = @JoinColumn(name = "agent_id", referencedColumnName = "id"))
-    @Column(name = "note")
-    private List<Integer> notesRecues;
+    // EAGER: charger immediatement pour eviter LazyInitializationException
+    @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private List<NoteAgent> notesRecues;
 
     @Column(name = "date_recu_facture")
     private LocalDate dateRecuFacture;
@@ -29,20 +28,13 @@ public abstract class Agent extends Utilisateur {
     protected Agent() {
     }
 
-    public Agent(int id, String nom, String prenom, String email, String motDePasse, List<Integer> notesRecues,
+    public Agent(int id, String nom, String prenom, String email, String motDePasse, List<NoteAgent> notesRecues,
             LocalDate dateRecuFacture2) {
         super(id, nom, prenom, email, motDePasse, Role.Agent);
         this.notesRecues = notesRecues;
         this.dateRecuFacture = dateRecuFacture2;
         // TODO Auto-generated constructor stub
     }
-
-    public void ajouterVehicule(Vehicule v) {
-        /* ... */ }
-    // public void souscrireOption(OptionPayante opt) {
-    // this.optionsActives.add(opt);
-    // }
-    // public abstract void accepterContrat(Contrat c);
 
     public void souscrireOption() {
 
@@ -58,5 +50,10 @@ public abstract class Agent extends Utilisateur {
 
     public void proposerLieuDepose() {
 
+    }
+
+    public void ajouterNote(NoteAgent note) {
+        this.notesRecues.add(note);
+        note.setAgent(this);
     }
 }
