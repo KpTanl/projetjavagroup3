@@ -184,6 +184,7 @@ public class VehiculeService {
                     System.out.println("Dernière date disponible: " + datesDisponibles.get(datesDisponibles.size() - 1));
                 }
                 System.out.println("------------------------------------");
+                System.err.println("Note: Les dates affichées sont calculées en fonction des contrats existants.");
             }
         }
     }
