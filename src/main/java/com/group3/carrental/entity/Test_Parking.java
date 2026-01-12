@@ -39,6 +39,35 @@ public class Test_Parking {
             // Si on arrive ici, c'est que notre sécurité fonctionne !
             System.out.println("Succès du test de sécurité : " + e.getMessage());
         }
+        // --- 4. TEST US (CAPACITÉ PARKING) ---
+        System.out.println("\n--- Test Capacité Parking ---");
+        // Créer un parking avec 1 seule place pour tester la limite
+        Parking p = new Parking("P1", "Montpellier", "Rue Jean", "34000", 1, 10.0, 0.2,"");
 
-    }
+        // Premier ajout : doit fonctionner (test1 sera true)
+        boolean test1 = p.ajouterVehicule(v1); 
+        System.out.println("Premier véhicule ajouté (v1) : " + test1);
+
+        // Deuxième ajout : doit échouer car nb_places_max = 1 (test2 sera false)
+        Vehicule v2 = new Vehicule(); 
+        boolean test2 = p.ajouterVehicule(v2); 
+        System.out.println("Deuxième véhicule ajouté (v2) : " + test2);
+        
+        System.out.println("Nombre de véhicules dans le parking : " + p.getVehiculesGares().size());
+
+       if (v1.getParkingPartenaire() != null) {
+    // On l'appelle 'parkingAttribue' au lieu de 'p'
+    Parking parkingAttribue = v1.getParkingPartenaire();
+    
+    System.out.println("\n--- INFOS POUR LE LOUEUR ---");
+    System.out.println("Adresse de dépôt : " + parkingAttribue.getLocalisationComplete());
+    System.out.println("Contraintes : " + parkingAttribue.getContraintes());
 }
+
+
+    } 
+
+    
+
+   
+    }
