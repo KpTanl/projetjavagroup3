@@ -3,23 +3,21 @@ package com.group3.carrental.entity;
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 // Requis par Hibernate/JPA
 @Entity
 @Table(name = "utilisateurs")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type")
-public class Utilisateur {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+public abstract class Utilisateur extends Compte {
+
     private String nom;
     private String prenom;
-    @Column(unique = true, nullable = false)
-    private String email;
-    private String motDePasse;
+
     @Enumerated(EnumType.STRING)
     protected Role role;
 
@@ -29,11 +27,9 @@ public class Utilisateur {
     }
 
     public Utilisateur(int id, String nom, String prenom, String email, String motDePasse, Role role) {
-        this.id = id;
+        super(id, email, motDePasse);
         this.nom = nom;
         this.prenom = prenom;
-        this.email = email;
-        this.motDePasse = motDePasse;
         this.role = role;
     }
 
@@ -42,7 +38,7 @@ public class Utilisateur {
     }
 
     public void modifierProfil() {
-
+        // TODO: Implement logic
     }
 
     public void signerContrat() {

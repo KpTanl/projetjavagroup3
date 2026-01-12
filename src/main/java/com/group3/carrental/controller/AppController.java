@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.group3.carrental.entity.Assurance;
 import com.group3.carrental.entity.Utilisateur;
+import com.group3.carrental.entity.Loueur;
+import com.group3.carrental.entity.AgentParticulier;
 import com.group3.carrental.entity.Message;
 import com.group3.carrental.service.AssuranceService;
 import com.group3.carrental.service.ContratService;
@@ -113,7 +115,14 @@ public class AppController {
                 sc.nextLine();
                 Utilisateur.Role role = (roleChoice == 2) ? Utilisateur.Role.Agent : Utilisateur.Role.Loueur;
 
-                Utilisateur newUser = new Utilisateur();
+                Utilisateur newUser = null;
+                if (role == Utilisateur.Role.Loueur) {
+                    newUser = new Loueur();
+                } else {
+                    // Par défaut un Agent Particulier si pas précisé
+                    newUser = new AgentParticulier();
+                }
+
                 newUser.setNom(nom);
                 newUser.setPrenom(prenom);
                 newUser.setEmail(userEmail);

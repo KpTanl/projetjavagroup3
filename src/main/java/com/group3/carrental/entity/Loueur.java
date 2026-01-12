@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @NoArgsConstructor
-public class Loueur extends Utilisateur {
+public class Loueur extends Utilisateur implements Commun {
 
     @Transient
     private List<Contrat> historiqueLocations;
@@ -26,8 +26,21 @@ public class Loueur extends Utilisateur {
         this.notesRecues = notesRecues;
     }
 
+    @Override
     public Vehicule rechercherVehicule() {
+        // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public Vehicule FiltreVehicule() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void ConsulterProfilsAgents() {
+        // TODO Auto-generated method stub
     }
 
     public NoteVehicule noterVehicule() {
@@ -40,6 +53,22 @@ public class Loueur extends Utilisateur {
 
     public void choisirAssurance(List<Assurance> a) {
 
+    }
+
+    public void ajouterNote(NoteLoueur note) {
+        this.notesRecues.add(note);
+        note.setLoueur(this);
+    }
+
+    public Double calculerNoteMoyenne() {
+        if (notesRecues == null || notesRecues.isEmpty()) {
+            return null;
+        }
+        double moyenne = notesRecues.stream()
+                .mapToDouble(NoteLoueur::calculerNoteGlobale)
+                .average()
+                .orElse(0.0);
+        return Math.round(moyenne * 100.0) / 100.0;
     }
 
 }

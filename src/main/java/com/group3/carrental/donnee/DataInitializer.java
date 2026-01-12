@@ -12,7 +12,6 @@ import com.group3.carrental.entity.Entreprise;
 import com.group3.carrental.entity.AgentParticulier;
 import com.group3.carrental.entity.Loueur;
 import com.group3.carrental.entity.NoteAgent;
-import com.group3.carrental.entity.NoteLoueur;
 import com.group3.carrental.entity.NoteVehicule;
 import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.repository.AssuranceRepository;
@@ -200,8 +199,8 @@ public class DataInitializer implements CommandLineRunner {
 
                 AgentPro agentPro1 = new AgentPro(0, "Société", "Admin", "admin@rentcar.com", "admin123",
                                 new ArrayList<>(), LocalDate.now(), 12345678901234L, "RentCar Pro");
-                agentPro1.ajouterNote(new NoteAgent(4, 5, 4, "Très bon service", 4.33, agentPro1));
-                agentPro1.ajouterNote(new NoteAgent(5, 5, 5, "Suuuper", 5.0, agentPro1));
+                agentPro1.ajouterNote(new NoteAgent(4, 5, 4, "Très bon service", agentPro1));
+                agentPro1.ajouterNote(new NoteAgent(5, 5, 5, "Suuuper", agentPro1));
                 utilisateurRepository.save(agentPro1);
 
                 AgentPro agentPro2 = new AgentPro(
@@ -259,10 +258,14 @@ public class DataInitializer implements CommandLineRunner {
                 utilisateurRepository.save(agentParticulier3);
 
                 // ========== Entreprises ==========
-                Entreprise e1 = new Entreprise("12345678900011", "CleanAuto", "Nettoyage intérieur/extérieur");
-                Entreprise e2 = new Entreprise("98765432100022", "FastRepair", "Réparations rapides");
-                Entreprise e3 = new Entreprise("45678912300033", "AutoService+", "Entretien complet");
-                Entreprise e4 = new Entreprise("74185296300044", "ProGarage", "Garage professionnel");
+                Entreprise e1 = new Entreprise(0, "cleanauto@example.com", "pass123", "CleanAuto", "12345678900011",
+                                "Nettoyage intérieur/extérieur");
+                Entreprise e2 = new Entreprise(0, "fastrepair@example.com", "pass123", "FastRepair", "98765432100022",
+                                "Réparations rapides");
+                Entreprise e3 = new Entreprise(0, "autoservice@example.com", "pass123", "AutoService+",
+                                "45678912300033", "Entretien complet");
+                Entreprise e4 = new Entreprise(0, "progarage@example.com", "pass123", "ProGarage", "74185296300044",
+                                "Garage professionnel");
                 entrepriseRepository.save(e1);
                 entrepriseRepository.save(e2);
                 entrepriseRepository.save(e3);

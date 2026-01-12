@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 
 @Entity
 @DiscriminatorValue("Agent")
-public abstract class Agent extends Utilisateur {
+public abstract class Agent extends Utilisateur implements Commun {
 
     // EAGER: charger immediatement pour eviter LazyInitializationException
     @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -38,6 +38,7 @@ public abstract class Agent extends Utilisateur {
 
     public void souscrireOption() {
 
+
     }
 
     public void accepterContrat() {
@@ -55,5 +56,33 @@ public abstract class Agent extends Utilisateur {
     public void ajouterNote(NoteAgent note) {
         this.notesRecues.add(note);
         note.setAgent(this);
+    }
+
+    public Double calculerNoteMoyenne() {
+        if (notesRecues == null || notesRecues.isEmpty()) {
+            return null;
+        }
+        double moyenne = notesRecues.stream()
+                .mapToDouble(NoteAgent::calculerNoteGlobale)
+                .average()
+                .orElse(0.0);
+        return Math.round(moyenne * 100.0) / 100.0;
+    }
+
+    @Override
+    public Vehicule rechercherVehicule() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Vehicule FiltreVehicule() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void ConsulterProfilsAgents() {
+        // TODO Auto-generated method stub
     }
 }

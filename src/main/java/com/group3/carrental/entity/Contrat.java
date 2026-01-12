@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@DiscriminatorValue("Contrat")
 @Data
 @NoArgsConstructor
 public class Contrat {
@@ -23,6 +22,15 @@ public class Contrat {
     private Vehicule vehicule;
     private double prixTotal;
 
+    @Enumerated(EnumType.STRING)
+    private Statut statut;
+
+    public enum Statut {
+        Presigne,
+        Accepte,
+        Refuse
+    }
+
     public Contrat(Date dateDeb, Date dateFin, Agent agent, Loueur loueur, Vehicule vehicule, double prixTotal) {
         this.dateDeb = dateDeb;
         this.DateFin = dateFin;
@@ -34,9 +42,6 @@ public class Contrat {
 
     public void genererPdf() {
 
-    }
-
-    public class StatutContrat {
     }
 
 }
