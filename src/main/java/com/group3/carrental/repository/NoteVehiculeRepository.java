@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface NoteVehiculeRepository extends JpaRepository<NoteVehicule, Long> {
+public interface NoteVehiculeRepository extends JpaRepository<NoteVehicule, String> {
 }

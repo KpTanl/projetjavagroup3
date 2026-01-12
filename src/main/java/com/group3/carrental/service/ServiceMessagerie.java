@@ -73,4 +73,24 @@ public class ServiceMessagerie {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<Utilisateur> rechercherUtilisateursParNom(String nom) {
+        if (nom == null || nom.trim().isEmpty()) {
+            throw new IllegalArgumentException("Le nom ne peut pas être vide.");
+        }
+        return utilisateurRepository.findByNomIgnoreCase(nom.trim());
+    }
+
+    @Transactional(readOnly = true)
+    public List<Utilisateur> rechercherUtilisateursParNomPrenom(String nom, String prenom) {
+        if (nom == null || nom.trim().isEmpty()) {
+            throw new IllegalArgumentException("Le nom ne peut pas être vide.");
+        }
+        if (prenom == null || prenom.trim().isEmpty()) {
+            return utilisateurRepository.findByNomIgnoreCase(nom.trim());
+        }
+        return utilisateurRepository.findByNomIgnoreCaseAndPrenomIgnoreCase(nom.trim(), prenom.trim());
+    }
+
+
 }

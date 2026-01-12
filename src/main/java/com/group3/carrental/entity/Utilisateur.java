@@ -8,7 +8,6 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-// Requis par Hibernate/JPA
 @Entity
 @Table(name = "utilisateurs")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)

@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface NoteAgentRepository extends JpaRepository<NoteAgent, Long> {
+public interface NoteAgentRepository extends JpaRepository<NoteAgent, String> {
 }
