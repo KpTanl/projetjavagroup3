@@ -41,7 +41,7 @@ public class Vehicule {
 
     public enum EtatVehicule {
         Loué,
-        Non_loué, Loue
+        Non_loué
     }
 
     @Enumerated(EnumType.STRING)
@@ -51,6 +51,14 @@ public class Vehicule {
         Voiture,
         Camion,
         Moto
+    }
+    @Enumerated(EnumType.STRING)
+    private OptionRetour optionRetour;
+
+    public enum OptionRetour {
+        retour_parking ,
+        retour_classique
+
     }
 
     @ManyToOne
