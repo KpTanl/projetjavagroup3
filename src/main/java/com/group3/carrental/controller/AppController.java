@@ -1,5 +1,7 @@
 package com.group3.carrental.controller;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Scanner;
 
@@ -233,7 +235,39 @@ public class AppController {
             System.out.println("Véhicule sélectionné: " + vehiculeSelectionne.getMarque() + " "
                     + vehiculeSelectionne.getModele() + " (ID: " + vehiculeId + ")");
 
-            // Étape 2: Choisir les dates
+            // Afficher les dates disponibles
+            List<LocalDate> datesDisponibles = vehiculeSelectionne.getDatesDisponibles();
+            System.out.println("\nDates disponibles pour ce véhicule:");
+            if (datesDisponibles.isEmpty()) {
+                System.out.println("Aucune date disponible pour ce véhicule.");
+                return;
+            }
+            
+            // Étape 2: Choisir la date de début si plusieurs dates disponibles
+            LocalDate dateDebut = null;
+            if (datesDisponibles.size() > 1) {
+                System.out.println("Nombre de dates disponibles: " + datesDisponibles.size());
+                System.out.println("Première date disponible: " + datesDisponibles.get(0));
+                System.out.println("Dernière date disponible: " + datesDisponibles.get(datesDisponibles.size() - 1));
+                
+                System.out.print("\nSaisissez la date de début de location (format: AAAA-MM-JJ) : ");
+                String dateInput = sc.nextLine();
+                try {
+                    dateDebut = LocalDate.parse(dateInput);
+                    if (!datesDisponibles.contains(dateDebut)) {
+                        System.out.println("Cette date n'est pas disponible pour ce véhicule.");
+                        return;
+                    }
+                } catch (Exception e) {
+                    System.out.println("Format de date invalide. Utilisez AAAA-MM-JJ (ex: 2026-01-15)");
+                    return;
+                }
+            } else {
+                // Une seule date disponible
+                dateDebut = datesDisponibles.get(0);
+                System.out.println("Date de début: " + dateDebut);
+            }
+
             System.out.print("Nombre de jours de location : ");
             int nbJours = sc.nextInt();
             sc.nextLine();
@@ -271,6 +305,7 @@ public class AppController {
             // Étape 4: Récapitulatif et validation
             System.out.println("\n=== Récapitulatif de Location ===");
             System.out.println("Véhicule: ID " + vehiculeId);
+            System.out.println("Date de début: " + dateDebut);
             System.out.println("Durée: " + nbJours + " jours");
             System.out.println("Assurance: " + assuranceChoisie.getNom());
             System.out.println("Prix assurance: " + prixAssurance + "€");
@@ -280,15 +315,18 @@ public class AppController {
             String confirmation = sc.nextLine();
 
             if (confirmation.equalsIgnoreCase("O")) {
-                // Créer le contrat dans la base de données
-                java.util.Date today = new java.util.Date();
-                java.util.Date endDate = new java.util.Date(today.getTime() + (long) nbJours * 24 * 60 * 60 * 1000);
+                // Convertir LocalDate en java.util.Date pour le contrat
+                java.util.Date dateDebutContrat = java.util.Date.from(
+                    dateDebut.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                java.util.Date dateFinContrat = java.util.Date.from(
+                    dateDebut.plusDays(nbJours).atStartOfDay(ZoneId.systemDefault()).toInstant());
 
                 try {
-                    contratService.creerContrat(today, endDate, null, null, null, prixAssurance);
+                    contratService.creerContrat(dateDebutContrat, dateFinContrat, null, null, null, prixAssurance);
 
                     System.out.println("\nLocation confirmée !");
                     System.out.println("Votre contrat a été créé avec succès.");
+                    System.out.println("Période de location: du " + dateDebut + " au " + dateDebut.plusDays(nbJours));
                 } catch (Exception e) {
                     System.out.println("Erreur lors de la création du contrat: " + e.getMessage());
                 }
