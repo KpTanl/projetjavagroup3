@@ -36,6 +36,13 @@ public class ContratService {
     }
 
     /**
+     * Récupérer les contrats pour un loueur donné.
+     */
+    public List<Contrat> getContratsParLoueur(int loueurId) {
+        return contratRepository.findByLoueurId(loueurId);
+    }
+
+    /**
      * Récupérer un contrat par son ID
      */
     public Contrat getContratById(Long id) {

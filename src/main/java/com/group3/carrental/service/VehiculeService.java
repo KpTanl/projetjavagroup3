@@ -59,7 +59,6 @@ public class VehiculeService {
     public void afficherVehiculesDisponibles() {
         List<Vehicule> disponibles = vehiculeRepository.findByEtat(Vehicule.EtatVehicule.Non_loué);
         
-        //Filtrer pour garder seulement les véhicules avec des dates disponibles
         disponibles = disponibles.stream()
                 .filter(v -> !v.getDatesDisponibles().isEmpty())
                 .toList();
@@ -76,6 +75,13 @@ public class VehiculeService {
                 System.out.println("Lieu: " + v.getLocalisationComplete());
                 System.out.println("Etat: " + v.getEtat());
                 System.out.println("Note moyenne: " + v.calculerNoteMoyenne() + "/5");
+                // Afficher l'agent associé
+                if (v.getAgent() != null) {
+                    System.out.println("Agent: " + v.getAgent().getPrenom() + " " + v.getAgent().getNom() + 
+                            " (" + v.getAgent().getEmail() + ")");
+                } else {
+                    System.out.println("Agent: Non assigné");
+                }
                 System.out.println("Dates disponibles: " + v.getDatesDisponibles());
                 System.out.println("------------------------------------");
             }
@@ -165,12 +171,10 @@ public class VehiculeService {
         System.out.println("Vehicule ajoute reussi !!");
     }
 
-    // Supprimer un véhicule pour agent
     public void supprimerVehicule(int id) {
         vehiculeRepository.deleteById(id);
     }
 
-    // Filtrer les vehicules
     public void filtrerVehicules() {
         List<Vehicule> vehicules = vehiculeRepository.findAll();
         if (vehicules.isEmpty()) {

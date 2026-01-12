@@ -9,8 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.group3.carrental.entity.Assurance;
-import com.group3.carrental.entity.Utilisateur;
+import com.group3.carrental.entity.Contrat;
 import com.group3.carrental.entity.Message;
+import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.service.AssuranceService;
 import com.group3.carrental.service.ContratService;
 import com.group3.carrental.service.UtilisateurService;
@@ -21,7 +22,7 @@ import com.group3.carrental.service.ServiceMessagerie;
 public class AppController {
     private static final Scanner sc = new Scanner(System.in);
     private static UserRole currentUserRole = UserRole.Visitor;
-    private Utilisateur currentUser = null; // Utilisateur connecté
+    private Utilisateur currentUser = null;
 
     private final UtilisateurService utilisateurService;
     private final VehiculeService vehiculeService;
@@ -173,7 +174,7 @@ public class AppController {
                 displayMenuMessagerie();
                 break;
             case 6:
-                // TODO: Mon profil
+                afficherMonProfil();
                 break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
@@ -219,13 +220,11 @@ public class AppController {
         System.out.println("\n=== Location de Véhicule ===");
 
         try {
-            // Étape 1: Afficher et choisir un véhicule (uniquement les non loués)
             vehiculeService.afficherVehiculesDisponibles();
             System.out.print("\nEntrez l'ID du véhicule à louer (disponible) : ");
             int vehiculeId = sc.nextInt();
-            sc.nextLine(); // Consommer retour ligne
+            sc.nextLine();
 
-            // Vérifier que le véhicule sélectionné est disponible (Non_loué)
             com.group3.carrental.entity.Vehicule vehiculeSelectionne = vehiculeService
                     .getVehiculeDisponibleById(vehiculeId);
             if (vehiculeSelectionne == null) {
@@ -235,7 +234,6 @@ public class AppController {
             System.out.println("Véhicule sélectionné: " + vehiculeSelectionne.getMarque() + " "
                     + vehiculeSelectionne.getModele() + " (ID: " + vehiculeId + ")");
 
-            // Afficher les dates disponibles
             List<LocalDate> datesDisponibles = vehiculeSelectionne.getDatesDisponibles();
             System.out.println("\nDates disponibles pour ce véhicule:");
             if (datesDisponibles.isEmpty()) {
@@ -243,7 +241,6 @@ public class AppController {
                 return;
             }
             
-            // Étape 2: Choisir la date de début si plusieurs dates disponibles
             LocalDate dateDebut = null;
             if (datesDisponibles.size() > 1) {
                 System.out.println("Nombre de dates disponibles: " + datesDisponibles.size());
@@ -263,7 +260,6 @@ public class AppController {
                     return;
                 }
             } else {
-                // Une seule date disponible
                 dateDebut = datesDisponibles.get(0);
                 System.out.println("Date de début: " + dateDebut);
             }
@@ -272,7 +268,6 @@ public class AppController {
             int nbJours = sc.nextInt();
             sc.nextLine();
 
-            // Étape 3: Afficher et choisir une assurance
             System.out.println("\n=== Assurances Disponibles ===");
             List<Assurance> assurances = assuranceService.getAllAssurances();
 
@@ -281,7 +276,6 @@ public class AppController {
                 return;
             }
 
-            // Afficher les assurances avec prix
             for (int i = 0; i < assurances.size(); i++) {
                 Assurance a = assurances.get(i);
                 double prix = assuranceService.calculerPrix(a, nbJours);
@@ -302,7 +296,6 @@ public class AppController {
             Assurance assuranceChoisie = assurances.get(choixAssurance - 1);
             double prixAssurance = assuranceService.calculerPrix(assuranceChoisie, nbJours);
 
-            // Étape 4: Récapitulatif et validation
             System.out.println("\n=== Récapitulatif de Location ===");
             System.out.println("Véhicule: ID " + vehiculeId);
             System.out.println("Date de début: " + dateDebut);
@@ -315,14 +308,21 @@ public class AppController {
             String confirmation = sc.nextLine();
 
             if (confirmation.equalsIgnoreCase("O")) {
-                // Convertir LocalDate en java.util.Date pour le contrat
                 java.util.Date dateDebutContrat = java.util.Date.from(
                     dateDebut.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 java.util.Date dateFinContrat = java.util.Date.from(
                     dateDebut.plusDays(nbJours).atStartOfDay(ZoneId.systemDefault()).toInstant());
 
                 try {
-                    contratService.creerContrat(dateDebutContrat, dateFinContrat, null, null, null, prixAssurance);
+                    // Récupérer l'agent du véhicule et le loueur courant
+                    com.group3.carrental.entity.Agent agentVehicule = vehiculeSelectionne.getAgent();
+                    com.group3.carrental.entity.Loueur loueurCourant = null;
+                    if (currentUser instanceof com.group3.carrental.entity.Loueur) {
+                        loueurCourant = (com.group3.carrental.entity.Loueur) currentUser;
+                    }
+                    
+                    contratService.creerContrat(dateDebutContrat, dateFinContrat, agentVehicule, loueurCourant, 
+                            vehiculeSelectionne, prixAssurance);
 
                     System.out.println("\nLocation confirmée !");
                     System.out.println("Votre contrat a été créé avec succès.");
@@ -378,6 +378,99 @@ public class AppController {
             default:
                 System.out.println("Choix invalide !");
                 break;
+        }
+    }
+
+    // ========== Mon profil (Loueur) ==========
+    private void afficherMonProfil() {
+        if (currentUser == null) {
+            System.out.println("Accès refusé : vous devez être connecté.");
+            return;
+        }
+
+        boolean retour = false;
+        while (!retour) {
+            System.out.println("\n--- Mon profil ---");
+            System.out.println("ID          : " + currentUser.getId());
+            System.out.println("Nom         : " + currentUser.getNom());
+            System.out.println("Prénom      : " + currentUser.getPrenom());
+            System.out.println("Email       : " + currentUser.getEmail());
+            System.out.println("Mot de passe: " + currentUser.getMotDePasse());
+
+            System.out.println("\n1. Modifier nom");
+            System.out.println("2. Modifier prénom");
+            System.out.println("3. Modifier email");
+            System.out.println("4. Modifier mot de passe");
+            System.out.println("5. Historique des locations");
+            System.out.println("0. Retour");
+            int choix = sc.nextInt();
+            sc.nextLine();
+
+            switch (choix) {
+                case 1:
+                    System.out.print("Nouveau nom : ");
+                    currentUser.setNom(sc.nextLine());
+                    utilisateurService.mettreAJour(currentUser);
+                    System.out.println("Nom mis à jour.");
+                    break;
+                case 2:
+                    System.out.print("Nouveau prénom : ");
+                    currentUser.setPrenom(sc.nextLine());
+                    utilisateurService.mettreAJour(currentUser);
+                    System.out.println("Prénom mis à jour.");
+                    break;
+                case 3:
+                    System.out.print("Nouvel email : ");
+                    currentUser.setEmail(sc.nextLine());
+                    utilisateurService.mettreAJour(currentUser);
+                    System.out.println("Email mis à jour.");
+                    break;
+                case 4:
+                    System.out.print("Nouveau mot de passe : ");
+                    currentUser.setMotDePasse(sc.nextLine());
+                    utilisateurService.mettreAJour(currentUser);
+                    System.out.println("Mot de passe mis à jour.");
+                    break;
+                case 5:
+                    afficherHistoriqueLocations();
+                    break;
+                case 0:
+                    retour = true;
+                    break;
+                default:
+                    System.out.println("Choix invalide !");
+            }
+        }
+    }
+
+    private void afficherHistoriqueLocations() {
+        if (currentUser == null) {
+            System.out.println("Accès refusé : vous devez être connecté.");
+            return;
+        }
+
+        List<Contrat> contrats = contratService.getContratsParLoueur(currentUser.getId());
+        if (contrats.isEmpty()) {
+            System.out.println("Aucune location trouvée.");
+            return;
+        }
+
+        System.out.println("\n--- Historique des locations ---");
+        for (Contrat c : contrats) {
+            LocalDate deb = c.getDateDeb().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate fin = c.getDateFin().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            System.out.println("Contrat #" + c.getId() + " : du " + deb + " au " + fin);
+
+            if (c.getVehicule() != null) {
+                System.out.println("  Véhicule : " + c.getVehicule().getMarque() + " " + c.getVehicule().getModele());
+                System.out.println("  Lieu     : " + c.getVehicule().getLocalisationComplete());
+            }
+
+            if (c.getAgent() != null) {
+                System.out.println("  Agent    : " + c.getAgent().getPrenom() + " " + c.getAgent().getNom());
+            }
+            System.out.println("  Prix total : " + c.getPrixTotal() + "€");
+            System.out.println("------------------------------------");
         }
     }
 
