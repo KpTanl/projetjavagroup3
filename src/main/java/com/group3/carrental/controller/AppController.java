@@ -8,10 +8,12 @@ import org.springframework.stereotype.Component;
 
 import com.group3.carrental.entity.Assurance;
 import com.group3.carrental.entity.Utilisateur;
+import com.group3.carrental.entity.Message;
 import com.group3.carrental.service.AssuranceService;
 import com.group3.carrental.service.ContratService;
 import com.group3.carrental.service.UtilisateurService;
 import com.group3.carrental.service.VehiculeService;
+import com.group3.carrental.service.ServiceMessagerie;
 
 @Component
 public class AppController {
@@ -23,18 +25,16 @@ public class AppController {
     private final VehiculeService vehiculeService;
     private final AssuranceService assuranceService;
     private final ContratService contratService;
+    private final ServiceMessagerie serviceMessagerie;
 
-    /**
-     * Constructeur avec injection de dépendances.
-     * Spring injecte automatiquement les services nécessaires.
-     */
     @Autowired
     public AppController(UtilisateurService utilisateurService, VehiculeService vehiculeService,
-            AssuranceService assuranceService, ContratService contratService) {
+            AssuranceService assuranceService, ContratService contratService, ServiceMessagerie serviceMessagerie) {
         this.utilisateurService = utilisateurService;
         this.vehiculeService = vehiculeService;
         this.assuranceService = assuranceService;
         this.contratService = contratService;
+        this.serviceMessagerie = serviceMessagerie;
     }
 
     public enum UserRole {
@@ -73,6 +73,7 @@ public class AppController {
         System.out.println("5. Afficher les agents");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
+        sc.nextLine();
         switch (choice) {
             case 1: {
                 System.out.println("Entrez votre email : ");
@@ -81,7 +82,7 @@ public class AppController {
                 String motDePasse = sc.next();
                 Utilisateur utilisateur = utilisateurService.login(email, motDePasse).orElse(null);
                 if (utilisateur != null) {
-                    currentUser = utilisateur; // Sauvegarder l'utilisateur
+                    currentUser = utilisateur;
                     System.out.println("Connexion reussie !");
                     switch (utilisateur.getRole()) {
                         case Loueur:
@@ -109,6 +110,7 @@ public class AppController {
 
                 System.out.println("Choisissez votre role (1: Loueur, 2: Agent) : ");
                 int roleChoice = sc.nextInt();
+                sc.nextLine();
                 Utilisateur.Role role = (roleChoice == 2) ? Utilisateur.Role.Agent : Utilisateur.Role.Loueur;
 
                 Utilisateur newUser = new Utilisateur();
@@ -147,9 +149,11 @@ public class AppController {
         System.out.println("2. Filtrer les voitures");
         System.out.println("3. Louer un véhicule");
         System.out.println("4. Consulter les assurances");
-        System.out.println("5. Mon profil");
+        System.out.println("5. Messagerie");
+        System.out.println("6. Mon profil");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
+        sc.nextLine();
         switch (choice) {
             case 1:
                 vehiculeService.afficherTousLesVehicules();
@@ -164,11 +168,15 @@ public class AppController {
                 afficherAssurances();
                 break;
             case 5:
+                displayMenuMessagerie();
+                break;
+            case 6:
                 // TODO: Mon profil
                 break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
                 currentUserRole = UserRole.Visitor;
+                currentUser = null;
                 break;
             default:
                 System.out.println("Choix invalide !");
@@ -276,12 +284,7 @@ public class AppController {
                 java.util.Date today = new java.util.Date();
                 java.util.Date endDate = new java.util.Date(today.getTime() + (long) nbJours * 24 * 60 * 60 * 1000);
 
-                // TODO: Récupérer le loueur et le véhicule actuels depuis la session
-                // utilisateur
-                // Pour l'instant, on utilise des valeurs par défaut
                 try {
-                    // Récupérer le véhicule (simulation - à améliorer)
-                    // Récupérer le loueur actuel (simulation - à améliorer)
                     contratService.creerContrat(today, endDate, null, null, null, prixAssurance);
 
                     System.out.println("\nLocation confirmée !");
@@ -306,8 +309,10 @@ public class AppController {
         System.out.println("3. Modifier mes vehicules");
         System.out.println("4. Afficher mes vehicules");
         System.out.println("5. Filtrer les voitures");
+        System.out.println("6. Messagerie");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
+        sc.nextLine();
         switch (choice) {
             case 1:
                 utilisateurService.ajouterVehicule(currentUser);
@@ -324,13 +329,112 @@ public class AppController {
             case 5:
                 vehiculeService.filtrerVehicules();
                 break;
+            case 6:
+                displayMenuMessagerie();
+                break;
             case 0:
-                System.out.println("vos avez choisi de quitter!");
+                System.out.println("vous avez choisi de quitter!");
                 currentUserRole = UserRole.Visitor;
+                currentUser = null;
                 break;
             default:
                 System.out.println("Choix invalide !");
                 break;
+        }
+    }
+
+    // ========== Messagerie ==========
+    private void displayMenuMessagerie() {
+        if (currentUser == null) {
+            System.out.println("Accès refusé : vous devez être connecté.");
+            return;
+        }
+
+        boolean back = false;
+        while (!back) {
+            System.out.println("\n--- Messagerie ---");
+            System.out.println("1. Envoyer un message");
+            System.out.println("2. Voir ma boîte de réception");
+            System.out.println("3. Voir une conversation (par id)");
+            System.out.println("0. Retour");
+
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+                case 1:
+                    menuEnvoyerMessage();
+                    break;
+                case 2:
+                    menuAfficherInbox();
+                    break;
+                case 3:
+                    menuAfficherConversation();
+                    break;
+                case 0:
+                    back = true;
+                    break;
+                default:
+                    System.out.println("Choix invalide !");
+            }
+        }
+    }
+
+    private void menuEnvoyerMessage() {
+        System.out.print("ID du destinataire : ");
+        int destinataireId = Integer.parseInt(sc.nextLine());
+
+        System.out.print("Contenu du message : ");
+        String contenu = sc.nextLine();
+
+        try {
+            Message msg = serviceMessagerie.envoyerMessage(
+                    currentUser.getId(),
+                    destinataireId,
+                    contenu);
+            System.out.println("Message envoyé ! (id=" + msg.getId() + ", date=" + msg.getDateEnvoi() + ")");
+        } catch (Exception e) {
+            System.out.println("Erreur : " + e.getMessage());
+        }
+    }
+
+    private void menuAfficherInbox() {
+        try {
+            List<Message> inbox = serviceMessagerie.consulterMessages(currentUser.getId());
+            if (inbox.isEmpty()) {
+                System.out.println("(Aucun message reçu)");
+                return;
+            }
+
+            System.out.println("\n--- Boîte de réception ---");
+            for (Message m : inbox) {
+                System.out.println("[" + m.getDateEnvoi() + "] de "
+                        + m.getExpediteur().getPrenom() + " " + m.getExpediteur().getNom()
+                        + " : " + m.getContenu());
+            }
+        } catch (Exception e) {
+            System.out.println("Erreur : " + e.getMessage());
+        }
+    }
+
+    private void menuAfficherConversation() {
+        System.out.print("ID de l'utilisateur : ");
+        int otherId = Integer.parseInt(sc.nextLine());
+
+        try {
+            List<Message> conv = serviceMessagerie.consulterConversation(currentUser.getId(), otherId);
+            if (conv.isEmpty()) {
+                System.out.println("(Aucun message entre vous)");
+                return;
+            }
+
+            System.out.println("\n--- Conversation ---");
+            for (Message m : conv) {
+                String who = (m.getExpediteur().getId() == currentUser.getId()) ? "Moi" : m.getExpediteur().getPrenom();
+                System.out.println("[" + m.getDateEnvoi() + "] " + who + " : " + m.getContenu());
+            }
+        } catch (Exception e) {
+            System.out.println("Erreur : " + e.getMessage());
         }
     }
 }

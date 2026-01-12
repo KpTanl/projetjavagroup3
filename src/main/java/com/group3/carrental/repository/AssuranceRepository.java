@@ -7,7 +7,7 @@ import java.util.Optional;
 
 @Repository
 public interface AssuranceRepository extends JpaRepository<Assurance, Long> {
-    
+
     // Trouver une assurance par son nom
     Optional<Assurance> findByNom(String nom);
 }
