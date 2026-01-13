@@ -100,7 +100,7 @@ public class UtilisateurController {
 
         System.out.println("\n--- Historique des locations ---");
         for (Contrat c : contrats) {
-            LocalDate deb = c.getDateDeb().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate deb = c.getDateDebut().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate fin = c.getDateFin().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             System.out.println("Contrat #" + c.getId() + " : du " + deb + " au " + fin);
 

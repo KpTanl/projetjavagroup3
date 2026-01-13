@@ -30,17 +30,20 @@ public class AppController {
     private final ContratService contratService;
     private final MessagerieController messagerieController;
     private final UtilisateurController utilisateurController;
+    private final AgentController agentController;
 
     @Autowired
     public AppController(UtilisateurService utilisateurService, VehiculeService vehiculeService,
-            AssuranceService assuranceService, ContratService contratService, 
-            MessagerieController messagerieController, UtilisateurController utilisateurController) {
+            AssuranceService assuranceService, ContratService contratService,
+            MessagerieController messagerieController, UtilisateurController utilisateurController,
+            AgentController agentController) {
         this.utilisateurService = utilisateurService;
         this.vehiculeService = vehiculeService;
         this.assuranceService = assuranceService;
         this.contratService = contratService;
         this.messagerieController = messagerieController;
         this.utilisateurController = utilisateurController;
+        this.agentController = agentController;
     }
 
     public enum UserRole {
@@ -70,6 +73,7 @@ public class AppController {
         System.out.println("Au revoir !");
     }
 
+    // ========== Menu Visitor ==========
     private void displayMenuVisitor() {
         System.out.println("\nMenu de Visitor : ");
         System.out.println("1. Se connecter");
@@ -156,6 +160,7 @@ public class AppController {
         }
     }
 
+    // ========== Menu Loueur ==========
     private void displayMenuLoueur() {
         System.out.println("\nMenu de Loueur : ");
         System.out.println("1. Consulter les véhicules");
@@ -250,13 +255,13 @@ public class AppController {
                 System.out.println("Aucune date disponible pour ce véhicule.");
                 return;
             }
-            
+
             LocalDate dateDebut = null;
             if (datesDisponibles.size() > 1) {
                 System.out.println("Nombre de dates disponibles: " + datesDisponibles.size());
                 System.out.println("Première date disponible: " + datesDisponibles.get(0));
                 System.out.println("Dernière date disponible: " + datesDisponibles.get(datesDisponibles.size() - 1));
-                
+
                 System.out.print("\nSaisissez la date de début de location (format: AAAA-MM-JJ) : ");
                 String dateInput = sc.nextLine();
                 try {
@@ -319,9 +324,9 @@ public class AppController {
 
             if (confirmation.equalsIgnoreCase("O")) {
                 java.util.Date dateDebutContrat = java.util.Date.from(
-                    dateDebut.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                        dateDebut.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 java.util.Date dateFinContrat = java.util.Date.from(
-                    dateDebut.plusDays(nbJours).atStartOfDay(ZoneId.systemDefault()).toInstant());
+                        dateDebut.plusDays(nbJours).atStartOfDay(ZoneId.systemDefault()).toInstant());
 
                 try {
                     // Récupérer l'agent du véhicule et le loueur courant
@@ -330,8 +335,8 @@ public class AppController {
                     if (currentUser instanceof com.group3.carrental.entity.Loueur) {
                         loueurCourant = (com.group3.carrental.entity.Loueur) currentUser;
                     }
-                    
-                    contratService.creerContrat(dateDebutContrat, dateFinContrat, agentVehicule, loueurCourant, 
+
+                    contratService.creerContrat(dateDebutContrat, dateFinContrat, agentVehicule, loueurCourant,
                             vehiculeSelectionne, prixAssurance);
 
                     System.out.println("\nLocation confirmée !");
@@ -350,6 +355,7 @@ public class AppController {
         }
     }
 
+    // ========== Menu Agent ==========
     private void displayMenuAgent() {
         System.out.println("\nMenu de Agent : ");
         System.out.println("1. Ajouter mes vehicules");
@@ -358,6 +364,7 @@ public class AppController {
         System.out.println("4. Afficher mes vehicules");
         System.out.println("5. Filtrer les voitures");
         System.out.println("6. Messagerie");
+        System.out.println("7. Consulter l'historique de mes véhicules");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -380,6 +387,9 @@ public class AppController {
             case 6:
                 messagerieController.displayMenuMessagerie(currentUser);
                 break;
+            case 7:
+                agentController.consulterHistoriqueVehicules(currentUser);
+                break;
             case 0:
                 System.out.println("vous avez choisi de quitter!");
                 currentUserRole = UserRole.Visitor;
@@ -391,8 +401,10 @@ public class AppController {
         }
     }
 
-    // ========== Les méthodes de profil ont été déplacées vers UtilisateurController ==========
-
-    // ========== Messagerie ==========
-    // ========== Les méthodes de messagerie ont été déplacées vers MessagerieController ==========
+    // ========== Les méthodes de profil ont été déplacées vers
+    // UtilisateurController ==========
+    // ========== Les méthodes de messagerie ont été déplacées vers
+    // MessagerieController ==========
+    // ========== Les méthodes d'historique véhicules ont été déplacées vers
+    // AgentController ==========
 }

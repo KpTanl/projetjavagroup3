@@ -99,6 +99,13 @@ public class VehiculeService {
     }
 
     /**
+     * Retourne les véhicules appartenant à un agent spécifique.
+     */
+    public List<Vehicule> getVehiculesByAgentId(int agentId) {
+        return vehiculeRepository.findByAgentId(agentId);
+    }
+
+    /**
      * Récupère un véhicule par son ID.
      */
     public Vehicule getVehiculeById(int id) {
@@ -216,7 +223,8 @@ public class VehiculeService {
                 .filter(v -> v.getMarque().equalsIgnoreCase(marqueSaisie))
                 .filter(v -> {
                     Double noteVehicule = v.calculerNoteMoyenne();
-                    if (noteSaisie == 0.0) return true;
+                    if (noteSaisie == 0.0)
+                        return true;
                     return noteVehicule != null && noteVehicule >= noteSaisie;
                 })
                 .filter(v -> v.getCouleur().equalsIgnoreCase(couleurSaisie))

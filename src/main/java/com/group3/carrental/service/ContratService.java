@@ -23,7 +23,8 @@ public class ContratService {
     /**
      * Créer et sauvegarder un nouveau contrat
      */
-    public Contrat creerContrat(Date dateDebut, Date dateFin, Agent agent, Loueur loueur, Vehicule vehicule, double prixTotal) {
+    public Contrat creerContrat(Date dateDebut, Date dateFin, Agent agent, Loueur loueur, Vehicule vehicule,
+            double prixTotal) {
         Contrat contrat = new Contrat(dateDebut, dateFin, agent, loueur, vehicule, prixTotal);
         return contratRepository.save(contrat);
     }
@@ -42,12 +43,28 @@ public class ContratService {
         return contratRepository.findByLoueurId(loueurId);
     }
 
+    public List<Contrat> getContratsParAgent(int agentId) {
+        return contratRepository.findByAgentId(agentId);
+    }
+
+    public List<Contrat> getContratsParVehicule(int vehiculeId) {
+        return contratRepository.findByVehiculeId(vehiculeId);
+    }
+
+    public List<Contrat> getContratsParDate(Date dateDebut, Date dateFin) {
+        return contratRepository.findByDateDebutAndDateFin(dateDebut, dateFin);
+    }
+
+    public List<Contrat> getHistoriqueVehiculedeAgent(int agentId, int vehiculeId) {
+        return contratRepository.findByAgentIdAndVehiculeId(agentId, vehiculeId);
+    }
+
     /**
      * Récupérer un contrat par son ID
      */
     public Contrat getContratById(Long id) {
         return contratRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Contrat non trouvé"));
+                .orElseThrow(() -> new RuntimeException("Contrat non trouvé"));
     }
 
     /**

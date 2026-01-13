@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name = "parking")
-public class Parking {
+public class Parking implements Services {
     // propriétés
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -90,4 +90,23 @@ public class Parking {
         return villes;
     }
 
+    // ==================== Services Interface ====================
+    @Override
+    public void Souscrire() {
+
+    }
+
+    @Override
+    public void Resilier() {
+
+    }
+
+    @Override
+    public void Renouveler() {
+
+    }
+
 }
+
+
+
