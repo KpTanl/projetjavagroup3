@@ -365,25 +365,29 @@ public class AppController {
             switch (choix) {
                 case 1:
                     System.out.print("Nouveau nom : ");
-                    currentUser.setNom(sc.nextLine());
+                    String newNom = sc.nextLine();
+                    currentUser.modifierProfil(newNom, null, null, null);
                     utilisateurService.mettreAJour(currentUser);
                     System.out.println("Nom mis à jour.");
                     break;
                 case 2:
                     System.out.print("Nouveau prénom : ");
-                    currentUser.setPrenom(sc.nextLine());
+                    String newPrenom = sc.nextLine();
+                    currentUser.modifierProfil(null, newPrenom, null, null);
                     utilisateurService.mettreAJour(currentUser);
                     System.out.println("Prénom mis à jour.");
                     break;
                 case 3:
                     System.out.print("Nouvel email : ");
-                    currentUser.setEmail(sc.nextLine());
+                    String newEmail = sc.nextLine();
+                    currentUser.modifierProfil(null, null, newEmail, null);
                     utilisateurService.mettreAJour(currentUser);
                     System.out.println("Email mis à jour.");
                     break;
                 case 4:
                     System.out.print("Nouveau mot de passe : ");
-                    currentUser.setMotDePasse(sc.nextLine());
+                    String newMotDePasse = sc.nextLine();
+                    currentUser.modifierProfil(null, null, null, newMotDePasse);
                     utilisateurService.mettreAJour(currentUser);
                     System.out.println("Mot de passe mis à jour.");
                     break;

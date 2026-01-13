@@ -56,7 +56,6 @@ public class UtilisateurService {
 
     // Ajouter un véhicule pour agent
     public void ajouterVehicule(Utilisateur currentUser) {
-        // Vérifier si l'utilisateur est un Agent
         if (!(currentUser instanceof Agent)) {
             System.out.println("Erreur: Seul un Agent peut ajouter un véhicule.");
             return;
@@ -114,7 +113,7 @@ public class UtilisateurService {
         Vehicule vehicule = new Vehicule(type, inputMarque, inputModele,
                 inputCouleur, etat, rue, codePostal, ville);
         vehicule.ajouterDisponibilite(LocalDate.now().plusDays(1));
-        vehicule.setAgent(agent); // Associer l'agent avant de sauvegarder
+        vehicule.setAgent(agent);
         vehiculeRepository.save(vehicule);
         System.out.println("Vehicule ajoute reussi !!");
 

@@ -36,8 +36,19 @@ public abstract class Utilisateur extends Compte {
 
     }
 
-    public void modifierProfil() {
-        // TODO: Implement logic
+    public void modifierProfil(String nom, String prenom, String email, String motDePasse) {
+        if (nom != null && !nom.isEmpty()) {
+            this.nom = nom;
+        }
+        if (prenom != null && !prenom.isEmpty()) {
+            this.prenom = prenom;
+        }
+        if (email != null && !email.isEmpty()) {
+            this.email = email;
+        }
+        if (motDePasse != null && !motDePasse.isEmpty()) {
+            this.motDePasse = motDePasse;
+        }
     }
 
     public void signerContrat() {
