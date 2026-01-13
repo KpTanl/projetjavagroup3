@@ -74,7 +74,6 @@ public class AppController {
         System.out.println("Au revoir !");
     }
 
-    // ========== Menu Visitor ==========
     private void displayMenuVisitor() {
         System.out.println("\nMenu de Visitor : ");
         System.out.println("1. Se connecter");
@@ -128,7 +127,6 @@ public class AppController {
                 if (role == Utilisateur.Role.Loueur) {
                     newUser = new Loueur();
                 } else {
-                    // Par défaut un Agent Particulier si pas précisé
                     newUser = new AgentParticulier();
                 }
 
@@ -149,7 +147,6 @@ public class AppController {
                 vehiculeService.filtrerVehicules();
                 break;
             case 5:
-                // On appelle la nouvelle méthode créée ci-dessous
                 actionConsulterAgents();
                 break;
             case 0:
@@ -162,7 +159,6 @@ public class AppController {
         }
     }
 
-    // ========== Menu Loueur ==========
     private void displayMenuLoueur() {
         System.out.println("\nMenu de Loueur : ");
         System.out.println("1. Consulter les véhicules");
@@ -172,6 +168,8 @@ public class AppController {
         System.out.println("5. Messagerie");
         System.out.println("6. Mon profil");
         System.out.println("7. Suggestions autour de chez moi (Rayon X km)");
+        System.out.println("8. Noter");
+        System.out.println("9. Mes contrats terminés");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -200,6 +198,12 @@ public class AppController {
                 sc.nextLine();
                 vehiculeService.suggererVehiculesProches(currentUser, rayonsuggestion);
                 break;
+            case 8:
+                utilisateurController.menuNotation(currentUser);
+                break;
+            case 9:
+                utilisateurController.menuMesContratsTermines(currentUser);
+                break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
                 currentUserRole = UserRole.Visitor;
@@ -211,9 +215,6 @@ public class AppController {
         }
     }
 
-    /**
-     * Afficher toutes les assurances disponibles
-     */
     private void afficherAssurances() {
         System.out.println("\n=== Assurances Disponibles ===");
         List<Assurance> assurances = assuranceService.getAllAssurances();
@@ -236,10 +237,6 @@ public class AppController {
         }
     }
 
-    /**
-     * Processus de location d'un véhicule
-     * Étapes: Choisir véhicule -> Dates -> Assurance -> Validation
-     */
     private void louerVehicule() {
         System.out.println("\n=== Location de Véhicule ===");
 
@@ -337,7 +334,6 @@ public class AppController {
                         dateDebut.plusDays(nbJours).atStartOfDay(ZoneId.systemDefault()).toInstant());
 
                 try {
-                    // Récupérer l'agent du véhicule et le loueur courant
                     Agent agentVehicule = vehiculeSelectionne.getAgent();
                     Loueur loueurCourant = null;
                     if (currentUser instanceof Loueur) {
@@ -363,7 +359,6 @@ public class AppController {
         }
     }
 
-    // ========== Menu Agent ==========
     private void displayMenuAgent() {
         if (!(currentUser instanceof Agent)) {
             System.out.println("Erreur: accès agent refusé pour cet utilisateur.");
@@ -380,6 +375,9 @@ public class AppController {
         System.out.println("6. Messagerie");
         System.out.println("7. Gérer l'option Parking Partenaire");
         System.out.println("8. Consulter l'historique de mes véhicules");
+        System.out.println("9. Valider contrats (pré-signés)");
+        System.out.println("10. Noter Loueur");
+        System.out.println("11. Mes contrats terminés");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -408,6 +406,15 @@ public class AppController {
             case 8:
                 agentController.consulterHistoriqueVehicules(currentUser);
                 break;
+            case 9:
+                utilisateurController.menuValidationContrats(agent);
+                break;
+            case 10:
+                utilisateurController.menuNotation(currentUser);
+                break;
+            case 11:
+                utilisateurController.menuMesContratsTermines(currentUser);
+                break;
             case 0:
                 System.out.println("vous avez choisi de quitter!");
                 currentUserRole = UserRole.Visitor;
@@ -419,9 +426,6 @@ public class AppController {
         }
     }
 
-    /**
-     * Gestion des options de parking pour les véhicules de l'agent (venant de main)
-     */
     private void gererOptionsParkingAgent() {
         if (!(currentUser instanceof Agent)) {
             System.out.println("Erreur : Vous devez être un Agent pour accéder à cette option.");
@@ -429,8 +433,6 @@ public class AppController {
         }
 
         Agent agentActuel = (Agent) currentUser;
-
-        // Récupération des véhicules via le service (basé sur l'ID de l'agent)
         List<Vehicule> mesVehicules = vehiculeService.getVehiculesByAgentId(agentActuel.getId());
 
         if (mesVehicules == null || mesVehicules.isEmpty()) {
@@ -458,7 +460,6 @@ public class AppController {
             int action = sc.nextInt();
             sc.nextLine();
 
-            // Appel de la logique métier située dans Agent.java
             if (action == 1) {
                 agentActuel.configurerOptionParking(vSelectionne, true);
                 System.out.println("Mise à jour réussie : Option activée.");
@@ -468,17 +469,11 @@ public class AppController {
             } else {
                 System.out.println("Action annulée : choix invalide.");
             }
-
-            // Note : En situation réelle, il faudrait ici appeler
-            // vehiculeService.save(vSelectionne)
-            // pour persister le changement en base de données.
         }
     }
 
     private void actionConsulterAgents() {
         System.out.println("\n--- CONSULTATION DES AGENTS ---");
-
-        // 1. On récupère tous les agents via le service
         List<Utilisateur> agents = utilisateurService.findAllAgents();
 
         if (agents.isEmpty()) {
@@ -486,17 +481,15 @@ public class AppController {
             return;
         }
 
-        // 2. On affiche la liste pour que l'utilisateur puisse choisir
         for (int i = 0; i < agents.size(); i++) {
             Utilisateur a = agents.get(i);
             System.out.println((i + 1) + ". " + a.getPrenom() + " " + a.getNom() + " (Email: " + a.getEmail() + ")");
         }
 
-        // 3. Choix de l'utilisateur
         System.out.print("\nEntrez le numéro de l'agent pour voir ses véhicules (ou 0 pour annuler) : ");
         if (sc.hasNextInt()) {
             int choix = sc.nextInt();
-            sc.nextLine(); // Nettoie le buffer
+            sc.nextLine();
 
             if (choix > 0 && choix <= agents.size()) {
                 Utilisateur agentChoisi = agents.get(choix - 1);
@@ -504,14 +497,11 @@ public class AppController {
                 System.out.println("\n-----------------------------------------");
                 System.out.println("VÉHICULES PROPOSÉS PAR " + agentChoisi.getPrenom().toUpperCase());
                 System.out.println("-----------------------------------------");
-
-                // 4. On appelle le service pour afficher les voitures de cet agent
                 utilisateurService.afficherLesVehiculesDeAgent(agentChoisi);
-
                 System.out.println("-----------------------------------------");
             }
         } else {
-            sc.next(); // Nettoie en cas de mauvaise saisie
+            sc.next();
             System.out.println("Saisie invalide.");
         }
     }

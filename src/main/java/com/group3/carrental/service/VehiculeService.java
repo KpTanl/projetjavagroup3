@@ -13,9 +13,6 @@ import com.group3.carrental.entity.Vehicule.EtatVehicule;
 import com.group3.carrental.entity.Vehicule.TypeVehicule;
 import com.group3.carrental.repository.VehiculeRepository;
 
-/**
- * Service pour gérer les opérations sur les véhicules.
- */
 @Service
 public class VehiculeService {
 
@@ -43,7 +40,6 @@ public class VehiculeService {
                 System.out.println("Etat: " + v.getEtat());
                 Double note = v.calculerNoteMoyenne();
                 System.out.println("Note moyenne: " + (note != null ? note + "/5" : "Aucune note"));
-                // Afficher l'agent associé
                 if (v.getAgent() != null) {
                     System.out.println("Agent: " + v.getAgent().getPrenom() + " " + v.getAgent().getNom() +
                             " (" + v.getAgent().getEmail() + ")");
@@ -62,9 +58,6 @@ public class VehiculeService {
         System.out.println("Total vehicules en base: " + vehicules.size());
     }
 
-    /**
-     * Affiche uniquement les véhicules disponibles (etat = Non_loué).
-     */
     public void afficherVehiculesDisponibles() {
         List<Vehicule> disponibles = vehiculeRepository.findByEtat(Vehicule.EtatVehicule.Non_loué);
 
@@ -85,7 +78,6 @@ public class VehiculeService {
                 System.out.println("Etat: " + v.getEtat());
                 Double noteDisp = v.calculerNoteMoyenne();
                 System.out.println("Note moyenne: " + (noteDisp != null ? noteDisp + "/5" : "Aucune note"));
-                // Afficher l'agent associé
                 if (v.getAgent() != null) {
                     System.out.println("Agent: " + v.getAgent().getPrenom() + " " + v.getAgent().getNom() +
                             " (" + v.getAgent().getEmail() + ")");
@@ -99,31 +91,18 @@ public class VehiculeService {
         System.out.println("Total véhicules disponibles: " + disponibles.size());
     }
 
-    /**
-     * Retourne tous les véhicules.
-     */
     public List<Vehicule> getTousLesVehicules() {
         return vehiculeRepository.findAll();
     }
 
-    /**
-     * Retourne les véhicules appartenant à un agent spécifique.
-     */
     public List<Vehicule> getVehiculesByAgentId(int agentId) {
         return vehiculeRepository.findByAgentId(agentId);
     }
 
-    /**
-     * Récupère un véhicule par son ID.
-     */
     public Vehicule getVehiculeById(int id) {
         return vehiculeRepository.findById(id).orElse(null);
     }
 
-    /**
-     * Récupère un véhicule disponible (etat = Non_loué) par son ID.
-     * Retourne null si le véhicule n'existe pas ou n'est pas disponible.
-     */
     public Vehicule getVehiculeDisponibleById(int id) {
         Vehicule v = getVehiculeById(id);
         if (v == null)
@@ -131,7 +110,6 @@ public class VehiculeService {
         return v.getEtat() == Vehicule.EtatVehicule.Non_loué ? v : null;
     }
 
-    // Ajouter un véhicule pour agent
     public void ajouterVehicule() {
         System.out.println("\n--- Ajout d'un vehicule ---");
         System.out.println("Type (Voiture(1) / Camion(2) / Moto(3)): ");
@@ -257,21 +235,12 @@ public class VehiculeService {
         }
     }
 
-    /**
-     * Sauvegarde les modifications d'un véhicule (utile pour l'option parking).
-     */
     public void save(Vehicule vehicule) {
         vehiculeRepository.save(vehicule);
     }
 
-    // ========== Fonctionnalités de suggestion de véhicules proches (de riad2)
-    // ==========
-
-    /**
-     * Calcule la distance entre deux points géographiques (formule Haversine).
-     */
     public double calculerDistance(double lat1, double lon1, double lat2, double lon2) {
-        final int R = 6371; // Rayon de la Terre en km
+        final int R = 6371;
         double latDistance = Math.toRadians(lat2 - lat1);
         double lonDistance = Math.toRadians(lon2 - lon1);
         double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
@@ -281,10 +250,6 @@ public class VehiculeService {
         return R * c;
     }
 
-    /**
-     * Suggère les véhicules disponibles proches de l'utilisateur dans un rayon
-     * donné.
-     */
     public void suggererVehiculesProches(Utilisateur utilisateur, double rayonKm) {
         List<Vehicule> tousLesVehicules = vehiculeRepository.findAll();
 
@@ -302,18 +267,11 @@ public class VehiculeService {
             System.out.println("Aucun véhicule trouvé dans un rayon de " + rayonKm + " km.");
         } else {
             System.out.println("\n--- SUGGESTIONS PROCHES DE CHEZ VOUS ---");
-            // --- C'EST ICI QUE TU METS LE CODE DE DEBUG ---
             suggestions.forEach(v -> {
-                System.out.println("   [DEBUG] Ma position: " + utilisateur.getLatitudeHabitation() + " / "
-                        + utilisateur.getLongitudeHabitation());
-                System.out.println(
-                        "   [DEBUG] Position véhicule: " + v.getLatitudeVehicule() + " / " + v.getLongitudeVehicule());
-
                 double d = calculerDistance(utilisateur.getLatitudeHabitation(), utilisateur.getLongitudeHabitation(),
                         v.getLatitudeVehicule(), v.getLongitudeVehicule());
-                System.out.printf("- %s %s (à %.2f km)\n", v.getMarque(), v.getModele(), d);
+                System.out.printf("- %s %s (à %.2f km)%n", v.getMarque(), v.getModele(), d);
             });
-            // ----------------------------------------------
         }
     }
 }

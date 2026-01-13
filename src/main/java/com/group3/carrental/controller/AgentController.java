@@ -76,7 +76,7 @@ public class AgentController {
         System.out.println("\n=== Historique du véhicule : " + vehiculeChoisi.getMarque() + " "
                 + vehiculeChoisi.getModele() + " ===");
         for (Contrat c : contrats) {
-            LocalDate deb = c.getDateDebut().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate deb = c.getDateDeb().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate fin = c.getDateFin().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             System.out.println("\nContrat #" + c.getId());
             System.out.println("  Période    : du " + deb + " au " + fin);

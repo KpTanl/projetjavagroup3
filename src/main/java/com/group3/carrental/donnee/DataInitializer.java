@@ -2,6 +2,9 @@ package com.group3.carrental.donnee;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -14,6 +17,7 @@ import com.group3.carrental.entity.Loueur;
 import com.group3.carrental.entity.NoteAgent;
 import com.group3.carrental.entity.NoteVehicule;
 import com.group3.carrental.entity.Vehicule;
+import com.group3.carrental.entity.Contrat;
 import com.group3.carrental.repository.AssuranceRepository;
 import com.group3.carrental.repository.UtilisateurRepository;
 import com.group3.carrental.repository.VehiculeRepository;
@@ -21,6 +25,7 @@ import com.group3.carrental.repository.NoteAgentRepository;
 import com.group3.carrental.repository.NoteLoueurRepository;
 import com.group3.carrental.repository.NoteVehiculeRepository;
 import com.group3.carrental.repository.EntrepriseRepository;
+import com.group3.carrental.repository.ContratRepository;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -32,6 +37,7 @@ public class DataInitializer implements CommandLineRunner {
         private final NoteAgentRepository noteAgentRepository;
         private final NoteLoueurRepository noteLoueurRepository;
         private final NoteVehiculeRepository noteVehiculeRepository;
+        private final ContratRepository contratRepository;
 
         public DataInitializer(VehiculeRepository vehiculeRepository,
                         UtilisateurRepository utilisateurRepository,
@@ -39,7 +45,8 @@ public class DataInitializer implements CommandLineRunner {
                         EntrepriseRepository entrepriseRepository,
                         NoteAgentRepository noteAgentRepository,
                         NoteLoueurRepository noteLoueurRepository,
-                        NoteVehiculeRepository noteVehiculeRepository) {
+                        NoteVehiculeRepository noteVehiculeRepository,
+                        ContratRepository contratRepository) {
                 this.vehiculeRepository = vehiculeRepository;
                 this.utilisateurRepository = utilisateurRepository;
                 this.assuranceRepository = assuranceRepository;
@@ -47,6 +54,7 @@ public class DataInitializer implements CommandLineRunner {
                 this.noteAgentRepository = noteAgentRepository;
                 this.noteLoueurRepository = noteLoueurRepository;
                 this.noteVehiculeRepository = noteVehiculeRepository;
+                this.contratRepository = contratRepository;
         }
 
         @Override
@@ -58,7 +66,6 @@ public class DataInitializer implements CommandLineRunner {
 
                 System.out.println("Initialisation des données de démonstration...");
 
-                // ========== Assurances (avec prix) ==========
                 Assurance assuranceAZA = new Assurance(
                                 "Assurance AZA Complète",
                                 "Voiture:30.0,Moto:45.0,Camion:60.0,Voiture-Clio:28.0",
@@ -77,7 +84,6 @@ public class DataInitializer implements CommandLineRunner {
                                 80.0);
                 assuranceRepository.save(assurancePremium);
 
-                // ========== Utilisateurs ==========
                 Loueur loueur1 = new Loueur(0, "Dupont", "Jean", "jean.dupont@email.com", "motdepasse123",
                                 new ArrayList<>(), new ArrayList<>(), 48.8584, 2.3488);
                 utilisateurRepository.save(loueur1);
@@ -98,8 +104,6 @@ public class DataInitializer implements CommandLineRunner {
 
                 AgentPro agentPro1 = new AgentPro(0, "Société", "Admin", "admin@rentcar.com", "admin123",
                                 new ArrayList<>(), LocalDate.now(), 12345678901234L, "RentCar Pro", 48.8566, 2.3522);
-                agentPro1.ajouterNote(new NoteAgent(4, 5, 4, "Très bon service", agentPro1));
-                agentPro1.ajouterNote(new NoteAgent(5, 5, 5, "Suuuper", agentPro1));
                 utilisateurRepository.save(agentPro1);
 
                 AgentPro agentPro2 = new AgentPro(
@@ -155,26 +159,7 @@ public class DataInitializer implements CommandLineRunner {
                                 new ArrayList<>(),
                                 LocalDate.now().minusMonths(1), 50.6292, 3.0573);
                 utilisateurRepository.save(agentParticulier3);
-                /*
-                 * //Pour parking - agent
-                 * AgentParticulier paul = new AgentParticulier(0, "Durand", "Paul",
-                 * "paul.durand@email.com", "paulpass", new ArrayList<>(),
-                 * LocalDate.now().minusDays(3));
-                 * utilisateurRepository.save(paul); // Sauvegardez-le pour qu'il ait un ID
-                 * 
-                 * // 2. Créez le véhicule
-                 * Vehicule veh1 = new Vehicule(Vehicule.TypeVehicule.Voiture, "Renault",
-                 * "Clio", "Bleu", Vehicule.EtatVehicule.Non_loué, "Rue de la Paix", "75000",
-                 * "Paris");
-                 * 
-                 * // 3. LIEZ LES DEUX !
-                 * v1.setAgent(paul); // Indiquez que Paul est le propriétaire
-                 * 
-                 * // 4. Sauvegardez le véhicule
-                 * vehiculeRepository.save(veh1);
-                 */
 
-                // ========== Véhicules ==========
                 Vehicule v1 = new Vehicule(
                                 Vehicule.TypeVehicule.Voiture,
                                 "Renault",
@@ -186,7 +171,6 @@ public class DataInitializer implements CommandLineRunner {
                                 "Paris",
                                 48.8583, 2.2945);
                 v1.ajouterDisponibilite(LocalDate.now().plusDays(1));
-                v1.ajouterNote(new NoteVehicule(4, 5, 4, "Très bon véhicule"));
                 vehiculeRepository.save(v1);
 
                 Vehicule v2 = new Vehicule(
@@ -200,7 +184,6 @@ public class DataInitializer implements CommandLineRunner {
                                 "Toulouse",
                                 48.8397, 2.2399);
                 v2.ajouterDisponibilite(LocalDate.now().plusDays(2));
-                v2.ajouterNote(new NoteVehicule(5, 5, 5, "Moto excellente"));
                 vehiculeRepository.save(v2);
 
                 Vehicule v3 = new Vehicule(
@@ -214,7 +197,6 @@ public class DataInitializer implements CommandLineRunner {
                                 "Lille",
                                 48.9361, 2.3574);
                 v3.ajouterDisponibilite(LocalDate.now().plusDays(3));
-                v3.ajouterNote(new NoteVehicule(4, 4, 5, "Voiture confortable"));
                 vehiculeRepository.save(v3);
 
                 Vehicule v4 = new Vehicule(
@@ -228,7 +210,6 @@ public class DataInitializer implements CommandLineRunner {
                                 "Lille",
                                 48.8048, 2.1203);
                 v4.ajouterDisponibilite(LocalDate.now().plusDays(5));
-                v4.ajouterNote(new NoteVehicule(3, 4, 4, "Utile pour déménagement"));
                 vehiculeRepository.save(v4);
 
                 Vehicule v5 = new Vehicule(
@@ -285,7 +266,20 @@ public class DataInitializer implements CommandLineRunner {
                 v8.setAgent(agentParticulier3);
                 vehiculeRepository.save(v8);
 
-                // ========== Entreprises ==========
+                Loueur loueurDemo = loueur1;
+                AgentParticulier agentDemo = agentParticulier1;
+                Vehicule vehiculeDemo = v6;
+
+                Date deb = Date.from(Instant.now().minus(5, ChronoUnit.DAYS));
+                Date fin = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+
+                Contrat contratTermine = new Contrat(deb, fin, agentDemo, loueurDemo, vehiculeDemo, 150.0);
+                contratTermine.setStatut(Contrat.Statut.Accepte);
+
+                contratRepository.save(contratTermine);
+
+                System.out.println("Contrat démo terminé + accepté créé : #" + contratTermine.getId());
+
                 Entreprise e1 = new Entreprise(0, "cleanauto@example.com", "pass123", "CleanAuto", "12345678900011",
                                 "Nettoyage intérieur/extérieur");
                 Entreprise e2 = new Entreprise(0, "fastrepair@example.com", "pass123", "FastRepair", "98765432100022",

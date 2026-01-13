@@ -1,23 +1,23 @@
 package com.group3.carrental.service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.group3.carrental.entity.Agent;
 import com.group3.carrental.entity.Assurance;
+import com.group3.carrental.entity.Loueur;
 import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.entity.Vehicule.EtatVehicule;
 import com.group3.carrental.entity.Vehicule.TypeVehicule;
 import com.group3.carrental.repository.UtilisateurRepository;
 import com.group3.carrental.repository.VehiculeRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UtilisateurService {
@@ -30,8 +30,11 @@ public class UtilisateurService {
     private final VehiculeService vehiculeService;
 
     @Autowired
-    public UtilisateurService(UtilisateurRepository utilisateurRepository, VehiculeRepository vehiculeRepository,
-            AssuranceService assuranceService, ContratService contratService, VehiculeService vehiculeService) {
+    public UtilisateurService(UtilisateurRepository utilisateurRepository,
+            VehiculeRepository vehiculeRepository,
+            AssuranceService assuranceService,
+            ContratService contratService,
+            VehiculeService vehiculeService) {
         this.utilisateurRepository = utilisateurRepository;
         this.vehiculeRepository = vehiculeRepository;
         this.assuranceService = assuranceService;
@@ -47,21 +50,15 @@ public class UtilisateurService {
         return utilisateurRepository.save(utilisateur);
     }
 
-    /**
-     * Met à jour les informations d'un utilisateur.
-     */
     public Utilisateur mettreAJour(Utilisateur utilisateur) {
         return utilisateurRepository.save(utilisateur);
     }
 
-    // Ajouter un véhicule pour agent
     public void ajouterVehicule(Utilisateur currentUser) {
-        // Vérifier si l'utilisateur est un Agent
-        if (!(currentUser instanceof Agent)) {
+        if (!(currentUser instanceof Agent agent)) {
             System.out.println("Erreur: Seul un Agent peut ajouter un véhicule.");
             return;
         }
-        Agent agent = (Agent) currentUser;
 
         System.out.println("\n--- Ajout d'un vehicule ---");
         System.out.println("Type (Voiture(1) / Camion(2) / Moto(3)): ");
@@ -114,99 +111,64 @@ public class UtilisateurService {
         System.out.println("Latitude: ");
         double latitude = Double.parseDouble(scanner.nextLine());
         System.out.println("Longitude: ");
-        double longitude = Double.parseDouble(scanner.nextLine());  
+        double longitude = Double.parseDouble(scanner.nextLine());
         Vehicule vehicule = new Vehicule(type, inputMarque, inputModele,
                 inputCouleur, etat, rue, codePostal, ville, latitude, longitude);
         vehicule.ajouterDisponibilite(LocalDate.now().plusDays(1));
-        vehicule.setAgentProprietaire(agent); // Associer l'agent avant de sauvegarder
+        vehicule.setAgent(agent);
         vehiculeRepository.save(vehicule);
         System.out.println("Vehicule ajoute reussi !!");
-
     }
 
-    // Afficher les vehicules de l'agent
     public void afficherLesVehiculesDeAgent(Utilisateur agent) {
         List<Vehicule> vehicules = vehiculeRepository.findByAgent((Agent) agent);
+        System.out.println("\n--- Véhicules de l'agent ---");
         if (vehicules.isEmpty()) {
             System.out.println("Aucun véhicule trouvé.");
         } else {
-            vehicules.forEach(v -> System.out.println("- " + v.getMarque() + " " + v.getModele()));
+            for (Vehicule v : vehicules) {
+                System.out.println("- " + v.getMarque() + " " + v.getModele());
+            }
         }
     }
 
-    // Supprimer un véhicule pour agent
     public void supprimerVehicule(Agent agent) {
         afficherLesVehiculesDeAgent(agent);
-        System.out.println("ID du vehicule a supprimer: ");
-        int id = scanner.nextInt();
+        System.out.print("ID du vehicule à supprimer: ");
+        int id = lireIntSafe();
+
         Vehicule vehicule = vehiculeRepository.findById(id).orElse(null);
-        if (vehicule == null || vehicule.getAgentProprietaire() == null
-                || vehicule.getAgentProprietaire().getId() != agent.getId()) {
-            System.out.println("Erreur: Vehicule non trouve ou ne vous appartient pas.");
+        if (vehicule == null || vehicule.getAgent() == null || vehicule.getAgent().getId() != agent.getId()) {
+            System.out.println("Erreur: Véhicule introuvable ou ne vous appartient pas.");
             return;
         }
+
         vehiculeRepository.delete(vehicule);
-        System.out.println("Vehicule supprime reussi !!");
+        System.out.println("Véhicule supprimé !");
     }
 
-    // Modifier un véhicule pour agent
     public void modifierVehicule(Agent agent) {
         afficherLesVehiculesDeAgent(agent);
-        System.out.println("ID du vehicule a modifier: ");
-        int id = scanner.nextInt();
+        System.out.print("ID du vehicule à modifier: ");
+        int id = lireIntSafe();
+
         Vehicule vehicule = vehiculeRepository.findById(id).orElse(null);
-        if (vehicule == null || vehicule.getAgentProprietaire() == null
-                || vehicule.getAgentProprietaire().getId() != agent.getId()) {
-            System.out.println("Erreur: Vehicule non trouve ou ne vous appartient pas.");
+        if (vehicule == null || vehicule.getAgent() == null || vehicule.getAgent().getId() != agent.getId()) {
+            System.out.println("Erreur: Véhicule introuvable ou ne vous appartient pas.");
             return;
         }
-        System.out.println("Type (Voiture(1) / Camion(2) / Moto(3)): ");
-        String inputType = scanner.nextLine();
-        TypeVehicule type = null;
-        while (type == null) {
-            switch (inputType) {
-                case "1":
-                    type = TypeVehicule.Voiture;
-                    break;
-                case "2":
-                    type = TypeVehicule.Camion;
-                    break;
-                case "3":
-                    type = TypeVehicule.Moto;
-                    break;
-                default:
-                    System.out.println("Type invalide. Veuillez choisir un type valide.");
-                    break;
-            }
-        }
-        System.out.println("Marque: ");
-        String inputMarque = scanner.nextLine();
-        System.out.println("Modele: ");
-        String inputModele = scanner.nextLine();
-        System.out.println("Couleur: ");
-        String inputCouleur = scanner.nextLine();
-        System.out.println("Etat (Loue(1) / Non_loue(2)): ");
-        String inputEtat = scanner.nextLine();
-        EtatVehicule etat = null;
-        while (etat == null) {
-            switch (inputEtat) {
-                case "1":
-                    etat = EtatVehicule.Loué;
-                    break;
-                case "2":
-                    etat = EtatVehicule.Non_loué;
-                    break;
-                default:
-                    System.out.println("Type invalide. Veuillez choisir un type valide.");
-                    break;
-            }
-        }
-        System.out.println("RueLocalisation: ");
-        String rueLocalisation = scanner.nextLine();
-        System.out.println("CPostalLocalisation: ");
-        String cPostalLocalisation = scanner.nextLine();
-        System.out.println("VilleLocalisation: ");
-        String villeLocalisation = scanner.nextLine();
+
+        System.out.println("\n--- Modification du véhicule ---");
+        TypeVehicule type = saisirTypeVehicule();
+        String inputMarque = saisirTexte("Marque: ");
+        String inputModele = saisirTexte("Modele: ");
+        String inputCouleur = saisirTexte("Couleur: ");
+        EtatVehicule etat = saisirEtatVehicule();
+
+        String rueLocalisation = saisirTexte("RueLocalisation: ");
+        String cPostalLocalisation = saisirTexte("CPostalLocalisation: ");
+        String villeLocalisation = saisirTexte("VilleLocalisation: ");
+
         vehicule.setType(type);
         vehicule.setMarque(inputMarque);
         vehicule.setModele(inputModele);
@@ -215,77 +177,66 @@ public class UtilisateurService {
         vehicule.setRueLocalisation(rueLocalisation);
         vehicule.setCPostalLocalisation(cPostalLocalisation);
         vehicule.setVilleLocalisation(villeLocalisation);
+
         vehiculeRepository.save(vehicule);
-        System.out.println("Vehicule modifie reussi !!");
+        System.out.println("Véhicule modifié !");
     }
 
-
-    // Dans UtilisateurService.java
     public List<Utilisateur> findAllAgents() {
-        // On demande au repository de trouver tous les utilisateurs ayant le rôle Agent
         return utilisateurRepository.findByRole(Utilisateur.Role.Agent);
     }
 
     public void louerVehicule(Utilisateur currentUser) {
+        if (!(currentUser instanceof Loueur loueurCourant)) {
+            System.out.println("Erreur: seul un loueur peut louer.");
+            return;
+        }
+
         System.out.println("\n=== Location de Véhicule ===");
 
         try {
             vehiculeService.afficherVehiculesDisponibles();
             System.out.print("\nEntrez l'ID du véhicule à louer (disponible) : ");
-            int vehiculeId = scanner.nextInt();
-            scanner.nextLine();
+            int vehiculeId = lireIntSafe();
 
-            com.group3.carrental.entity.Vehicule vehiculeSelectionne = vehiculeService
-                    .getVehiculeDisponibleById(vehiculeId);
+            Vehicule vehiculeSelectionne = vehiculeService.getVehiculeDisponibleById(vehiculeId);
             if (vehiculeSelectionne == null) {
-                System.out.println("Le véhicule choisi n'est pas disponible (non loué) ou n'existe pas.");
+                System.out.println("Le véhicule choisi n'est pas disponible ou n'existe pas.");
                 return;
             }
+
+            if (vehiculeSelectionne.getAgent() == null) {
+                System.out.println("Ce véhicule n'a pas d'agent associé, impossible de créer un contrat.");
+                return;
+            }
+
             System.out.println("Véhicule sélectionné: " + vehiculeSelectionne.getMarque() + " "
                     + vehiculeSelectionne.getModele() + " (ID: " + vehiculeId + ")");
 
             List<LocalDate> datesDisponibles = vehiculeSelectionne.getDatesDisponibles();
-            System.out.println("\nDates disponibles pour ce véhicule:");
-            if (datesDisponibles.isEmpty()) {
+            if (datesDisponibles == null || datesDisponibles.isEmpty()) {
                 System.out.println("Aucune date disponible pour ce véhicule.");
                 return;
             }
-            
-            LocalDate dateDebut = null;
-            if (datesDisponibles.size() > 1) {
-                System.out.println("Nombre de dates disponibles: " + datesDisponibles.size());
-                System.out.println("Première date disponible: " + datesDisponibles.get(0));
-                System.out.println("Dernière date disponible: " + datesDisponibles.get(datesDisponibles.size() - 1));
-                
-                System.out.print("\nSaisissez la date de début de location (format: AAAA-MM-JJ) : ");
-                String dateInput = scanner.nextLine();
-                try {
-                    dateDebut = LocalDate.parse(dateInput);
-                    if (!datesDisponibles.contains(dateDebut)) {
-                        System.out.println("Cette date n'est pas disponible pour ce véhicule.");
-                        return;
-                    }
-                } catch (Exception e) {
-                    System.out.println("Format de date invalide. Utilisez AAAA-MM-JJ (ex: 2026-01-15)");
-                    return;
-                }
-            } else {
-                dateDebut = datesDisponibles.get(0);
-                System.out.println("Date de début: " + dateDebut);
-            }
+
+            LocalDate dateDebut = choisirDateDebut(datesDisponibles);
+            if (dateDebut == null)
+                return;
 
             System.out.print("Nombre de jours de location : ");
-            int nbJours = scanner.nextInt();
-            scanner.nextLine();
+            int nbJours = lireIntSafe();
+            if (nbJours <= 0) {
+                System.out.println("Nombre de jours invalide.");
+                return;
+            }
 
-            System.out.println("\n=== Assurances Disponibles ===");
             List<Assurance> assurances = assuranceService.getAllAssurances();
-
             if (assurances.isEmpty()) {
                 System.out.println("Aucune assurance disponible.");
                 return;
             }
 
+            System.out.println("\n=== Assurances Disponibles ===");
             for (int i = 0; i < assurances.size(); i++) {
                 Assurance a = assurances.get(i);
                 double prix = assuranceService.calculerPrix(a, nbJours);
@@ -295,9 +246,7 @@ public class UtilisateurService {
             }
 
             System.out.print("\nChoisissez une assurance (numéro) : ");
-            int choixAssurance = scanner.nextInt();
-            scanner.nextLine();
-
+            int choixAssurance = lireIntSafe();
             if (choixAssurance < 1 || choixAssurance > assurances.size()) {
                 System.out.println("Choix invalide !");
                 return;
@@ -312,42 +261,110 @@ public class UtilisateurService {
             System.out.println("Durée: " + nbJours + " jours");
             System.out.println("Assurance: " + assuranceChoisie.getNom());
             System.out.println("Prix assurance: " + prixAssurance + "€");
-            System.out.println("\nPrix total estimé: " + prixAssurance + "€");
+            System.out.println("Prix total estimé: " + prixAssurance + "€");
 
             System.out.print("\nConfirmer la location ? (O/N) : ");
             String confirmation = scanner.nextLine();
 
-            if (confirmation.equalsIgnoreCase("O")) {
-                java.util.Date dateDebutContrat = java.util.Date.from(
+            if (!confirmation.equalsIgnoreCase("O")) {
+                System.out.println("Location annulée.");
+                return;
+            }
+
+            java.util.Date dateDebutContrat = java.util.Date.from(
                     dateDebut.atStartOfDay(ZoneId.systemDefault()).toInstant());
-                java.util.Date dateFinContrat = java.util.Date.from(
+            java.util.Date dateFinContrat = java.util.Date.from(
                     dateDebut.plusDays(nbJours).atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-                try {
-                    // Récupérer l'agent du véhicule et le loueur courant
-                    com.group3.carrental.entity.Agent agentVehicule = vehiculeSelectionne.getAgent();
-                    com.group3.carrental.entity.Loueur loueurCourant = null;
-                    if (currentUser instanceof com.group3.carrental.entity.Loueur) {
-                        loueurCourant = (com.group3.carrental.entity.Loueur) currentUser;
-                    }
-                    
-                    contratService.creerContrat(dateDebutContrat, dateFinContrat, agentVehicule, loueurCourant, 
-                            vehiculeSelectionne, prixAssurance);
+            Agent agentVehicule = vehiculeSelectionne.getAgent();
 
-                    System.out.println("\nLocation confirmée !");
-                    System.out.println("Votre contrat a été créé avec succès.");
-                    System.out.println("Période de location: du " + dateDebut + " au " + dateDebut.plusDays(nbJours));
-                } catch (Exception e) {
-                    System.out.println("Erreur lors de la création du contrat: " + e.getMessage());
-                }
-            } else {
-                System.out.println("Location annulée.");
-            }
+            contratService.creerContratPresigne(
+                    dateDebutContrat,
+                    dateFinContrat,
+                    agentVehicule,
+                    loueurCourant,
+                    vehiculeSelectionne,
+                    prixAssurance);
+
+            System.out.println("\n Location demandée !");
+            System.out.println("Contrat pré-signé créé. L'agent doit maintenant l'accepter/refuser.");
+            System.out.println("Période: du " + dateDebut + " au " + dateDebut.plusDays(nbJours));
 
         } catch (Exception e) {
             System.out.println("Erreur lors de la location: " + e.getMessage());
-            scanner.nextLine();
         }
     }
 
+    private int lireIntSafe() {
+        while (true) {
+            try {
+                int x = Integer.parseInt(scanner.nextLine().trim());
+                return x;
+            } catch (Exception e) {
+                System.out.print("Veuillez saisir un nombre valide : ");
+            }
+        }
+    }
+
+    private String saisirTexte(String prompt) {
+        System.out.print(prompt);
+        return scanner.nextLine().trim();
+    }
+
+    private TypeVehicule saisirTypeVehicule() {
+        while (true) {
+            System.out.print("Type (Voiture(1) / Camion(2) / Moto(3)): ");
+            String inputType = scanner.nextLine().trim();
+            switch (inputType) {
+                case "1":
+                    return TypeVehicule.Voiture;
+                case "2":
+                    return TypeVehicule.Camion;
+                case "3":
+                    return TypeVehicule.Moto;
+                default:
+                    System.out.println("Type invalide.");
+            }
+        }
+    }
+
+    private EtatVehicule saisirEtatVehicule() {
+        while (true) {
+            System.out.print("Etat (Loue(1) / Non_loue(2)): ");
+            String inputEtat = scanner.nextLine().trim();
+            switch (inputEtat) {
+                case "1":
+                    return EtatVehicule.Loué;
+                case "2":
+                    return EtatVehicule.Non_loué;
+                default:
+                    System.out.println("Etat invalide.");
+            }
+        }
+    }
+
+    private LocalDate choisirDateDebut(List<LocalDate> datesDisponibles) {
+        System.out.println("\nDates disponibles : ");
+        System.out.println("Première: " + datesDisponibles.get(0));
+        System.out.println("Dernière: " + datesDisponibles.get(datesDisponibles.size() - 1));
+
+        if (datesDisponibles.size() == 1) {
+            System.out.println("Date de début imposée: " + datesDisponibles.get(0));
+            return datesDisponibles.get(0);
+        }
+
+        System.out.print("Saisissez la date de début (AAAA-MM-JJ) : ");
+        String dateInput = scanner.nextLine();
+        try {
+            LocalDate dateDebut = LocalDate.parse(dateInput);
+            if (!datesDisponibles.contains(dateDebut)) {
+                System.out.println("Cette date n'est pas disponible.");
+                return null;
+            }
+            return dateDebut;
+        } catch (Exception e) {
+            System.out.println("Format invalide.");
+            return null;
+        }
+    }
 }
