@@ -9,8 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.group3.carrental.entity.Agent;
-import com.group3.carrental.entity.Assurance;
-import com.group3.carrental.entity.Contrat;
+import com.group3.carrental.entity.Assurance;import com.group3.carrental.entity.Contrat;import com.group3.carrental.entity.Contrat;
 import com.group3.carrental.entity.Message;
 import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Loueur;
@@ -157,6 +156,14 @@ public class AppController {
     }
 
     private void displayMenuLoueur() {
+        // Vérifier s'il y a des véhicules à rendre
+        if (currentUser instanceof com.group3.carrental.entity.Loueur loueur) {
+            List<Contrat> contratsARendre = contratService.getContratsARendre(loueur.getId());
+            if (!contratsARendre.isEmpty()) {
+                afficherVehiculesARendre(contratsARendre);
+            }
+        }
+
         System.out.println("\nMenu de Loueur : ");
         System.out.println("1. Consulter les véhicules");
         System.out.println("2. Filtrer les voitures");
@@ -164,6 +171,7 @@ public class AppController {
         System.out.println("4. Consulter les assurances");
         System.out.println("5. Messagerie");
         System.out.println("6. Mon profil");
+        System.out.println("7. Mes contrats et PDF");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -185,6 +193,9 @@ public class AppController {
                 break;
             case 6:
                 afficherMonProfil();
+                break;
+            case 7:
+                afficherMesContrats();
                 break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
@@ -235,6 +246,7 @@ public class AppController {
         System.out.println("5. Filtrer les voitures");
         System.out.println("6. Messagerie");
         System.out.println("7. Gérer l'option Parking Partenaire");
+        System.out.println("8. Mes contrats et PDF");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -260,6 +272,9 @@ public class AppController {
             case 7 :
                 this.gererOptionsParkingAgent();
             break;
+            case 8:
+                afficherMesContrats();
+                break;
             case 0:
                 System.out.println("vous avez choisi de quitter!");
                 currentUserRole = UserRole.Visitor;
@@ -565,5 +580,168 @@ public class AppController {
         }
 
         return candidats.get(idx - 1).getId();
+    }
+    private void afficherVehiculesARendre(List<Contrat> contratsARendre) {
+        System.out.println("\n========================================");
+        System.out.println("    VEHICULES A RENDRE");
+        System.out.println("========================================");
+        
+        for (int i = 0; i < contratsARendre.size(); i++) {
+            Contrat c = contratsARendre.get(i);
+            System.out.println("\n--- Véhicule " + (i + 1) + " ---");
+            System.out.println("Contrat ID: " + c.getId());
+            System.out.println("Véhicule: " + c.getVehicule().getMarque() + " " + c.getVehicule().getModele());
+            System.out.println("Couleur: " + c.getVehicule().getCouleur());
+            System.out.println("Date de fin: " + c.getDateFin());
+            System.out.println("Agent: " + c.getAgent().getPrenom() + " " + c.getAgent().getNom());
+        }
+        
+        System.out.println("\n1. Rendre un véhicule");
+        System.out.println("0. Continuer vers le menu");
+        System.out.print("Votre choix: ");
+        int choix = sc.nextInt();
+        sc.nextLine();
+        
+        if (choix == 1) {
+            rendreVehicule(contratsARendre);
+        }
+    }
+
+    private void rendreVehicule(List<Contrat> contratsARendre) {
+        if (contratsARendre.size() == 1) {
+            traiterRetourVehicule(contratsARendre.get(0));
+        } else {
+            System.out.print("Numéro du véhicule à rendre (1-" + contratsARendre.size() + "): ");
+            int num = sc.nextInt();
+            sc.nextLine();
+            
+            if (num < 1 || num > contratsARendre.size()) {
+                System.out.println("Choix invalide.");
+                return;
+            }
+            
+            traiterRetourVehicule(contratsARendre.get(num - 1));
+        }
+    }
+
+    private void traiterRetourVehicule(Contrat contrat) {
+        System.out.println("\n=== Retour du véhicule: " + contrat.getVehicule().getMarque() + " " 
+            + contrat.getVehicule().getModele() + " ===");
+        
+        // Noter l'agent
+        System.out.println("\n--- Notation de l'agent ---");
+        Agent agent = contrat.getAgent();
+        System.out.println("Agent: " + agent.getPrenom() + " " + agent.getNom());
+        
+        System.out.print("Note pour le service (1-5): ");
+        int noteService = sc.nextInt();
+        System.out.print("Note pour la communication (1-5): ");
+        int noteCommunication = sc.nextInt();
+        System.out.print("Note pour la disponibilité (1-5): ");
+        int noteDisponibilite = sc.nextInt();
+        sc.nextLine();
+        
+        System.out.print("Commentaire (optionnel): ");
+        String commentaire = sc.nextLine();
+        
+        com.group3.carrental.entity.NoteAgent noteAgent = new com.group3.carrental.entity.NoteAgent(
+            noteService, noteCommunication, noteDisponibilite, commentaire, agent);
+        agent.ajouterNote(noteAgent);
+        utilisateurService.mettreAJour(agent);
+        
+        System.out.println("✓ Note enregistrée pour l'agent.");
+        
+        // Photo de kilométrage
+        System.out.println("\n--- Photo du kilométrage ---");
+        System.out.println("Veuillez saisir le chemin du fichier photo (ex: C:/photos/kilometrage.jpg)");
+        System.out.print("Chemin: ");
+        String cheminPhoto = sc.nextLine();
+        
+        if (cheminPhoto.isEmpty()) {
+            cheminPhoto = "Non fourni";
+        }
+        
+        // Marquer le contrat comme rendu
+        contratService.rendreVehicule(contrat.getId(), cheminPhoto);
+        
+        System.out.println("\n========================================");
+        System.out.println("  VEHICULE RENDU AVEC SUCCES !");
+        System.out.println("========================================");
+        System.out.println("Photo enregistrée: " + cheminPhoto);
+    }
+
+    private void afficherMesContrats() {
+        if (currentUser instanceof com.group3.carrental.entity.Loueur loueur) {
+            List<Contrat> contrats = contratService.getContratsParLoueur(loueur.getId());
+            afficherListeContrats(contrats);
+        } else if (currentUser instanceof Agent agent) {
+            // Pour l'agent, récupérer tous les contrats et filtrer par agent
+            List<Contrat> tousContrats = contratService.getTousLesContrats();
+            List<Contrat> contratsAgent = tousContrats.stream()
+                .filter(c -> c.getAgent() != null && c.getAgent().getId() == agent.getId())
+                .toList();
+            afficherListeContrats(contratsAgent);
+        }
+    }
+
+    private void afficherListeContrats(List<Contrat> contrats) {
+        if (contrats.isEmpty()) {
+            System.out.println("\nAucun contrat trouvé.");
+            return;
+        }
+
+        System.out.println("\n========================================");
+        System.out.println("         MES CONTRATS");
+        System.out.println("========================================");
+
+        for (int i = 0; i < contrats.size(); i++) {
+            Contrat c = contrats.get(i);
+            System.out.println("\n--- Contrat " + (i + 1) + " ---");
+            System.out.println("ID: " + c.getId());
+            System.out.println("Véhicule: " + c.getVehicule().getMarque() + " " + c.getVehicule().getModele());
+            System.out.println("Du " + c.getDateDeb() + " au " + c.getDateFin());
+            System.out.println("Prix total: " + c.getPrixTotal() + " EUR");
+            System.out.println("Statut: " + (c.getStatut() != null ? c.getStatut() : "Non défini"));
+            if (currentUser instanceof com.group3.carrental.entity.Loueur) {
+                System.out.println("Agent: " + c.getAgent().getPrenom() + " " + c.getAgent().getNom());
+            } else {
+                System.out.println("Loueur: " + c.getLoueur().getPrenom() + " " + c.getLoueur().getNom());
+            }
+        }
+
+        System.out.println("\n1. Télécharger le PDF d'un contrat");
+        System.out.println("0. Retour");
+        System.out.print("Votre choix: ");
+        int choix = sc.nextInt();
+        sc.nextLine();
+
+        if (choix == 1) {
+            System.out.print("Numéro du contrat (1-" + contrats.size() + "): ");
+            int num = sc.nextInt();
+            sc.nextLine();
+
+            if (num < 1 || num > contrats.size()) {
+                System.out.println("Choix invalide.");
+                return;
+            }
+
+            Contrat contratSelectionne = contrats.get(num - 1);
+            
+            System.out.print("Chemin du dossier de destination (ex: C:/contrats): ");
+            String dossier = sc.nextLine();
+            
+            if (dossier.isEmpty()) {
+                dossier = System.getProperty("user.home") + "/Downloads";
+                System.out.println("Utilisation du dossier par défaut: " + dossier);
+            }
+
+            String cheminPdf = contratService.genererPdfContrat(contratSelectionne.getId(), dossier);
+            if (cheminPdf != null) {
+                System.out.println("\nPDF généré avec succès!");
+                System.out.println("Emplacement: " + cheminPdf);
+            } else {
+                System.out.println("\nErreur lors de la génération du PDF.");
+            }
+        }
     }
 }
