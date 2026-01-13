@@ -3,6 +3,7 @@ package com.group3.carrental.service;
 import java.util.Scanner;
 
 import com.group3.carrental.entity.Agent;
+import com.group3.carrental.entity.Assurance;
 import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.entity.Vehicule.EtatVehicule;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,11 +25,18 @@ public class UtilisateurService {
 
     private final UtilisateurRepository utilisateurRepository;
     private final VehiculeRepository vehiculeRepository;
+    private final AssuranceService assuranceService;
+    private final ContratService contratService;
+    private final VehiculeService vehiculeService;
 
     @Autowired
-    public UtilisateurService(UtilisateurRepository utilisateurRepository, VehiculeRepository vehiculeRepository) {
+    public UtilisateurService(UtilisateurRepository utilisateurRepository, VehiculeRepository vehiculeRepository,
+            AssuranceService assuranceService, ContratService contratService, VehiculeService vehiculeService) {
         this.utilisateurRepository = utilisateurRepository;
         this.vehiculeRepository = vehiculeRepository;
+        this.assuranceService = assuranceService;
+        this.contratService = contratService;
+        this.vehiculeService = vehiculeService;
     }
 
     public Optional<Utilisateur> login(String email, String motDePasse) {
@@ -112,7 +121,7 @@ public class UtilisateurService {
     }
 
     // Afficher les vehicules de l'agent
-    public void afficherLesVehiculesDeAgent(Utilisateur agent) {
+    public void afficherLesVehiculesDeAgent(Agent agent) {
         List<Vehicule> vehicules = vehiculeRepository.findByAgent(agent);
         System.out.println("\n--- Liste des vehicules de l'agent " + " ---");
         for (Vehicule vehicule : vehicules) {
@@ -121,7 +130,7 @@ public class UtilisateurService {
     }
 
     // Supprimer un véhicule pour agent
-    public void supprimerVehicule(Utilisateur agent) {
+    public void supprimerVehicule(Agent agent) {
         afficherLesVehiculesDeAgent(agent);
         System.out.println("ID du vehicule a supprimer: ");
         int id = scanner.nextInt();
@@ -135,7 +144,7 @@ public class UtilisateurService {
     }
 
     // Modifier un véhicule pour agent
-    public void modifierVehicule(Utilisateur agent) {
+    public void modifierVehicule(Agent agent) {
         afficherLesVehiculesDeAgent(agent);
         System.out.println("ID du vehicule a modifier: ");
         int id = scanner.nextInt();
@@ -201,6 +210,130 @@ public class UtilisateurService {
         vehicule.setVilleLocalisation(villeLocalisation);
         vehiculeRepository.save(vehicule);
         System.out.println("Vehicule modifie reussi !!");
+    }
+
+    public void louerVehicule(Utilisateur currentUser) {
+        System.out.println("\n=== Location de Véhicule ===");
+
+        try {
+            vehiculeService.afficherVehiculesDisponibles();
+            System.out.print("\nEntrez l'ID du véhicule à louer (disponible) : ");
+            int vehiculeId = scanner.nextInt();
+            scanner.nextLine();
+
+            com.group3.carrental.entity.Vehicule vehiculeSelectionne = vehiculeService
+                    .getVehiculeDisponibleById(vehiculeId);
+            if (vehiculeSelectionne == null) {
+                System.out.println("Le véhicule choisi n'est pas disponible (non loué) ou n'existe pas.");
+                return;
+            }
+            System.out.println("Véhicule sélectionné: " + vehiculeSelectionne.getMarque() + " "
+                    + vehiculeSelectionne.getModele() + " (ID: " + vehiculeId + ")");
+
+            List<LocalDate> datesDisponibles = vehiculeSelectionne.getDatesDisponibles();
+            System.out.println("\nDates disponibles pour ce véhicule:");
+            if (datesDisponibles.isEmpty()) {
+                System.out.println("Aucune date disponible pour ce véhicule.");
+                return;
+            }
+            
+            LocalDate dateDebut = null;
+            if (datesDisponibles.size() > 1) {
+                System.out.println("Nombre de dates disponibles: " + datesDisponibles.size());
+                System.out.println("Première date disponible: " + datesDisponibles.get(0));
+                System.out.println("Dernière date disponible: " + datesDisponibles.get(datesDisponibles.size() - 1));
+                
+                System.out.print("\nSaisissez la date de début de location (format: AAAA-MM-JJ) : ");
+                String dateInput = scanner.nextLine();
+                try {
+                    dateDebut = LocalDate.parse(dateInput);
+                    if (!datesDisponibles.contains(dateDebut)) {
+                        System.out.println("Cette date n'est pas disponible pour ce véhicule.");
+                        return;
+                    }
+                } catch (Exception e) {
+                    System.out.println("Format de date invalide. Utilisez AAAA-MM-JJ (ex: 2026-01-15)");
+                    return;
+                }
+            } else {
+                dateDebut = datesDisponibles.get(0);
+                System.out.println("Date de début: " + dateDebut);
+            }
+
+            System.out.print("Nombre de jours de location : ");
+            int nbJours = scanner.nextInt();
+            scanner.nextLine();
+
+            System.out.println("\n=== Assurances Disponibles ===");
+            List<Assurance> assurances = assuranceService.getAllAssurances();
+
+            if (assurances.isEmpty()) {
+                System.out.println("Aucune assurance disponible.");
+                return;
+            }
+
+            for (int i = 0; i < assurances.size(); i++) {
+                Assurance a = assurances.get(i);
+                double prix = assuranceService.calculerPrix(a, nbJours);
+                System.out.println((i + 1) + ". " + a.getNom() +
+                        " - " + a.getPrixParJour() + "€/jour" +
+                        " (Total: " + prix + "€ pour " + nbJours + " jours)");
+            }
+
+            System.out.print("\nChoisissez une assurance (numéro) : ");
+            int choixAssurance = scanner.nextInt();
+            scanner.nextLine();
+
+            if (choixAssurance < 1 || choixAssurance > assurances.size()) {
+                System.out.println("Choix invalide !");
+                return;
+            }
+
+            Assurance assuranceChoisie = assurances.get(choixAssurance - 1);
+            double prixAssurance = assuranceService.calculerPrix(assuranceChoisie, nbJours);
+
+            System.out.println("\n=== Récapitulatif de Location ===");
+            System.out.println("Véhicule: ID " + vehiculeId);
+            System.out.println("Date de début: " + dateDebut);
+            System.out.println("Durée: " + nbJours + " jours");
+            System.out.println("Assurance: " + assuranceChoisie.getNom());
+            System.out.println("Prix assurance: " + prixAssurance + "€");
+            System.out.println("\nPrix total estimé: " + prixAssurance + "€");
+
+            System.out.print("\nConfirmer la location ? (O/N) : ");
+            String confirmation = scanner.nextLine();
+
+            if (confirmation.equalsIgnoreCase("O")) {
+                java.util.Date dateDebutContrat = java.util.Date.from(
+                    dateDebut.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                java.util.Date dateFinContrat = java.util.Date.from(
+                    dateDebut.plusDays(nbJours).atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+                try {
+                    // Récupérer l'agent du véhicule et le loueur courant
+                    com.group3.carrental.entity.Agent agentVehicule = vehiculeSelectionne.getAgent();
+                    com.group3.carrental.entity.Loueur loueurCourant = null;
+                    if (currentUser instanceof com.group3.carrental.entity.Loueur) {
+                        loueurCourant = (com.group3.carrental.entity.Loueur) currentUser;
+                    }
+                    
+                    contratService.creerContrat(dateDebutContrat, dateFinContrat, agentVehicule, loueurCourant, 
+                            vehiculeSelectionne, prixAssurance);
+
+                    System.out.println("\nLocation confirmée !");
+                    System.out.println("Votre contrat a été créé avec succès.");
+                    System.out.println("Période de location: du " + dateDebut + " au " + dateDebut.plusDays(nbJours));
+                } catch (Exception e) {
+                    System.out.println("Erreur lors de la création du contrat: " + e.getMessage());
+                }
+            } else {
+                System.out.println("Location annulée.");
+            }
+
+        } catch (Exception e) {
+            System.out.println("Erreur lors de la location: " + e.getMessage());
+            scanner.nextLine();
+        }
     }
 
 }
