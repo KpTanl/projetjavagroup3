@@ -42,6 +42,13 @@ public class VehiculeService {
                 System.out.println("Etat: " + v.getEtat());
                 Double note = v.calculerNoteMoyenne();
                 System.out.println("Note moyenne: " + (note != null ? note + "/5" : "Aucune note"));
+                // Afficher l'agent associé
+                if (v.getAgent() != null) {
+                    System.out.println("Agent: " + v.getAgent().getPrenom() + " " + v.getAgent().getNom() +
+                            " (" + v.getAgent().getEmail() + ")");
+                } else {
+                    System.out.println("Agent: Non assigné");
+                }
                 System.out.print("Dates disponibles: ");
                 if (v.getDatesDisponibles().isEmpty()) {
                     System.out.println("Aucune");
