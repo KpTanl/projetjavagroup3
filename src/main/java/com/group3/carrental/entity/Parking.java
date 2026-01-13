@@ -31,6 +31,10 @@ public class Parking {
         this.contraintes = contraintes ; 
     }
     //methodes (get/set + us)
+    public String getidP() {
+        return idP;
+    }
+
     public String getVilleP() {
         return VilleP;
     }
@@ -97,6 +101,17 @@ public String getContraintes() {
         System.out.println("Erreur : Le parking est complet !");
         return false;
     }
+}
+// Dans Parking.java
+public static List<String> getVillesDisponibles(List<Parking> tousLesParkings) {
+    List<String> villes = new ArrayList<>();
+    for (Parking p : tousLesParkings) {
+        // On vérifie s'il y a de la place et si la ville n'est pas déjà dans la liste
+        if (p.getVehiculesGares().size() < p.getNb_places_max() && !villes.contains(p.getVilleP())) {
+            villes.add(p.getVilleP());
+        }
+    }
+    return villes;
 }
 
     
