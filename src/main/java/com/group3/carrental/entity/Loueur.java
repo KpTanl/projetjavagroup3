@@ -55,33 +55,36 @@ public class Loueur extends Utilisateur implements Commun {
     public void choisirAssurance(List<Assurance> a) {
 
     }
+
     public List<Parking> consulterParkingsParVille(String ville, List<Parking> catalogue) {
-    List<Parking> resultats = new ArrayList<>();
-    
-    for (Parking p : catalogue) {
-        // Filtrage par ville (ignore la casse) et vérification de la capacité
-        if (p.getVilleP().equalsIgnoreCase(ville) && p.getVehiculesGares().size() < p.getNb_places_max()) {
-            resultats.add(p);
+        List<Parking> resultats = new ArrayList<>();
+
+        for (Parking p : catalogue) {
+            // Filtrage par ville (ignore la casse) et vérification de la capacité
+            if (p.getVilleP().equalsIgnoreCase(ville) && p.getVehiculesGares().size() < p.getNb_places_max()) {
+                resultats.add(p);
+            }
         }
+
+        // Gestion de l'erreur si aucun parking n'est trouvé
+        if (resultats.isEmpty()) {
+            System.out.println("--- AUCUN RÉSULTAT ---");
+            System.out.println("La ville '" + ville + "' n'est pas disponible ou est complète.");
+            System.out.println(
+                    "Vérifiez l'orthographe ou choisissez une ville dans la liste des destinations possibles.");
+        } else {
+            System.out.println(resultats.size() + " parking(s) trouvé(s) à " + ville);
+        }
+
+        return resultats;
     }
 
-    // Gestion de l'erreur si aucun parking n'est trouvé
-    if (resultats.isEmpty()) {
-        System.out.println("--- AUCUN RÉSULTAT ---");
-        System.out.println("La ville '" + ville + "' n'est pas disponible ou est complète.");
-        System.out.println("Vérifiez l'orthographe ou choisissez une ville dans la liste des destinations possibles.");
-    } else {
-        System.out.println(resultats.size() + " parking(s) trouvé(s) à " + ville);
-    }
-
-    return resultats;
-}
-public void choisirEtDeposer(Vehicule v, Parking p) {
+    public void choisirEtDeposer(Vehicule v, Parking p) {
         // L'assignation se fait via la méthode de l'objet Parking
-        boolean succes = p.ajouterVehicule(v); 
+        boolean succes = p.ajouterVehicule(v);
 
         if (succes) {
-            System.out.println("Assignation réussie au parking : " + p.getidP());
+            System.out.println("Assignation réussie au parking : " + p.getIdP());
         } else {
             System.out.println("Echec de l'assignation (Parking complet ou option non activée)");
         }
