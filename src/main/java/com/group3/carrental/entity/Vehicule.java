@@ -102,10 +102,9 @@ public class Vehicule {
         note.setVehicule(this);
     }
 
-    // Calcule la note moyenne de toutes les évaluations
-    public double calculerNoteMoyenne() {
+    public Double calculerNoteMoyenne() {
         if (notesRecues == null || notesRecues.isEmpty()) {
-            return 0.0;
+            return null;
         }
         double noteMoyenne = notesRecues.stream()
                 .mapToDouble(NoteVehicule::calculerNoteGlobale)
