@@ -1,5 +1,6 @@
 package com.group3.carrental.service;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -55,5 +56,41 @@ public class ContratService {
      */
     public void supprimerContrat(Long id) {
         contratRepository.deleteById(id);
+    }
+
+    /**
+     * Récupérer les contrats à rendre pour un loueur (date de fin passée, statut != Rendu)
+     */
+    public List<Contrat> getContratsARendre(int loueurId) {
+        Date maintenant = new Date();
+        return contratRepository.findByLoueurId(loueurId).stream()
+            .filter(c -> c.getStatut() != Contrat.Statut.Rendu)
+            .filter(c -> c.getDateFin().before(maintenant))
+            .toList();
+    }
+
+    /**
+     * Marquer un contrat comme rendu avec photo de kilométrage
+     */
+    public void rendreVehicule(Long contratId, String cheminPhoto) {
+        Contrat contrat = getContratById(contratId);
+        contrat.setStatut(Contrat.Statut.Rendu);
+        contrat.setCheminPhotoKilometrage(cheminPhoto);
+        contratRepository.save(contrat);
+    }
+
+    /**
+     * Générer le PDF d'un contrat
+     */
+    public String genererPdfContrat(Long contratId, String dossierDestination) {
+        try {
+            Contrat contrat = getContratById(contratId);
+            String cheminPdf = contrat.genererPdf(dossierDestination);
+            System.out.println("PDF généré avec succès: " + cheminPdf);
+            return cheminPdf;
+        } catch (IOException e) {
+            System.out.println("Erreur lors de la génération du PDF: " + e.getMessage());
+            return null;
+        }
     }
 }
