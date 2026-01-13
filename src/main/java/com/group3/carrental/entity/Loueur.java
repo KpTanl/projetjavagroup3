@@ -20,8 +20,12 @@ public class Loueur extends Utilisateur {
     private List<NoteLoueur> notesRecues;
 
     public Loueur(int id, String nom, String prenom, String email, String motDePasse,
-            List<Contrat> historiqueLocations, List<NoteLoueur> notesRecues) {
-        super(id, nom, prenom, email, motDePasse, Role.Loueur);
+            List<Contrat> historiqueLocations, List<NoteLoueur> notesRecues,
+            double latitudeHabitation, double longitudeHabitation) { // <--- 1. On les ajoute ici
+
+        // 2. Maintenant on peut les passer au constructeur parent Utilisateur
+        super(id, nom, prenom, email, motDePasse, Role.Loueur, latitudeHabitation, longitudeHabitation);
+
         this.historiqueLocations = historiqueLocations;
         this.notesRecues = notesRecues;
     }

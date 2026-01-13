@@ -95,8 +95,12 @@ public class UtilisateurService {
         String codePostal = scanner.nextLine();
         System.out.println("Ville: ");
         String ville = scanner.nextLine();
+        System.out.println("Latitude: ");
+        double latitude = Double.parseDouble(scanner.nextLine());
+        System.out.println("Longitude: ");
+        double longitude = Double.parseDouble(scanner.nextLine());  
         Vehicule vehicule = new Vehicule(type, inputMarque, inputModele,
-                inputCouleur, etat, rue, codePostal, ville);
+                inputCouleur, etat, rue, codePostal, ville, latitude, longitude);
         vehicule.ajouterDisponibilite(LocalDate.now().plusDays(1));
         vehicule.setAgentProprietaire(agent); // Associer l'agent avant de sauvegarder
         vehiculeRepository.save(vehicule);

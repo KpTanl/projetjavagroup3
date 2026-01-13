@@ -12,9 +12,12 @@ public class AgentParticulier extends Agent {
     }
 
     public AgentParticulier(int id, String nom, String prenom, String email, String motDePasse,
-            List<NoteAgent> notesRecues, LocalDate dateRecuFacture) {
-        super(id, nom, prenom, email, motDePasse, notesRecues, dateRecuFacture);
-        // TODO Auto-generated constructor stub
+            List<NoteAgent> notesRecues, LocalDate dateRecuFacture,
+            double latitudeHabitation, double longitudeHabitation) { // 1. Ajout ici
+
+        // 2. Transmission au constructeur de la classe Agent
+        super(id, nom, prenom, email, motDePasse, notesRecues, dateRecuFacture,
+                latitudeHabitation, longitudeHabitation);
     }
 
 }

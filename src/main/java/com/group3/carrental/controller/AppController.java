@@ -17,7 +17,8 @@ import com.group3.carrental.service.ServiceMessagerie;
 
 @Component
 public class AppController {
-    private static final Scanner sc = new Scanner(System.in);
+    // Modifie cette ligne :
+    private static final Scanner sc = new Scanner(System.in).useLocale(java.util.Locale.US);
     private static UserRole currentUserRole = UserRole.Visitor;
     private Utilisateur currentUser = null; // Utilisateur connecté
 
@@ -152,6 +153,7 @@ public class AppController {
         System.out.println("4. Consulter les assurances");
         System.out.println("5. Messagerie");
         System.out.println("6. Mon profil");
+        System.out.println("7. Suggestions autour de chez moi (Rayon X km)"); // <-- Nouvelle option
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -171,8 +173,18 @@ public class AppController {
             case 5:
                 displayMenuMessagerie();
                 break;
+            // Dans displayMenuLoueur()
             case 6:
-                // TODO: Mon profil
+                System.out.print("Entrez le rayon de recherche maximum (en km) : ");
+                double rayon = sc.nextDouble();
+                vehiculeService.suggererVehiculesProches(currentUser, rayon);
+                break;
+            case 7:
+                System.out.print("Entrez le rayon maximum souhaité (en km) : ");
+                double rayonsuggestion = sc.nextDouble();
+                sc.nextLine();
+                // Appels de ta méthode que tu viens de créer
+                vehiculeService.suggererVehiculesProches(currentUser, rayonsuggestion);
                 break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
@@ -344,7 +356,6 @@ public class AppController {
         }
     }
 
-<<<<<<< Updated upstream
     // ========== Messagerie ==========
     private void displayMenuMessagerie() {
         if (currentUser == null) {
@@ -437,7 +448,9 @@ public class AppController {
             }
         } catch (Exception e) {
             System.out.println("Erreur : " + e.getMessage());
-=======
+        }
+    }
+
     private void actionConsulterAgents() {
         System.out.println("\n--- CONSULTATION DES AGENTS ---");
 
@@ -476,7 +489,6 @@ public class AppController {
         } else {
             sc.next(); // Nettoie en cas de mauvaise saisie
             System.out.println("Saisie invalide.");
->>>>>>> Stashed changes
         }
     }
 }

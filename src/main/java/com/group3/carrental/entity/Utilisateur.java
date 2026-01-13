@@ -22,20 +22,22 @@ public class Utilisateur {
     private String motDePasse;
     @Enumerated(EnumType.STRING)
     protected Role role;
-    private double latitudeHabitation;
-    private double longitudeHabitation;
+    protected double latitudeHabitation;
+    protected double longitudeHabitation;
 
     public enum Role {
         Loueur,
         Agent
     }
 
-    public Utilisateur(int id, String nom, String prenom, String email, String motDePasse, Role role) {
+    public Utilisateur(int id, String nom, String prenom, String email, String motDePasse, Role role, double latitudeHabitation, double longitudeHabitation) {
         this.id = id;
         this.nom = nom;
         this.prenom = prenom;
         this.email = email;
         this.motDePasse = motDePasse;
+        this.latitudeHabitation = latitudeHabitation;
+        this.longitudeHabitation = longitudeHabitation;
         this.role = role;
     }
 

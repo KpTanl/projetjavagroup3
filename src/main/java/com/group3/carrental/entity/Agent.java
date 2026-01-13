@@ -32,13 +32,16 @@ public abstract class Agent extends Utilisateur {
     protected Agent() {
     }
 
-    public Agent(int id, String nom, String prenom, String email, String motDePasse, List<NoteAgent> notesRecues,
-            LocalDate dateRecuFacture2) {
-        super(id, nom, prenom, email, motDePasse, Role.Agent);
-        this.notesRecues = notesRecues;
-        this.dateRecuFacture = dateRecuFacture2;
-        // TODO Auto-generated constructor stub
-    }
+    public Agent(int id, String nom, String prenom, String email, String motDePasse, 
+             List<NoteAgent> notesRecues, LocalDate dateRecuFacture2, 
+             double latitudeHabitation, double longitudeHabitation) { // <--- Ajoute les deux paramètres ici
+             
+    // Maintenant on peut les passer au parent (Utilisateur)
+    super(id, nom, prenom, email, motDePasse, Role.Agent, latitudeHabitation, longitudeHabitation);
+    
+    this.notesRecues = notesRecues;
+    this.dateRecuFacture = dateRecuFacture2;
+}
 
     public void souscrireOption() {
 
