@@ -8,6 +8,7 @@ import java.util.Scanner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.group3.carrental.entity.Agent;
 import com.group3.carrental.entity.Assurance;
 import com.group3.carrental.entity.Contrat;
 import com.group3.carrental.entity.Utilisateur;
@@ -351,6 +352,10 @@ public class AppController {
     }
 
     private void displayMenuAgent() {
+        if (!(currentUser instanceof Agent agent)) {
+            System.out.println("Erreur: accès agent refusé pour cet utilisateur.");
+            return;
+        }
         System.out.println("\nMenu de Agent : ");
         System.out.println("1. Ajouter mes vehicules");
         System.out.println("2. Supprimer mes vehicules");
@@ -363,16 +368,16 @@ public class AppController {
         sc.nextLine();
         switch (choice) {
             case 1:
-                utilisateurService.ajouterVehicule(currentUser);
+                utilisateurService.ajouterVehicule(agent);
                 break;
             case 2:
-                utilisateurService.supprimerVehicule(currentUser);
+                utilisateurService.supprimerVehicule(agent);
                 break;
             case 3:
-                utilisateurService.modifierVehicule(currentUser);
+                utilisateurService.modifierVehicule(agent);
                 break;
             case 4:
-                utilisateurService.afficherLesVehiculesDeAgent(currentUser);
+                utilisateurService.afficherLesVehiculesDeAgent(agent);
                 break;
             case 5:
                 vehiculeService.filtrerVehicules();
