@@ -357,6 +357,12 @@ public class AppController {
 
     // ========== Menu Agent ==========
     private void displayMenuAgent() {
+        if (!(currentUser instanceof Agent)) {
+            System.out.println("Erreur: accès agent refusé pour cet utilisateur.");
+            return;
+        }
+        Agent agent = (Agent) currentUser;
+
         System.out.println("\nMenu de Agent : ");
         System.out.println("1. Ajouter mes vehicules");
         System.out.println("2. Supprimer mes vehicules");
@@ -371,16 +377,16 @@ public class AppController {
         sc.nextLine();
         switch (choice) {
             case 1:
-                utilisateurService.ajouterVehicule(currentUser);
+                utilisateurService.ajouterVehicule(agent);
                 break;
             case 2:
-                utilisateurService.supprimerVehicule(currentUser);
+                utilisateurService.supprimerVehicule(agent);
                 break;
             case 3:
-                utilisateurService.modifierVehicule(currentUser);
+                utilisateurService.modifierVehicule(agent);
                 break;
             case 4:
-                utilisateurService.afficherLesVehiculesDeAgent(currentUser);
+                utilisateurService.afficherLesVehiculesDeAgent(agent);
                 break;
             case 5:
                 vehiculeService.filtrerVehicules();
