@@ -40,7 +40,8 @@ public class VehiculeService {
                 System.out.println("Vehicule: " + v.getMarque() + " " + v.getModele());
                 System.out.println("Lieu: " + v.getLocalisationComplete());
                 System.out.println("Etat: " + v.getEtat());
-                System.out.println("Note moyenne: " + v.calculerNoteMoyenne() + "/5");
+                Double note = v.calculerNoteMoyenne();
+                System.out.println("Note moyenne: " + (note != null ? note + "/5" : "Aucune note"));
                 System.out.print("Dates disponibles: ");
                 if (v.getDatesDisponibles().isEmpty()) {
                     System.out.println("Aucune");
@@ -58,7 +59,7 @@ public class VehiculeService {
      */
     public void afficherVehiculesDisponibles() {
         List<Vehicule> disponibles = vehiculeRepository.findByEtat(Vehicule.EtatVehicule.Non_loué);
-        
+
         disponibles = disponibles.stream()
                 .filter(v -> !v.getDatesDisponibles().isEmpty())
                 .toList();
@@ -74,10 +75,11 @@ public class VehiculeService {
                 System.out.println("Vehicule: " + v.getMarque() + " " + v.getModele());
                 System.out.println("Lieu: " + v.getLocalisationComplete());
                 System.out.println("Etat: " + v.getEtat());
-                System.out.println("Note moyenne: " + v.calculerNoteMoyenne() + "/5");
+                Double noteDisp = v.calculerNoteMoyenne();
+                System.out.println("Note moyenne: " + (noteDisp != null ? noteDisp + "/5" : "Aucune note"));
                 // Afficher l'agent associé
                 if (v.getAgent() != null) {
-                    System.out.println("Agent: " + v.getAgent().getPrenom() + " " + v.getAgent().getNom() + 
+                    System.out.println("Agent: " + v.getAgent().getPrenom() + " " + v.getAgent().getNom() +
                             " (" + v.getAgent().getEmail() + ")");
                 } else {
                     System.out.println("Agent: Non assigné");
@@ -203,7 +205,7 @@ public class VehiculeService {
         System.out.println("Quelle couleur ? (Disponibles : " + couleursPossibles + ")");
         String couleurSaisie = scanner.nextLine();
 
-        System.out.println("Note minimale souhaitee (ex: 4.0 ou Entree pour 0) :");
+        System.out.println("Note minimale souhaitee (ex: 4.0 ou Entree pour 0.0 = pas de filtre) :");
         String noteInput = scanner.nextLine();
         double noteSaisie = noteInput.isEmpty() ? 0.0 : Double.parseDouble(noteInput);
 
@@ -212,7 +214,11 @@ public class VehiculeService {
                 .filter(v -> v.getVilleLocalisation().equalsIgnoreCase(villeSaisie))
                 .filter(v -> v.getDatesDisponibles().contains(demain))
                 .filter(v -> v.getMarque().equalsIgnoreCase(marqueSaisie))
-                .filter(v -> v.calculerNoteMoyenne() >= noteSaisie)
+                .filter(v -> {
+                    Double noteVehicule = v.calculerNoteMoyenne();
+                    if (noteSaisie == 0.0) return true;
+                    return noteVehicule != null && noteVehicule >= noteSaisie;
+                })
                 .filter(v -> v.getCouleur().equalsIgnoreCase(couleurSaisie))
                 .collect(java.util.stream.Collectors.toList());
 
@@ -224,7 +230,8 @@ public class VehiculeService {
                 System.out.println("------------------------------------");
                 System.out.println("Vehicule : " + v.getMarque() + " " + v.getModele() + " (" + v.getCouleur() + ")");
                 System.out.println("Lieu : " + v.getLocalisationComplete());
-                System.out.println("Note : " + v.calculerNoteMoyenne() + "/5");
+                Double noteResult = v.calculerNoteMoyenne();
+                System.out.println("Note : " + (noteResult != null ? noteResult + "/5" : "Aucune note"));
                 System.out.println("------------------------------------");
             }
         }

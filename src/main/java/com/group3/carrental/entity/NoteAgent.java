@@ -2,39 +2,36 @@ package com.group3.carrental.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
 @Entity
 @Table(name = "note_agent")
-public class NoteAgent {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class NoteAgent extends Note {
 
     private int noteGestionVehicule;
     private int noteBienveillance;
     private int noteReactivite;
-    private String commentaire;
 
-    @Column(name = "note_globale")
-    private double noteGlobale = (noteGestionVehicule + noteBienveillance + noteReactivite) / 3.0;
-
-    @ManyToOne
-    @JoinColumn(name = "agent_id")
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "agent_id", nullable = false)
     private Agent agent;
 
-    public NoteAgent() {
-    }
-
     public NoteAgent(int noteGestionVehicule, int noteBienveillance, int noteReactivite, String commentaire,
-            double noteGlobale, Agent agent) {
+            Agent agent) {
+        super(commentaire);
         this.noteGestionVehicule = noteGestionVehicule;
         this.noteBienveillance = noteBienveillance;
         this.noteReactivite = noteReactivite;
-        this.commentaire = commentaire;
-        this.noteGlobale = noteGlobale;
         this.agent = agent;
+        this.noteGlobale = calculerNoteGlobale();
     }
 
+    @Override
+    public double calculerNoteGlobale() {
+        return (noteGestionVehicule + noteBienveillance + noteReactivite) / 3.0;
+    }
 }

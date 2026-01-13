@@ -12,6 +12,8 @@ import com.group3.carrental.entity.Assurance;
 import com.group3.carrental.entity.Contrat;
 import com.group3.carrental.entity.Message;
 import com.group3.carrental.entity.Utilisateur;
+import com.group3.carrental.entity.Loueur;
+import com.group3.carrental.entity.AgentParticulier;
 import com.group3.carrental.service.AssuranceService;
 import com.group3.carrental.service.ContratService;
 import com.group3.carrental.service.UtilisateurService;
@@ -116,7 +118,14 @@ public class AppController {
                 sc.nextLine();
                 Utilisateur.Role role = (roleChoice == 2) ? Utilisateur.Role.Agent : Utilisateur.Role.Loueur;
 
-                Utilisateur newUser = new Utilisateur();
+                Utilisateur newUser = null;
+                if (role == Utilisateur.Role.Loueur) {
+                    newUser = new Loueur();
+                } else {
+                    // Par défaut un Agent Particulier si pas précisé
+                    newUser = new AgentParticulier();
+                }
+
                 newUser.setNom(nom);
                 newUser.setPrenom(prenom);
                 newUser.setEmail(userEmail);
@@ -486,7 +495,7 @@ public class AppController {
             System.out.println("\n--- Messagerie ---");
             System.out.println("1. Envoyer un message");
             System.out.println("2. Voir ma boîte de réception");
-            System.out.println("3. Voir une conversation (par id)");
+            System.out.println("3. Voir une conversation");
             System.out.println("0. Retour");
 
             int choice = sc.nextInt();
@@ -512,8 +521,9 @@ public class AppController {
     }
 
     private void menuEnvoyerMessage() {
-        System.out.print("ID du destinataire : ");
-        int destinataireId = Integer.parseInt(sc.nextLine());
+        Integer destinataireId = choisirUtilisateurParNom();
+        if (destinataireId == null)
+            return;
 
         System.out.print("Contenu du message : ");
         String contenu = sc.nextLine();
@@ -549,8 +559,9 @@ public class AppController {
     }
 
     private void menuAfficherConversation() {
-        System.out.print("ID de l'utilisateur : ");
-        int otherId = Integer.parseInt(sc.nextLine());
+        Integer otherId = choisirUtilisateurParNom();
+        if (otherId == null)
+            return;
 
         try {
             List<Message> conv = serviceMessagerie.consulterConversation(currentUser.getId(), otherId);
@@ -567,5 +578,60 @@ public class AppController {
         } catch (Exception e) {
             System.out.println("Erreur : " + e.getMessage());
         }
+    }
+
+    // 来自 jihane 分支的新功能 - 按名字搜索用户
+    private Integer choisirUtilisateurParNom() {
+        System.out.print("Nom du destinataire : ");
+        String nom = sc.nextLine().trim();
+
+        System.out.print("Prénom (optionnel, Entrée si inconnu) : ");
+        String prenom = sc.nextLine().trim();
+
+        List<Utilisateur> candidats;
+        try {
+            if (prenom.isEmpty()) {
+                candidats = serviceMessagerie.rechercherUtilisateursParNom(nom);
+            } else {
+                candidats = serviceMessagerie.rechercherUtilisateursParNomPrenom(nom, prenom);
+            }
+        } catch (Exception e) {
+            System.out.println("Erreur : " + e.getMessage());
+            return null;
+        }
+
+        // enlever soi-même
+        candidats.removeIf(u -> u.getId() == currentUser.getId());
+
+        if (candidats.isEmpty()) {
+            System.out.println("Aucun utilisateur trouvé.");
+            return null;
+        }
+
+        System.out.println("\n--- Résultats ---");
+        for (int i = 0; i < candidats.size(); i++) {
+            Utilisateur u = candidats.get(i);
+            System.out.println((i + 1) + ". " + u.getNom() + " " + u.getPrenom() + " (" + u.getRole() + ")");
+        }
+
+        System.out.print("Choisis un numéro (0 = annuler) : ");
+        String choix = sc.nextLine().trim();
+
+        int idx;
+        try {
+            idx = Integer.parseInt(choix);
+        } catch (NumberFormatException e) {
+            System.out.println("Choix invalide.");
+            return null;
+        }
+
+        if (idx == 0)
+            return null;
+        if (idx < 1 || idx > candidats.size()) {
+            System.out.println("Choix invalide.");
+            return null;
+        }
+
+        return candidats.get(idx - 1).getId();
     }
 }
