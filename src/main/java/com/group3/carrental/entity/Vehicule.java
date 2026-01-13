@@ -24,6 +24,8 @@ public class Vehicule {
     private String rueLocalisation;
     private String cPostalLocalisation;
     private String villeLocalisation;
+    private double latitudeVehicule;
+    private double longitudeVehicule;
 
     // Notes reçues - stockées dans une table séparée vehicule_notes
     @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -61,10 +63,6 @@ public class Vehicule {
 
     }
 
-    @ManyToOne
-    @JoinColumn(name = "agent_id")
-    private Agent agent;
-
     public Vehicule(TypeVehicule type, String marque, String modele, String couleur, EtatVehicule etat,
             String rueLocalisation, String cPostalLocalisation, String villeLocalisation) {
         this.type = type;
@@ -75,6 +73,18 @@ public class Vehicule {
         this.rueLocalisation = rueLocalisation;
         this.cPostalLocalisation = cPostalLocalisation;
         this.villeLocalisation = villeLocalisation;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "agent_id")
+    private Agent agentProprietaire;
+
+    public Agent getAgentProprietaire() {
+        return agentProprietaire;
+    }
+
+    public void setAgentProprietaire(Agent agent) {
+        this.agentProprietaire = agent;
     }
 
     public String getLocalisationComplete() {

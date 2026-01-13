@@ -22,6 +22,8 @@ public class Utilisateur {
     private String motDePasse;
     @Enumerated(EnumType.STRING)
     protected Role role;
+    private double latitudeHabitation;
+    private double longitudeHabitation;
 
     public enum Role {
         Loueur,

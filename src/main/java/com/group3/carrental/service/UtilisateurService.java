@@ -98,7 +98,7 @@ public class UtilisateurService {
         Vehicule vehicule = new Vehicule(type, inputMarque, inputModele,
                 inputCouleur, etat, rue, codePostal, ville);
         vehicule.ajouterDisponibilite(LocalDate.now().plusDays(1));
-        vehicule.setAgent(agent); // Associer l'agent avant de sauvegarder
+        vehicule.setAgentProprietaire(agent); // Associer l'agent avant de sauvegarder
         vehiculeRepository.save(vehicule);
         System.out.println("Vehicule ajoute reussi !!");
 
@@ -106,10 +106,13 @@ public class UtilisateurService {
 
     // Afficher les vehicules de l'agent
     public void afficherLesVehiculesDeAgent(Utilisateur agent) {
-        List<Vehicule> vehicules = vehiculeRepository.findByAgent(agent);
-        System.out.println("\n--- Liste des vehicules de l'agent " + " ---");
-        for (Vehicule vehicule : vehicules) {
-            System.out.println(vehicule);
+        // Vérifie que tu appelles bien le nouveau nom de la méthode :
+        List<Vehicule> vehicules = vehiculeRepository.findByAgentProprietaire(agent);
+
+        if (vehicules.isEmpty()) {
+            System.out.println("Aucun véhicule trouvé.");
+        } else {
+            vehicules.forEach(v -> System.out.println("- " + v.getMarque() + " " + v.getModele()));
         }
     }
 
@@ -119,7 +122,7 @@ public class UtilisateurService {
         System.out.println("ID du vehicule a supprimer: ");
         int id = scanner.nextInt();
         Vehicule vehicule = vehiculeRepository.findById(id).orElse(null);
-        if (vehicule == null || vehicule.getAgent() == null || vehicule.getAgent().getId() != agent.getId()) {
+        if (vehicule == null || vehicule.getAgentProprietaire() == null || vehicule.getAgentProprietaire().getId() != agent.getId()) {
             System.out.println("Erreur: Vehicule non trouve ou ne vous appartient pas.");
             return;
         }
@@ -133,7 +136,7 @@ public class UtilisateurService {
         System.out.println("ID du vehicule a modifier: ");
         int id = scanner.nextInt();
         Vehicule vehicule = vehiculeRepository.findById(id).orElse(null);
-        if (vehicule == null || vehicule.getAgent() == null || vehicule.getAgent().getId() != agent.getId()) {
+        if (vehicule == null || vehicule.getAgentProprietaire() == null || vehicule.getAgentProprietaire().getId() != agent.getId()) {
             System.out.println("Erreur: Vehicule non trouve ou ne vous appartient pas.");
             return;
         }
@@ -194,6 +197,12 @@ public class UtilisateurService {
         vehicule.setVilleLocalisation(villeLocalisation);
         vehiculeRepository.save(vehicule);
         System.out.println("Vehicule modifie reussi !!");
+    }
+
+    // Dans UtilisateurService.java
+    public List<Utilisateur> findAllAgents() {
+        // On demande au repository de trouver tous les utilisateurs ayant le rôle Agent
+        return utilisateurRepository.findByRole(Utilisateur.Role.Agent);
     }
 
 }

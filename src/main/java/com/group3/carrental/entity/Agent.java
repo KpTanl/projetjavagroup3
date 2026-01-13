@@ -4,6 +4,10 @@ import com.group3.carrental.entity.Vehicule.OptionRetour;
 import java.util.Date;
 import java.util.List;
 import jakarta.persistence.*;
+import lombok.Data;
+
+
+
 
 @Entity
 @DiscriminatorValue("Agent")
@@ -60,7 +64,7 @@ public abstract class Agent extends Utilisateur {
     // Méthode pour activer l'option sur UN véhicule
 // Dans Agent.java, vérifiez que vous avez bien ceci :
 public void activerOptionParkingVehicule(Vehicule v) {
-    if (v != null && v.getAgent() != null && v.getAgent().getId() == this.getId()) {
+    if (v != null && v.getAgentProprietaire() != null && v.getAgentProprietaire().getId() == this.getId()) {
         // Accès via la classe Vehicule
         v.setOptionRetour(Vehicule.OptionRetour.retour_parking); 
         System.out.println("Option parking activée pour le véhicule : " + v.getModele());
@@ -78,7 +82,7 @@ public void activerOptionParkingEnMasse(List<Vehicule> vehiculesSelectionnes) {
 
 // Permet d'activer OU de désactiver selon le besoin
 public void configurerOptionParking(Vehicule v, boolean activer) {
-    if (v != null && v.getAgent() != null && v.getAgent().getId() == this.getId()) {
+    if (v != null && v.getAgentProprietaire() != null && v.getAgentProprietaire().getId() == this.getId()) {
         if (activer) {
             v.setOptionRetour(Vehicule.OptionRetour.retour_parking);
             System.out.println("Option parking activée pour le : " + v.getType() +v.getModele()+ v.getMarque()+ v.getCouleur());
@@ -90,4 +94,12 @@ public void configurerOptionParking(Vehicule v, boolean activer) {
         System.out.println("Action non autorisée sur ce véhicule.");
     }
 }
+
+
+    @OneToMany(mappedBy = "agentProprietaire", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Vehicule> vehiculesEnLocation;
+
+    public List<Vehicule> getVehiculesEnLocation() {
+        return vehiculesEnLocation;
+    }
 }
