@@ -628,29 +628,6 @@ public class AppController {
         System.out.println("\n=== Retour du véhicule: " + contrat.getVehicule().getMarque() + " " 
             + contrat.getVehicule().getModele() + " ===");
         
-        // Noter l'agent
-        System.out.println("\n--- Notation de l'agent ---");
-        Agent agent = contrat.getAgent();
-        System.out.println("Agent: " + agent.getPrenom() + " " + agent.getNom());
-        
-        System.out.print("Note pour le service (1-5): ");
-        int noteService = sc.nextInt();
-        System.out.print("Note pour la communication (1-5): ");
-        int noteCommunication = sc.nextInt();
-        System.out.print("Note pour la disponibilité (1-5): ");
-        int noteDisponibilite = sc.nextInt();
-        sc.nextLine();
-        
-        System.out.print("Commentaire (optionnel): ");
-        String commentaire = sc.nextLine();
-        
-        com.group3.carrental.entity.NoteAgent noteAgent = new com.group3.carrental.entity.NoteAgent(
-            noteService, noteCommunication, noteDisponibilite, commentaire, agent);
-        agent.ajouterNote(noteAgent);
-        utilisateurService.mettreAJour(agent);
-        
-        System.out.println("✓ Note enregistrée pour l'agent.");
-        
         // Photo de kilométrage
         System.out.println("\n--- Photo du kilométrage ---");
         System.out.println("Veuillez saisir le chemin du fichier photo (ex: C:/photos/kilometrage.jpg)");

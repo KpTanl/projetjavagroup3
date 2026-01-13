@@ -1,5 +1,6 @@
 package com.group3.carrental.entity;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -52,6 +53,15 @@ public class Contrat {
     }
 
     public String genererPdf(String dossierDestination) throws IOException {
+        // Créer le dossier s'il n'existe pas
+        File dossier = new File(dossierDestination);
+        if (!dossier.exists()) {
+            boolean created = dossier.mkdirs();
+            if (!created) {
+                throw new IOException("Impossible de créer le dossier: " + dossierDestination);
+            }
+        }
+
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         String nomFichier = dossierDestination + "/contrat_" + id + ".pdf";
 
