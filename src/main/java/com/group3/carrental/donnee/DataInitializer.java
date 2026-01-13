@@ -280,6 +280,13 @@ public class DataInitializer implements CommandLineRunner {
 
                 System.out.println("Contrat démo terminé + accepté créé : #" + contratTermine.getId());
 
+                NoteAgent noteAgent1 = new NoteAgent(4, 5, 4, "Très bon service", agentDemo, loueurDemo,
+                                contratTermine);
+                NoteAgent noteAgent2 = new NoteAgent(5, 5, 5, "Excellent !", agentDemo, loueurDemo, contratTermine);
+                noteAgentRepository.save(noteAgent1);
+                noteAgentRepository.save(noteAgent2);
+                System.out.println("Notes agent démo créées.");
+
                 Entreprise e1 = new Entreprise(0, "cleanauto@example.com", "pass123", "CleanAuto", "12345678900011",
                                 "Nettoyage intérieur/extérieur");
                 Entreprise e2 = new Entreprise(0, "fastrepair@example.com", "pass123", "FastRepair", "98765432100022",
