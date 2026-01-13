@@ -38,6 +38,13 @@ public class UtilisateurService {
         return utilisateurRepository.save(utilisateur);
     }
 
+    /**
+     * Met à jour les informations d'un utilisateur.
+     */
+    public Utilisateur mettreAJour(Utilisateur utilisateur) {
+        return utilisateurRepository.save(utilisateur);
+    }
+
     // Ajouter un véhicule pour agent
     public void ajouterVehicule(Utilisateur currentUser) {
         // Vérifier si l'utilisateur est un Agent
