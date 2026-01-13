@@ -236,4 +236,22 @@ public class VehiculeService {
             }
         }
     }
+    /**
+ * Récupère la liste des véhicules appartenant à un agent spécifique.
+ */
+public List<Vehicule> getVehiculesByAgentId(int agentId) {
+    // On récupère tous les véhicules et on filtre par l'ID de l'agent
+    // Note: C'est plus efficace de le faire via une requête Repository, 
+    // mais cette solution fonctionne directement avec votre code actuel.
+    return vehiculeRepository.findAll().stream()
+            .filter(v -> v.getAgent() != null && v.getAgent().getId() == agentId)
+            .toList();
+}
+
+/**
+ * Sauvegarde les modifications d'un véhicule (utile pour l'option parking).
+ */
+public void save(Vehicule vehicule) {
+    vehiculeRepository.save(vehicule);
+}
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.group3.carrental.entity.Assurance;
 import com.group3.carrental.entity.Contrat;
+import com.group3.carrental.entity.Message;
 import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Loueur;
 import com.group3.carrental.entity.AgentParticulier;
@@ -17,6 +18,7 @@ import com.group3.carrental.service.AssuranceService;
 import com.group3.carrental.service.ContratService;
 import com.group3.carrental.service.UtilisateurService;
 import com.group3.carrental.service.VehiculeService;
+import com.group3.carrental.service.ServiceMessagerie;
 
 @Component
 public class AppController {
@@ -28,19 +30,16 @@ public class AppController {
     private final VehiculeService vehiculeService;
     private final AssuranceService assuranceService;
     private final ContratService contratService;
-    private final MessagerieController messagerieController;
-    private final UtilisateurController utilisateurController;
+    private final ServiceMessagerie serviceMessagerie;
 
     @Autowired
     public AppController(UtilisateurService utilisateurService, VehiculeService vehiculeService,
-            AssuranceService assuranceService, ContratService contratService, 
-            MessagerieController messagerieController, UtilisateurController utilisateurController) {
+            AssuranceService assuranceService, ContratService contratService, ServiceMessagerie serviceMessagerie) {
         this.utilisateurService = utilisateurService;
         this.vehiculeService = vehiculeService;
         this.assuranceService = assuranceService;
         this.contratService = contratService;
-        this.messagerieController = messagerieController;
-        this.utilisateurController = utilisateurController;
+        this.serviceMessagerie = serviceMessagerie;
     }
 
     public enum UserRole {
@@ -181,10 +180,10 @@ public class AppController {
                 afficherAssurances();
                 break;
             case 5:
-                messagerieController.displayMenuMessagerie(currentUser);
+                displayMenuMessagerie();
                 break;
             case 6:
-                utilisateurController.afficherMonProfil(currentUser);
+                afficherMonProfil();
                 break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
@@ -358,6 +357,7 @@ public class AppController {
         System.out.println("4. Afficher mes vehicules");
         System.out.println("5. Filtrer les voitures");
         System.out.println("6. Messagerie");
+        System.out.println("7. Gérer l'option Parking Partenaire");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -378,8 +378,11 @@ public class AppController {
                 vehiculeService.filtrerVehicules();
                 break;
             case 6:
-                messagerieController.displayMenuMessagerie(currentUser);
+                displayMenuMessagerie();
                 break;
+            case 7 :
+                this.gererOptionsParkingAgent();
+            break;
             case 0:
                 System.out.println("vous avez choisi de quitter!");
                 currentUserRole = UserRole.Visitor;
@@ -390,9 +393,300 @@ public class AppController {
                 break;
         }
     }
+    private void gererOptionsParkingAgent() {
+        if (!(currentUser instanceof com.group3.carrental.entity.Agent)) {
+            System.out.println("Erreur : Vous devez être un Agent pour accéder à cette option.");
+            return;
+        }
 
-    // ========== Les méthodes de profil ont été déplacées vers UtilisateurController ==========
+        com.group3.carrental.entity.Agent agentActuel = (com.group3.carrental.entity.Agent) currentUser;
+        
+        // Récupération des véhicules via le service (basé sur l'ID de l'agent)
+        List<com.group3.carrental.entity.Vehicule> mesVehicules = vehiculeService.getVehiculesByAgentId(agentActuel.getId());
+
+        if (mesVehicules == null || mesVehicules.isEmpty()) {
+            System.out.println("Vous n'avez aucun véhicule enregistré.");
+            return;
+        }
+
+        System.out.println("\n--- GESTION DES OPTIONS PARKING ---");
+        for (int i = 0; i < mesVehicules.size(); i++) {
+            com.group3.carrental.entity.Vehicule v = mesVehicules.get(i);
+            System.out.println((i + 1) + ". " + v.getMarque() + " " + v.getModele() 
+            + " | Option actuelle : " + v.getOptionRetour());
+        }
+
+        System.out.print("\nSélectionnez le numéro du véhicule à modifier (0 pour annuler) : ");
+        int choix = sc.nextInt();
+        sc.nextLine();
+
+        if (choix > 0 && choix <= mesVehicules.size()) {
+            com.group3.carrental.entity.Vehicule vSelectionne = mesVehicules.get(choix - 1);
+            
+            System.out.println("Voulez-vous activer ou désactiver l'option ?");
+            System.out.println("1. Activer (retour_parking)");
+            System.out.println("2. Désactiver (retour_classique)");
+            int action = sc.nextInt();
+            sc.nextLine();
+
+            // Appel de votre logique métier située dans Agent.java
+            if (action == 1) {
+                agentActuel.configurerOptionParking(vSelectionne, true);
+                System.out.println("Mise à jour réussie : Option activée.");
+            } else if (action == 2) {
+                agentActuel.configurerOptionParking(vSelectionne, false);
+                System.out.println("Mise à jour réussie : Option désactivée.");
+            } else {
+                System.out.println("Action annulée : choix invalide.");
+            }
+            
+            // Note : En situation réelle, il faudrait ici appeler vehiculeService.save(vSelectionne)
+            // pour persister le changement en base de données.
+        }
+    }
+
+    // ========== Mon profil (Loueur) ==========
+    private void afficherMonProfil() {
+        if (currentUser == null) {
+            System.out.println("Accès refusé : vous devez être connecté.");
+            return;
+        }
+
+        boolean retour = false;
+        while (!retour) {
+            System.out.println("\n--- Mon profil ---");
+            System.out.println("ID          : " + currentUser.getId());
+            System.out.println("Nom         : " + currentUser.getNom());
+            System.out.println("Prénom      : " + currentUser.getPrenom());
+            System.out.println("Email       : " + currentUser.getEmail());
+            System.out.println("Mot de passe: " + currentUser.getMotDePasse());
+
+            System.out.println("\n1. Modifier nom");
+            System.out.println("2. Modifier prénom");
+            System.out.println("3. Modifier email");
+            System.out.println("4. Modifier mot de passe");
+            System.out.println("5. Historique des locations");
+            System.out.println("0. Retour");
+            int choix = sc.nextInt();
+            sc.nextLine();
+
+            switch (choix) {
+                case 1:
+                    System.out.print("Nouveau nom : ");
+                    currentUser.setNom(sc.nextLine());
+                    utilisateurService.mettreAJour(currentUser);
+                    System.out.println("Nom mis à jour.");
+                    break;
+                case 2:
+                    System.out.print("Nouveau prénom : ");
+                    currentUser.setPrenom(sc.nextLine());
+                    utilisateurService.mettreAJour(currentUser);
+                    System.out.println("Prénom mis à jour.");
+                    break;
+                case 3:
+                    System.out.print("Nouvel email : ");
+                    currentUser.setEmail(sc.nextLine());
+                    utilisateurService.mettreAJour(currentUser);
+                    System.out.println("Email mis à jour.");
+                    break;
+                case 4:
+                    System.out.print("Nouveau mot de passe : ");
+                    currentUser.setMotDePasse(sc.nextLine());
+                    utilisateurService.mettreAJour(currentUser);
+                    System.out.println("Mot de passe mis à jour.");
+                    break;
+                case 5:
+                    afficherHistoriqueLocations();
+                    break;
+                case 0:
+                    retour = true;
+                    break;
+                default:
+                    System.out.println("Choix invalide !");
+            }
+        }
+    }
+
+    private void afficherHistoriqueLocations() {
+        if (currentUser == null) {
+            System.out.println("Accès refusé : vous devez être connecté.");
+            return;
+        }
+
+        List<Contrat> contrats = contratService.getContratsParLoueur(currentUser.getId());
+        if (contrats.isEmpty()) {
+            System.out.println("Aucune location trouvée.");
+            return;
+        }
+
+        System.out.println("\n--- Historique des locations ---");
+        for (Contrat c : contrats) {
+            LocalDate deb = c.getDateDeb().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate fin = c.getDateFin().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            System.out.println("Contrat #" + c.getId() + " : du " + deb + " au " + fin);
+
+            if (c.getVehicule() != null) {
+                System.out.println("  Véhicule : " + c.getVehicule().getMarque() + " " + c.getVehicule().getModele());
+                System.out.println("  Lieu     : " + c.getVehicule().getLocalisationComplete());
+            }
+
+            if (c.getAgent() != null) {
+                System.out.println("  Agent    : " + c.getAgent().getPrenom() + " " + c.getAgent().getNom());
+            }
+            System.out.println("  Prix total : " + c.getPrixTotal() + "€");
+            System.out.println("------------------------------------");
+        }
+    }
 
     // ========== Messagerie ==========
-    // ========== Les méthodes de messagerie ont été déplacées vers MessagerieController ==========
+    private void displayMenuMessagerie() {
+        if (currentUser == null) {
+            System.out.println("Accès refusé : vous devez être connecté.");
+            return;
+        }
+
+        boolean back = false;
+        while (!back) {
+            System.out.println("\n--- Messagerie ---");
+            System.out.println("1. Envoyer un message");
+            System.out.println("2. Voir ma boîte de réception");
+            System.out.println("3. Voir une conversation");
+            System.out.println("0. Retour");
+
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+                case 1:
+                    menuEnvoyerMessage();
+                    break;
+                case 2:
+                    menuAfficherInbox();
+                    break;
+                case 3:
+                    menuAfficherConversation();
+                    break;
+                case 0:
+                    back = true;
+                    break;
+                default:
+                    System.out.println("Choix invalide !");
+            }
+        }
+    }
+
+    private void menuEnvoyerMessage() {
+        Integer destinataireId = choisirUtilisateurParNom();
+        if (destinataireId == null)
+            return;
+
+        System.out.print("Contenu du message : ");
+        String contenu = sc.nextLine();
+
+        try {
+            Message msg = serviceMessagerie.envoyerMessage(
+                    currentUser.getId(),
+                    destinataireId,
+                    contenu);
+            System.out.println("Message envoyé ! (id=" + msg.getId() + ", date=" + msg.getDateEnvoi() + ")");
+        } catch (Exception e) {
+            System.out.println("Erreur : " + e.getMessage());
+        }
+    }
+
+    private void menuAfficherInbox() {
+        try {
+            List<Message> inbox = serviceMessagerie.consulterMessages(currentUser.getId());
+            if (inbox.isEmpty()) {
+                System.out.println("(Aucun message reçu)");
+                return;
+            }
+
+            System.out.println("\n--- Boîte de réception ---");
+            for (Message m : inbox) {
+                System.out.println("[" + m.getDateEnvoi() + "] de "
+                        + m.getExpediteur().getPrenom() + " " + m.getExpediteur().getNom()
+                        + " : " + m.getContenu());
+            }
+        } catch (Exception e) {
+            System.out.println("Erreur : " + e.getMessage());
+        }
+    }
+
+    private void menuAfficherConversation() {
+        Integer otherId = choisirUtilisateurParNom();
+        if (otherId == null)
+            return;
+
+        try {
+            List<Message> conv = serviceMessagerie.consulterConversation(currentUser.getId(), otherId);
+            if (conv.isEmpty()) {
+                System.out.println("(Aucun message entre vous)");
+                return;
+            }
+
+            System.out.println("\n--- Conversation ---");
+            for (Message m : conv) {
+                String who = (m.getExpediteur().getId() == currentUser.getId()) ? "Moi" : m.getExpediteur().getPrenom();
+                System.out.println("[" + m.getDateEnvoi() + "] " + who + " : " + m.getContenu());
+            }
+        } catch (Exception e) {
+            System.out.println("Erreur : " + e.getMessage());
+        }
+    }
+
+    // 来自 jihane 分支的新功能 - 按名字搜索用户
+    private Integer choisirUtilisateurParNom() {
+        System.out.print("Nom du destinataire : ");
+        String nom = sc.nextLine().trim();
+
+        System.out.print("Prénom (optionnel, Entrée si inconnu) : ");
+        String prenom = sc.nextLine().trim();
+
+        List<Utilisateur> candidats;
+        try {
+            if (prenom.isEmpty()) {
+                candidats = serviceMessagerie.rechercherUtilisateursParNom(nom);
+            } else {
+                candidats = serviceMessagerie.rechercherUtilisateursParNomPrenom(nom, prenom);
+            }
+        } catch (Exception e) {
+            System.out.println("Erreur : " + e.getMessage());
+            return null;
+        }
+
+        // enlever soi-même
+        candidats.removeIf(u -> u.getId() == currentUser.getId());
+
+        if (candidats.isEmpty()) {
+            System.out.println("Aucun utilisateur trouvé.");
+            return null;
+        }
+
+        System.out.println("\n--- Résultats ---");
+        for (int i = 0; i < candidats.size(); i++) {
+            Utilisateur u = candidats.get(i);
+            System.out.println((i + 1) + ". " + u.getNom() + " " + u.getPrenom() + " (" + u.getRole() + ")");
+        }
+
+        System.out.print("Choisis un numéro (0 = annuler) : ");
+        String choix = sc.nextLine().trim();
+
+        int idx;
+        try {
+            idx = Integer.parseInt(choix);
+        } catch (NumberFormatException e) {
+            System.out.println("Choix invalide.");
+            return null;
+        }
+
+        if (idx == 0)
+            return null;
+        if (idx < 1 || idx > candidats.size()) {
+            System.out.println("Choix invalide.");
+            return null;
+        }
+
+        return candidats.get(idx - 1).getId();
+    }
 }
