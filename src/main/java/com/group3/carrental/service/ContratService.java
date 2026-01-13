@@ -20,26 +20,32 @@ public class ContratService {
         this.contratRepository = contratRepository;
     }
 
-    /**
-     * Créer et sauvegarder un nouveau contrat
-     */
     public Contrat creerContrat(Date dateDebut, Date dateFin, Agent agent, Loueur loueur, Vehicule vehicule, double prixTotal) {
         Contrat contrat = new Contrat(dateDebut, dateFin, agent, loueur, vehicule, prixTotal);
+        contrat.setStatut(Contrat.Statut.Accepte);
         return contratRepository.save(contrat);
     }
 
-    /**
-     * Récupérer tous les contrats
-     */
     public List<Contrat> getTousLesContrats() {
         return contratRepository.findAll();
     }
 
-    /**
-     * Récupérer les contrats pour un loueur donné.
-     */
     public List<Contrat> getContratsParLoueur(int loueurId) {
         return contratRepository.findByLoueurId(loueurId);
+    }
+
+    public List<Contrat> getContratsParAgent(int agentId) {
+        return contratRepository.findByAgentId(agentId);
+    }
+
+    public List<Contrat> getContratsTerminesAccepteesParLoueur(int loueurId) {
+        return contratRepository.findByLoueurIdAndStatutAndDateFinBefore(
+                loueurId, Contrat.Statut.Accepte, new Date());
+    }
+
+    public List<Contrat> getContratsTerminesAccepteesParAgent(int agentId) {
+        return contratRepository.findByAgentIdAndStatutAndDateFinBefore(
+                agentId, Contrat.Statut.Accepte, new Date());
     }
 
     /**
@@ -56,4 +62,9 @@ public class ContratService {
     public void supprimerContrat(Long id) {
         contratRepository.deleteById(id);
     }
+
+    public Contrat save(Contrat c) {
+        return contratRepository.save(c);
+    }
+
 }

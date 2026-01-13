@@ -165,6 +165,7 @@ public class AppController {
         System.out.println("4. Consulter les assurances");
         System.out.println("5. Messagerie");
         System.out.println("6. Mon profil");
+        System.out.println("7. Noter (après location)");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -186,6 +187,9 @@ public class AppController {
                 break;
             case 6:
                 utilisateurController.afficherMonProfil(currentUser);
+                break;
+            case 7:
+                utilisateurController.menuNotation(currentUser);
                 break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
@@ -235,6 +239,7 @@ public class AppController {
         System.out.println("4. Afficher mes vehicules");
         System.out.println("5. Filtrer les voitures");
         System.out.println("6. Messagerie");
+        System.out.println("7. Noter Loueur"); 
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -256,6 +261,9 @@ public class AppController {
                 break;
             case 6:
                 messagerieController.displayMenuMessagerie(currentUser);
+                break;
+            case 7:
+                utilisateurController.menuNotation(currentUser);
                 break;
             case 0:
                 System.out.println("vous avez choisi de quitter!");

@@ -2,6 +2,9 @@ package com.group3.carrental.donnee;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -14,6 +17,7 @@ import com.group3.carrental.entity.Loueur;
 import com.group3.carrental.entity.NoteAgent;
 import com.group3.carrental.entity.NoteVehicule;
 import com.group3.carrental.entity.Vehicule;
+import com.group3.carrental.entity.Contrat;
 import com.group3.carrental.repository.AssuranceRepository;
 import com.group3.carrental.repository.UtilisateurRepository;
 import com.group3.carrental.repository.VehiculeRepository;
@@ -21,6 +25,7 @@ import com.group3.carrental.repository.NoteAgentRepository;
 import com.group3.carrental.repository.NoteLoueurRepository;
 import com.group3.carrental.repository.NoteVehiculeRepository;
 import com.group3.carrental.repository.EntrepriseRepository;
+import com.group3.carrental.repository.ContratRepository;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -32,6 +37,7 @@ public class DataInitializer implements CommandLineRunner {
         private final NoteAgentRepository noteAgentRepository;
         private final NoteLoueurRepository noteLoueurRepository;
         private final NoteVehiculeRepository noteVehiculeRepository;
+        private final ContratRepository contratRepository;
 
         public DataInitializer(VehiculeRepository vehiculeRepository,
                         UtilisateurRepository utilisateurRepository,
@@ -39,7 +45,8 @@ public class DataInitializer implements CommandLineRunner {
                         EntrepriseRepository entrepriseRepository,
                         NoteAgentRepository noteAgentRepository,
                         NoteLoueurRepository noteLoueurRepository,
-                        NoteVehiculeRepository noteVehiculeRepository) {
+                        NoteVehiculeRepository noteVehiculeRepository,
+                        ContratRepository contratRepository) {
                 this.vehiculeRepository = vehiculeRepository;
                 this.utilisateurRepository = utilisateurRepository;
                 this.assuranceRepository = assuranceRepository;
@@ -47,6 +54,7 @@ public class DataInitializer implements CommandLineRunner {
                 this.noteAgentRepository = noteAgentRepository;
                 this.noteLoueurRepository = noteLoueurRepository;
                 this.noteVehiculeRepository = noteVehiculeRepository;
+                this.contratRepository = contratRepository;
         }
 
         @Override
@@ -100,8 +108,6 @@ public class DataInitializer implements CommandLineRunner {
 
                 AgentPro agentPro1 = new AgentPro(0, "Société", "Admin", "admin@rentcar.com", "admin123",
                                 new ArrayList<>(), LocalDate.now(), 12345678901234L, "RentCar Pro");
-                agentPro1.ajouterNote(new NoteAgent(4, 5, 4, "Très bon service", agentPro1));
-                agentPro1.ajouterNote(new NoteAgent(5, 5, 5, "Suuuper", agentPro1));
                 utilisateurRepository.save(agentPro1);
 
                 AgentPro agentPro2 = new AgentPro(
@@ -170,7 +176,6 @@ public class DataInitializer implements CommandLineRunner {
                                 "75000",
                                 "Paris");
                 v1.ajouterDisponibilite(LocalDate.now().plusDays(1));
-                v1.ajouterNote(new NoteVehicule(4, 5, 4, "Très bon véhicule"));
                 vehiculeRepository.save(v1);
 
                 Vehicule v2 = new Vehicule(
@@ -183,7 +188,6 @@ public class DataInitializer implements CommandLineRunner {
                                 "31000",
                                 "Toulouse");
                 v2.ajouterDisponibilite(LocalDate.now().plusDays(2));
-                v2.ajouterNote(new NoteVehicule(5, 5, 5, "Moto excellente"));
                 vehiculeRepository.save(v2);
 
                 Vehicule v3 = new Vehicule(
@@ -196,7 +200,6 @@ public class DataInitializer implements CommandLineRunner {
                                 "59000",
                                 "Lille");
                 v3.ajouterDisponibilite(LocalDate.now().plusDays(3));
-                v3.ajouterNote(new NoteVehicule(4, 4, 5, "Voiture confortable"));
                 vehiculeRepository.save(v3);
 
                 Vehicule v4 = new Vehicule(
@@ -209,7 +212,6 @@ public class DataInitializer implements CommandLineRunner {
                                 "59800",
                                 "Lille");
                 v4.ajouterDisponibilite(LocalDate.now().plusDays(5));
-                v4.ajouterNote(new NoteVehicule(3, 4, 4, "Utile pour déménagement"));
                 vehiculeRepository.save(v4);
 
                 Vehicule v5 = new Vehicule(
@@ -262,6 +264,22 @@ public class DataInitializer implements CommandLineRunner {
                 v8.ajouterDisponibilite(LocalDate.now().plusDays(3));
                 v8.setAgent(agentParticulier3);
                 vehiculeRepository.save(v8);
+
+                // ================== Contrat terminé + accepté (pour tests de notation) ==================
+                Loueur loueurDemo = loueur1;
+                AgentParticulier agentDemo = agentParticulier1;
+                Vehicule vehiculeDemo = v6; // déjà lié à agentParticulier1
+
+                Date deb = Date.from(Instant.now().minus(5, ChronoUnit.DAYS));
+                Date fin = Date.from(Instant.now().minus(1, ChronoUnit.DAYS)); // terminé
+
+                Contrat contratTermine = new Contrat(deb, fin, agentDemo, loueurDemo, vehiculeDemo, 150.0);
+                contratTermine.setStatut(Contrat.Statut.Accepte);
+
+                contratRepository.save(contratTermine);
+
+                System.out.println("Contrat démo terminé + accepté créé : #" + contratTermine.getId());
+
 
                 // ========== Entreprises ==========
                 Entreprise e1 = new Entreprise(0, "cleanauto@example.com", "pass123", "CleanAuto", "12345678900011",
