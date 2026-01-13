@@ -21,7 +21,7 @@ import com.group3.carrental.service.VehiculeService;
 
 @Component
 public class AppController {
-    private static final Scanner sc = new Scanner(System.in);
+    private static final Scanner sc = new Scanner(System.in).useLocale(java.util.Locale.US);
     private static UserRole currentUserRole = UserRole.Visitor;
     private Utilisateur currentUser = null;
 
@@ -149,7 +149,8 @@ public class AppController {
                 vehiculeService.filtrerVehicules();
                 break;
             case 5:
-                // TODO: Afficher les agents
+                // On appelle la nouvelle méthode créée ci-dessous
+                actionConsulterAgents();
                 break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
@@ -170,6 +171,7 @@ public class AppController {
         System.out.println("4. Consulter les assurances");
         System.out.println("5. Messagerie");
         System.out.println("6. Mon profil");
+        System.out.println("7. Suggestions autour de chez moi (Rayon X km)");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -191,6 +193,12 @@ public class AppController {
                 break;
             case 6:
                 utilisateurController.afficherMonProfil(currentUser);
+                break;
+            case 7:
+                System.out.print("Entrez le rayon maximum souhaité (en km) : ");
+                double rayonsuggestion = sc.nextDouble();
+                sc.nextLine();
+                vehiculeService.suggererVehiculesProches(currentUser, rayonsuggestion);
                 break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
@@ -466,4 +474,46 @@ public class AppController {
             // pour persister le changement en base de données.
         }
     }
+
+    private void actionConsulterAgents() {
+        System.out.println("\n--- CONSULTATION DES AGENTS ---");
+
+        // 1. On récupère tous les agents via le service
+        List<Utilisateur> agents = utilisateurService.findAllAgents();
+
+        if (agents.isEmpty()) {
+            System.out.println("Désolé, aucun agent n'est inscrit pour le moment.");
+            return;
+        }
+
+        // 2. On affiche la liste pour que l'utilisateur puisse choisir
+        for (int i = 0; i < agents.size(); i++) {
+            Utilisateur a = agents.get(i);
+            System.out.println((i + 1) + ". " + a.getPrenom() + " " + a.getNom() + " (Email: " + a.getEmail() + ")");
+        }
+
+        // 3. Choix de l'utilisateur
+        System.out.print("\nEntrez le numéro de l'agent pour voir ses véhicules (ou 0 pour annuler) : ");
+        if (sc.hasNextInt()) {
+            int choix = sc.nextInt();
+            sc.nextLine(); // Nettoie le buffer
+
+            if (choix > 0 && choix <= agents.size()) {
+                Utilisateur agentChoisi = agents.get(choix - 1);
+
+                System.out.println("\n-----------------------------------------");
+                System.out.println("VÉHICULES PROPOSÉS PAR " + agentChoisi.getPrenom().toUpperCase());
+                System.out.println("-----------------------------------------");
+
+                // 4. On appelle le service pour afficher les voitures de cet agent
+                utilisateurService.afficherLesVehiculesDeAgent(agentChoisi);
+
+                System.out.println("-----------------------------------------");
+            }
+        } else {
+            sc.next(); // Nettoie en cas de mauvaise saisie
+            System.out.println("Saisie invalide.");
+        }
+    }
+
 }

@@ -7,6 +7,7 @@ import java.util.Scanner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.entity.Vehicule.EtatVehicule;
 import com.group3.carrental.entity.Vehicule.TypeVehicule;
@@ -180,8 +181,12 @@ public class VehiculeService {
         String codePostal = scanner.nextLine();
         System.out.println("Ville: ");
         String ville = scanner.nextLine();
+        System.out.println("Latitude: ");
+        double latitude = Double.parseDouble(scanner.nextLine());
+        System.out.println("Longitude: ");
+        double longitude = Double.parseDouble(scanner.nextLine());
         Vehicule vehicule = new Vehicule(type, inputMarque, inputModele,
-                inputCouleur, etat, rue, codePostal, ville);
+                inputCouleur, etat, rue, codePostal, ville, latitude, longitude);
         vehicule.ajouterDisponibilite(LocalDate.now().plusDays(1));
         vehiculeRepository.save(vehicule);
         System.out.println("Vehicule ajoute reussi !!");
@@ -257,5 +262,58 @@ public class VehiculeService {
      */
     public void save(Vehicule vehicule) {
         vehiculeRepository.save(vehicule);
+    }
+
+    // ========== Fonctionnalités de suggestion de véhicules proches (de riad2)
+    // ==========
+
+    /**
+     * Calcule la distance entre deux points géographiques (formule Haversine).
+     */
+    public double calculerDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // Rayon de la Terre en km
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                        * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    /**
+     * Suggère les véhicules disponibles proches de l'utilisateur dans un rayon
+     * donné.
+     */
+    public void suggererVehiculesProches(Utilisateur utilisateur, double rayonKm) {
+        List<Vehicule> tousLesVehicules = vehiculeRepository.findAll();
+
+        List<Vehicule> suggestions = tousLesVehicules.stream()
+                .filter(v -> v.getEtat() == Vehicule.EtatVehicule.Non_loué)
+                .filter(v -> {
+                    double dist = calculerDistance(
+                            utilisateur.getLatitudeHabitation(), utilisateur.getLongitudeHabitation(),
+                            v.getLatitudeVehicule(), v.getLongitudeVehicule());
+                    return dist <= rayonKm;
+                })
+                .toList();
+
+        if (suggestions.isEmpty()) {
+            System.out.println("Aucun véhicule trouvé dans un rayon de " + rayonKm + " km.");
+        } else {
+            System.out.println("\n--- SUGGESTIONS PROCHES DE CHEZ VOUS ---");
+            // --- C'EST ICI QUE TU METS LE CODE DE DEBUG ---
+            suggestions.forEach(v -> {
+                System.out.println("   [DEBUG] Ma position: " + utilisateur.getLatitudeHabitation() + " / "
+                        + utilisateur.getLongitudeHabitation());
+                System.out.println(
+                        "   [DEBUG] Position véhicule: " + v.getLatitudeVehicule() + " / " + v.getLongitudeVehicule());
+
+                double d = calculerDistance(utilisateur.getLatitudeHabitation(), utilisateur.getLongitudeHabitation(),
+                        v.getLatitudeVehicule(), v.getLongitudeVehicule());
+                System.out.printf("- %s %s (à %.2f km)\n", v.getMarque(), v.getModele(), d);
+            });
+            // ----------------------------------------------
+        }
     }
 }

@@ -15,6 +15,9 @@ public interface VehiculeRepository extends JpaRepository<Vehicule, Integer> {
     List<Vehicule> findByEtat(Vehicule.EtatVehicule etat);
 
     List<Vehicule> findByAgent(Agent agent);
+
     Optional<Vehicule> findByMarqueAndModele(String marque, String modele);
+
     List<Vehicule> findByAgentId(int agentId);
+
 }

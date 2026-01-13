@@ -1,9 +1,11 @@
 package com.group3.carrental.entity;
+
 import java.time.LocalDate;
 import com.group3.carrental.entity.Vehicule.OptionRetour;
 import java.util.Date;
 import java.util.List;
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
 @DiscriminatorValue("Agent")
@@ -12,6 +14,9 @@ public abstract class Agent extends Utilisateur implements Commun {
     // EAGER: charger immediatement pour eviter LazyInitializationException
     @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<NoteAgent> notesRecues;
+
+    @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Vehicule> vehiculesEnLocation;
 
     @Column(name = "date_recu_facture")
     private LocalDate dateRecuFacture;
@@ -29,15 +34,17 @@ public abstract class Agent extends Utilisateur implements Commun {
     }
 
     public Agent(int id, String nom, String prenom, String email, String motDePasse, List<NoteAgent> notesRecues,
-            LocalDate dateRecuFacture2) {
-        super(id, nom, prenom, email, motDePasse, Role.Agent);
+            LocalDate dateRecuFacture2, double latitudeHabitation, double longitudeHabitation) { // <--- Ajoute les deux
+                                                                                                 // paramètres ici
+
+        // Maintenant on peut les passer au parent (Utilisateur)
+        super(id, nom, prenom, email, motDePasse, Role.Agent, latitudeHabitation, longitudeHabitation);
+
         this.notesRecues = notesRecues;
         this.dateRecuFacture = dateRecuFacture2;
-        // TODO Auto-generated constructor stub
     }
 
     public void souscrireOption() {
-
 
     }
 
@@ -59,38 +66,39 @@ public abstract class Agent extends Utilisateur implements Commun {
     }
 
     // Méthode pour activer l'option sur UN véhicule
-// Dans Agent.java, vérifiez que vous avez bien ceci :
-public void activerOptionParkingVehicule(Vehicule v) {
-    if (v != null && v.getAgent() != null && v.getAgent().getId() == this.getId()) {
-        // Accès via la classe Vehicule
-        v.setOptionRetour(Vehicule.OptionRetour.retour_parking); 
-        System.out.println("Option parking activée pour le véhicule : " + v.getModele());
-    } else {
-        throw new IllegalStateException("Cet agent n'est pas autorisé à modifier ce véhicule.");
-    }
-}
-
-// Méthode pour activer l'option sur PLUSIEURS véhicules (en masse)
-public void activerOptionParkingEnMasse(List<Vehicule> vehiculesSelectionnes) {
-    for (Vehicule v : vehiculesSelectionnes) {
-        activerOptionParkingVehicule(v);
-    }
-}
-
-// Permet d'activer OU de désactiver selon le besoin
-public void configurerOptionParking(Vehicule v, boolean activer) {
-    if (v != null && v.getAgent() != null && v.getAgent().getId() == this.getId()) {
-        if (activer) {
+    public void activerOptionParkingVehicule(Vehicule v) {
+        if (v != null && v.getAgentProprietaire() != null && v.getAgentProprietaire().getId() == this.getId()) {
+            // Accès via la classe Vehicule
             v.setOptionRetour(Vehicule.OptionRetour.retour_parking);
-            System.out.println("Option parking activée pour le : " + v.getType() +v.getModele()+ v.getMarque()+ v.getCouleur());
+            System.out.println("Option parking activée pour le véhicule : " + v.getModele());
         } else {
-            v.setOptionRetour(Vehicule.OptionRetour.retour_classique);
-            System.out.println("Option parking desactivée pour le : " + v.getType() + v.getModele()+ v.getMarque()+ v.getCouleur());
+            throw new IllegalStateException("Cet agent n'est pas autorisé à modifier ce véhicule.");
         }
-    } else {
-        System.out.println("Action non autorisée sur ce véhicule.");
     }
-}
+
+    // Méthode pour activer l'option sur PLUSIEURS véhicules (en masse)
+    public void activerOptionParkingEnMasse(List<Vehicule> vehiculesSelectionnes) {
+        for (Vehicule v : vehiculesSelectionnes) {
+            activerOptionParkingVehicule(v);
+        }
+    }
+
+    // Permet d'activer OU de désactiver selon le besoin
+    public void configurerOptionParking(Vehicule v, boolean activer) {
+        if (v != null && v.getAgentProprietaire() != null && v.getAgentProprietaire().getId() == this.getId()) {
+            if (activer) {
+                v.setOptionRetour(Vehicule.OptionRetour.retour_parking);
+                System.out.println("Option parking activée pour le : " + v.getType() + v.getModele() + v.getMarque()
+                        + v.getCouleur());
+            } else {
+                v.setOptionRetour(Vehicule.OptionRetour.retour_classique);
+                System.out.println("Option parking desactivée pour le : " + v.getType() + v.getModele() + v.getMarque()
+                        + v.getCouleur());
+            }
+        } else {
+            System.out.println("Action non autorisée sur ce véhicule.");
+        }
+    }
 
     public Double calculerNoteMoyenne() {
         if (notesRecues == null || notesRecues.isEmpty()) {
@@ -118,5 +126,13 @@ public void configurerOptionParking(Vehicule v, boolean activer) {
     @Override
     public void ConsulterProfilsAgents() {
         // TODO Auto-generated method stub
+    }
+
+    public List<Vehicule> getVehiculesEnLocation() {
+        return vehiculesEnLocation;
+    }
+
+    public void setVehiculesEnLocation(List<Vehicule> vehiculesEnLocation) {
+        this.vehiculesEnLocation = vehiculesEnLocation;
     }
 }

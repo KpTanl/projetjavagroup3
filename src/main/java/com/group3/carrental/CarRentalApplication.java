@@ -14,6 +14,8 @@ public class CarRentalApplication {
 
         System.out.println("\n--- Bienvenue sur notre application de location de véhicules ---");
         System.out.println("Groupe 3\n");
+        
+
         AppController appController = context.getBean(AppController.class);
         appController.startApp();
     }
