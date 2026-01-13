@@ -42,6 +42,13 @@ public class VehiculeService {
                 System.out.println("Etat: " + v.getEtat());
                 Double note = v.calculerNoteMoyenne();
                 System.out.println("Note moyenne: " + (note != null ? note + "/5" : "Aucune note"));
+                // Afficher l'agent associé
+                if (v.getAgent() != null) {
+                    System.out.println("Agent: " + v.getAgent().getPrenom() + " " + v.getAgent().getNom() +
+                            " (" + v.getAgent().getEmail() + ")");
+                } else {
+                    System.out.println("Agent: Non assigné");
+                }
                 System.out.print("Dates disponibles: ");
                 if (v.getDatesDisponibles().isEmpty()) {
                     System.out.println("Aucune");
@@ -244,4 +251,22 @@ public class VehiculeService {
             }
         }
     }
+    /**
+ * Récupère la liste des véhicules appartenant à un agent spécifique.
+ */
+public List<Vehicule> getVehiculesByAgentId(int agentId) {
+    // On récupère tous les véhicules et on filtre par l'ID de l'agent
+    // Note: C'est plus efficace de le faire via une requête Repository, 
+    // mais cette solution fonctionne directement avec votre code actuel.
+    return vehiculeRepository.findAll().stream()
+            .filter(v -> v.getAgent() != null && v.getAgent().getId() == agentId)
+            .toList();
+}
+
+/**
+ * Sauvegarde les modifications d'un véhicule (utile pour l'option parking).
+ */
+public void save(Vehicule vehicule) {
+    vehiculeRepository.save(vehicule);
+}
 }

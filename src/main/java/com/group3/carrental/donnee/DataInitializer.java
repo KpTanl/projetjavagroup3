@@ -77,106 +77,7 @@ public class DataInitializer implements CommandLineRunner {
                                 80.0);
                 assuranceRepository.save(assurancePremium);
 
-                // ========== Véhicules ==========
-                Vehicule v1 = new Vehicule(
-                                Vehicule.TypeVehicule.Voiture,
-                                "Renault",
-                                "Clio",
-                                "Bleu",
-                                Vehicule.EtatVehicule.Non_loué,
-                                "Rue de la Paix",
-                                "75000",
-                                "Paris");
-                v1.ajouterDisponibilite(LocalDate.now().plusDays(1));
-                v1.ajouterNote(new NoteVehicule(4, 5, 4, "Très bon véhicule"));
-                vehiculeRepository.save(v1);
 
-                Vehicule v2 = new Vehicule(
-                                Vehicule.TypeVehicule.Moto,
-                                "Yamaha",
-                                "MT-07",
-                                "Noir",
-                                Vehicule.EtatVehicule.Non_loué,
-                                "Avenue des Minimes",
-                                "31000",
-                                "Toulouse");
-                v2.ajouterDisponibilite(LocalDate.now().plusDays(2));
-                v2.ajouterNote(new NoteVehicule(5, 5, 5, "Moto excellente"));
-                vehiculeRepository.save(v2);
-
-                Vehicule v3 = new Vehicule(
-                                Vehicule.TypeVehicule.Voiture,
-                                "Peugeot",
-                                "208",
-                                "Rouge",
-                                Vehicule.EtatVehicule.Non_loué,
-                                "Boulevard Carnot",
-                                "59000",
-                                "Lille");
-                v3.ajouterDisponibilite(LocalDate.now().plusDays(3));
-                v3.ajouterNote(new NoteVehicule(4, 4, 5, "Voiture confortable"));
-                vehiculeRepository.save(v3);
-
-                Vehicule v4 = new Vehicule(
-                                Vehicule.TypeVehicule.Camion,
-                                "Mercedes",
-                                "Sprinter",
-                                "Blanc",
-                                Vehicule.EtatVehicule.Non_loué,
-                                "Rue Nationale",
-                                "59800",
-                                "Lille");
-                v4.ajouterDisponibilite(LocalDate.now().plusDays(5));
-                v4.ajouterNote(new NoteVehicule(3, 4, 4, "Utile pour déménagement"));
-                vehiculeRepository.save(v4);
-
-                Vehicule v5 = new Vehicule(
-                                Vehicule.TypeVehicule.Moto,
-                                "Honda",
-                                "CB500",
-                                "Gris",
-                                Vehicule.EtatVehicule.Non_loué,
-                                "Rue Alsace Lorraine",
-                                "33000",
-                                "Bordeaux");
-                v5.ajouterDisponibilite(LocalDate.now().plusDays(1));
-                vehiculeRepository.save(v5);
-
-                Vehicule v6 = new Vehicule(
-                                Vehicule.TypeVehicule.Voiture,
-                                "Toyota",
-                                "Yaris",
-                                "Blanc",
-                                Vehicule.EtatVehicule.Non_loué,
-                                "Rue Victor Hugo",
-                                "69000",
-                                "Lyon");
-                v6.ajouterDisponibilite(LocalDate.now().plusDays(2));
-                vehiculeRepository.save(v6);
-
-                Vehicule v7 = new Vehicule(
-                                Vehicule.TypeVehicule.Camion,
-                                "Iveco",
-                                "Daily",
-                                "Bleu",
-                                Vehicule.EtatVehicule.Non_loué,
-                                "Avenue Jean Jaurès",
-                                "13000",
-                                "Marseille");
-                v7.ajouterDisponibilite(LocalDate.now().plusDays(4));
-                vehiculeRepository.save(v7);
-
-                Vehicule v8 = new Vehicule(
-                                Vehicule.TypeVehicule.Voiture,
-                                "BMW",
-                                "Serie 1",
-                                "Noir",
-                                Vehicule.EtatVehicule.Non_loué,
-                                "Place Bellecour",
-                                "69002",
-                                "Lyon");
-                v8.ajouterDisponibilite(LocalDate.now().plusDays(3));
-                vehiculeRepository.save(v8);
 
                 // ========== Utilisateurs ==========
                 Loueur loueur1 = new Loueur(0, "Dupont", "Jean", "jean.dupont@email.com", "motdepasse123",
@@ -256,6 +157,123 @@ public class DataInitializer implements CommandLineRunner {
                                 new ArrayList<>(),
                                 LocalDate.now().minusMonths(1));
                 utilisateurRepository.save(agentParticulier3);
+                /*//Pour parking - agent
+AgentParticulier paul = new AgentParticulier(0, "Durand", "Paul", "paul.durand@email.com", "paulpass", new ArrayList<>(), LocalDate.now().minusDays(3));
+utilisateurRepository.save(paul); // Sauvegardez-le pour qu'il ait un ID
+
+// 2. Créez le véhicule
+Vehicule veh1 = new Vehicule(Vehicule.TypeVehicule.Voiture, "Renault", "Clio", "Bleu", Vehicule.EtatVehicule.Non_loué, "Rue de la Paix", "75000", "Paris");
+
+// 3. LIEZ LES DEUX !
+v1.setAgent(paul); // Indiquez que Paul est le propriétaire
+
+// 4. Sauvegardez le véhicule
+vehiculeRepository.save(veh1);*/
+
+
+                // ========== Véhicules ==========
+                Vehicule v1 = new Vehicule(
+                                Vehicule.TypeVehicule.Voiture,
+                                "Renault",
+                                "Clio",
+                                "Bleu",
+                                Vehicule.EtatVehicule.Non_loué,
+                                "Rue de la Paix",
+                                "75000",
+                                "Paris");
+                v1.ajouterDisponibilite(LocalDate.now().plusDays(1));
+                v1.ajouterNote(new NoteVehicule(4, 5, 4, "Très bon véhicule"));
+                vehiculeRepository.save(v1);
+
+                Vehicule v2 = new Vehicule(
+                                Vehicule.TypeVehicule.Moto,
+                                "Yamaha",
+                                "MT-07",
+                                "Noir",
+                                Vehicule.EtatVehicule.Non_loué,
+                                "Avenue des Minimes",
+                                "31000",
+                                "Toulouse");
+                v2.ajouterDisponibilite(LocalDate.now().plusDays(2));
+                v2.ajouterNote(new NoteVehicule(5, 5, 5, "Moto excellente"));
+                vehiculeRepository.save(v2);
+
+                Vehicule v3 = new Vehicule(
+                                Vehicule.TypeVehicule.Voiture,
+                                "Peugeot",
+                                "208",
+                                "Rouge",
+                                Vehicule.EtatVehicule.Non_loué,
+                                "Boulevard Carnot",
+                                "59000",
+                                "Lille");
+                v3.ajouterDisponibilite(LocalDate.now().plusDays(3));
+                v3.ajouterNote(new NoteVehicule(4, 4, 5, "Voiture confortable"));
+                vehiculeRepository.save(v3);
+
+                Vehicule v4 = new Vehicule(
+                                Vehicule.TypeVehicule.Camion,
+                                "Mercedes",
+                                "Sprinter",
+                                "Blanc",
+                                Vehicule.EtatVehicule.Non_loué,
+                                "Rue Nationale",
+                                "59800",
+                                "Lille");
+                v4.ajouterDisponibilite(LocalDate.now().plusDays(5));
+                v4.ajouterNote(new NoteVehicule(3, 4, 4, "Utile pour déménagement"));
+                vehiculeRepository.save(v4);
+
+                Vehicule v5 = new Vehicule(
+                                Vehicule.TypeVehicule.Moto,
+                                "Honda",
+                                "CB500",
+                                "Gris",
+                                Vehicule.EtatVehicule.Non_loué,
+                                "Rue Alsace Lorraine",
+                                "33000",
+                                "Bordeaux");
+                v5.ajouterDisponibilite(LocalDate.now().plusDays(1));
+                vehiculeRepository.save(v5);
+
+                Vehicule v6 = new Vehicule(
+                                Vehicule.TypeVehicule.Voiture,
+                                "Toyota",
+                                "Yaris",
+                                "Blanc",
+                                Vehicule.EtatVehicule.Non_loué,
+                                "Rue Victor Hugo",
+                                "69000",
+                                "Lyon");
+                v6.ajouterDisponibilite(LocalDate.now().plusDays(2));
+                v6.setAgent(agentParticulier1);
+                vehiculeRepository.save(v6);
+
+                Vehicule v7 = new Vehicule(
+                                Vehicule.TypeVehicule.Camion,
+                                "Iveco",
+                                "Daily",
+                                "Bleu",
+                                Vehicule.EtatVehicule.Non_loué,
+                                "Avenue Jean Jaurès",
+                                "13000",
+                                "Marseille");
+                v7.ajouterDisponibilite(LocalDate.now().plusDays(4));
+                v7.setAgent(agentParticulier2);
+                vehiculeRepository.save(v7);
+
+                Vehicule v8 = new Vehicule(
+                                Vehicule.TypeVehicule.Voiture,
+                                "BMW",
+                                "Serie 1",
+                                "Noir",
+                                Vehicule.EtatVehicule.Non_loué,
+                                "Place Bellecour",
+                                "69002",
+                                "Lyon");
+                v8.ajouterDisponibilite(LocalDate.now().plusDays(3));
+                v8.setAgent(agentParticulier3);
+                vehiculeRepository.save(v8);
 
                 // ========== Entreprises ==========
                 Entreprise e1 = new Entreprise(0, "cleanauto@example.com", "pass123", "CleanAuto", "12345678900011",

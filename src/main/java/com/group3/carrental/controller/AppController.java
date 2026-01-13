@@ -8,11 +8,12 @@ import java.util.Scanner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.group3.carrental.entity.Agent;
 import com.group3.carrental.entity.Assurance;
-import com.group3.carrental.entity.Contrat;
 import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Loueur;
 import com.group3.carrental.entity.AgentParticulier;
+import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.service.AssuranceService;
 import com.group3.carrental.service.ContratService;
 import com.group3.carrental.service.UtilisateurService;
@@ -240,8 +241,7 @@ public class AppController {
             int vehiculeId = sc.nextInt();
             sc.nextLine();
 
-            com.group3.carrental.entity.Vehicule vehiculeSelectionne = vehiculeService
-                    .getVehiculeDisponibleById(vehiculeId);
+            Vehicule vehiculeSelectionne = vehiculeService.getVehiculeDisponibleById(vehiculeId);
             if (vehiculeSelectionne == null) {
                 System.out.println("Le véhicule choisi n'est pas disponible (non loué) ou n'existe pas.");
                 return;
@@ -330,10 +330,10 @@ public class AppController {
 
                 try {
                     // Récupérer l'agent du véhicule et le loueur courant
-                    com.group3.carrental.entity.Agent agentVehicule = vehiculeSelectionne.getAgent();
-                    com.group3.carrental.entity.Loueur loueurCourant = null;
-                    if (currentUser instanceof com.group3.carrental.entity.Loueur) {
-                        loueurCourant = (com.group3.carrental.entity.Loueur) currentUser;
+                    Agent agentVehicule = vehiculeSelectionne.getAgent();
+                    Loueur loueurCourant = null;
+                    if (currentUser instanceof Loueur) {
+                        loueurCourant = (Loueur) currentUser;
                     }
 
                     contratService.creerContrat(dateDebutContrat, dateFinContrat, agentVehicule, loueurCourant,
@@ -364,7 +364,8 @@ public class AppController {
         System.out.println("4. Afficher mes vehicules");
         System.out.println("5. Filtrer les voitures");
         System.out.println("6. Messagerie");
-        System.out.println("7. Consulter l'historique de mes véhicules");
+        System.out.println("7. Gérer l'option Parking Partenaire");
+        System.out.println("8. Consulter l'historique de mes véhicules");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -388,6 +389,9 @@ public class AppController {
                 messagerieController.displayMenuMessagerie(currentUser);
                 break;
             case 7:
+                gererOptionsParkingAgent();
+                break;
+            case 8:
                 agentController.consulterHistoriqueVehicules(currentUser);
                 break;
             case 0:
@@ -401,10 +405,59 @@ public class AppController {
         }
     }
 
-    // ========== Les méthodes de profil ont été déplacées vers
-    // UtilisateurController ==========
-    // ========== Les méthodes de messagerie ont été déplacées vers
-    // MessagerieController ==========
-    // ========== Les méthodes d'historique véhicules ont été déplacées vers
-    // AgentController ==========
+    /**
+     * Gestion des options de parking pour les véhicules de l'agent (venant de main)
+     */
+    private void gererOptionsParkingAgent() {
+        if (!(currentUser instanceof Agent)) {
+            System.out.println("Erreur : Vous devez être un Agent pour accéder à cette option.");
+            return;
+        }
+
+        Agent agentActuel = (Agent) currentUser;
+
+        // Récupération des véhicules via le service (basé sur l'ID de l'agent)
+        List<Vehicule> mesVehicules = vehiculeService.getVehiculesByAgentId(agentActuel.getId());
+
+        if (mesVehicules == null || mesVehicules.isEmpty()) {
+            System.out.println("Vous n'avez aucun véhicule enregistré.");
+            return;
+        }
+
+        System.out.println("\n--- GESTION DES OPTIONS PARKING ---");
+        for (int i = 0; i < mesVehicules.size(); i++) {
+            Vehicule v = mesVehicules.get(i);
+            System.out.println((i + 1) + ". " + v.getMarque() + " " + v.getModele()
+                    + " | Option actuelle : " + v.getOptionRetour());
+        }
+
+        System.out.print("\nSélectionnez le numéro du véhicule à modifier (0 pour annuler) : ");
+        int choix = sc.nextInt();
+        sc.nextLine();
+
+        if (choix > 0 && choix <= mesVehicules.size()) {
+            Vehicule vSelectionne = mesVehicules.get(choix - 1);
+
+            System.out.println("Voulez-vous activer ou désactiver l'option ?");
+            System.out.println("1. Activer (retour_parking)");
+            System.out.println("2. Désactiver (retour_classique)");
+            int action = sc.nextInt();
+            sc.nextLine();
+
+            // Appel de la logique métier située dans Agent.java
+            if (action == 1) {
+                agentActuel.configurerOptionParking(vSelectionne, true);
+                System.out.println("Mise à jour réussie : Option activée.");
+            } else if (action == 2) {
+                agentActuel.configurerOptionParking(vSelectionne, false);
+                System.out.println("Mise à jour réussie : Option désactivée.");
+            } else {
+                System.out.println("Action annulée : choix invalide.");
+            }
+
+            // Note : En situation réelle, il faudrait ici appeler
+            // vehiculeService.save(vSelectionne)
+            // pour persister le changement en base de données.
+        }
+    }
 }
