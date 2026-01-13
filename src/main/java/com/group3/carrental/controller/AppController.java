@@ -165,7 +165,8 @@ public class AppController {
         System.out.println("4. Consulter les assurances");
         System.out.println("5. Messagerie");
         System.out.println("6. Mon profil");
-        System.out.println("7. Noter (après location)");
+        System.out.println("7. Noter");
+        System.out.println("8. Mes contrats terminés");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -191,6 +192,9 @@ public class AppController {
             case 7:
                 utilisateurController.menuNotation(currentUser);
                 break;
+            case 8:
+                utilisateurController.menuMesContratsTermines(currentUser);
+                break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
                 currentUserRole = UserRole.Visitor;
@@ -202,9 +206,6 @@ public class AppController {
         }
     }
 
-    /**
-     * Afficher toutes les assurances disponibles
-     */
     private void afficherAssurances() {
         System.out.println("\n=== Assurances Disponibles ===");
         List<Assurance> assurances = assuranceService.getAllAssurances();
@@ -239,7 +240,9 @@ public class AppController {
         System.out.println("4. Afficher mes vehicules");
         System.out.println("5. Filtrer les voitures");
         System.out.println("6. Messagerie");
-        System.out.println("7. Noter Loueur"); 
+        System.out.println("7. Valider contrats (pré-signés)");
+        System.out.println("8. Noter Loueur");
+        System.out.println("9. Mes contrats terminés");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -263,7 +266,13 @@ public class AppController {
                 messagerieController.displayMenuMessagerie(currentUser);
                 break;
             case 7:
+                utilisateurController.menuValidationContrats(agent);
+                break;
+            case 8:
                 utilisateurController.menuNotation(currentUser);
+                break;
+            case 9:
+                utilisateurController.menuMesContratsTermines(currentUser);
                 break;
             case 0:
                 System.out.println("vous avez choisi de quitter!");

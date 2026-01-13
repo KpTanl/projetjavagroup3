@@ -20,11 +20,43 @@ public class ContratService {
         this.contratRepository = contratRepository;
     }
 
-    public Contrat creerContrat(Date dateDebut, Date dateFin, Agent agent, Loueur loueur, Vehicule vehicule, double prixTotal) {
+    public Contrat creerContratPresigne(Date dateDebut, Date dateFin,
+                                        Agent agent, Loueur loueur,
+                                        Vehicule vehicule, double prixTotal) {
+
         Contrat contrat = new Contrat(dateDebut, dateFin, agent, loueur, vehicule, prixTotal);
-        contrat.setStatut(Contrat.Statut.Accepte);
+        contrat.setStatut(Contrat.Statut.Presigne);
         return contratRepository.save(contrat);
     }
+
+    public Contrat accepterContrat(Long contratId, int agentId) {
+        Contrat c = getContratById(contratId);
+
+        if (c.getAgent() == null || c.getAgent().getId() != agentId) {
+            throw new IllegalArgumentException("Ce contrat ne vous concerne pas.");
+        }
+        if (c.getStatut() != Contrat.Statut.Presigne) {
+            throw new IllegalArgumentException("Contrat non pré-signé.");
+        }
+
+        c.setStatut(Contrat.Statut.Accepte);
+        return contratRepository.save(c);
+    }
+
+    public Contrat refuserContrat(Long contratId, int agentId) {
+        Contrat c = getContratById(contratId);
+
+        if (c.getAgent() == null || c.getAgent().getId() != agentId) {
+            throw new IllegalArgumentException("Ce contrat ne vous concerne pas.");
+        }
+        if (c.getStatut() != Contrat.Statut.Presigne) {
+            throw new IllegalArgumentException("Contrat non pré-signé.");
+        }
+
+        c.setStatut(Contrat.Statut.Refuse);
+        return contratRepository.save(c);
+    }
+
 
     public List<Contrat> getTousLesContrats() {
         return contratRepository.findAll();
@@ -38,6 +70,10 @@ public class ContratService {
         return contratRepository.findByAgentId(agentId);
     }
 
+    public List<Contrat> getContratsPresignesPourAgent(int agentId) {
+        return contratRepository.findByAgentIdAndStatut(agentId, Contrat.Statut.Presigne);
+    }
+
     public List<Contrat> getContratsTerminesAccepteesParLoueur(int loueurId) {
         return contratRepository.findByLoueurIdAndStatutAndDateFinBefore(
                 loueurId, Contrat.Statut.Accepte, new Date());
@@ -48,17 +84,28 @@ public class ContratService {
                 agentId, Contrat.Statut.Accepte, new Date());
     }
 
-    /**
-     * Récupérer un contrat par son ID
-     */
-    public Contrat getContratById(Long id) {
-        return contratRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Contrat non trouvé"));
+    public Contrat getContratTermineAcceptePourLoueur(Long contratId, int loueurId) {
+        return contratRepository
+                .findByIdAndLoueurIdAndStatutAndDateFinBefore(
+                        contratId, loueurId, Contrat.Statut.Accepte, new Date())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Contrat introuvable ou non autorisé (ou pas terminé/accepté)."));
     }
 
-    /**
-     * Supprimer un contrat
-     */
+    public Contrat getContratTermineAcceptePourAgent(Long contratId, int agentId) {
+        return contratRepository
+                .findByIdAndAgentIdAndStatutAndDateFinBefore(
+                        contratId, agentId, Contrat.Statut.Accepte, new Date())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Contrat introuvable ou non autorisé (ou pas terminé/accepté)."));
+    }
+
+
+    public Contrat getContratById(Long id) {
+        return contratRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Contrat non trouvé"));
+    }
+
     public void supprimerContrat(Long id) {
         contratRepository.deleteById(id);
     }
@@ -66,5 +113,4 @@ public class ContratService {
     public Contrat save(Contrat c) {
         return contratRepository.save(c);
     }
-
 }

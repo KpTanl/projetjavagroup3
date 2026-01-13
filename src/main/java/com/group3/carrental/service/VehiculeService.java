@@ -12,9 +12,7 @@ import com.group3.carrental.entity.Vehicule.EtatVehicule;
 import com.group3.carrental.entity.Vehicule.TypeVehicule;
 import com.group3.carrental.repository.VehiculeRepository;
 
-/**
- * Service pour gérer les opérations sur les véhicules.
- */
+
 @Service
 public class VehiculeService {
 
@@ -61,9 +59,7 @@ public class VehiculeService {
         System.out.println("Total vehicules en base: " + vehicules.size());
     }
 
-    /**
-     * Affiche uniquement les véhicules disponibles (etat = Non_loué).
-     */
+
     public void afficherVehiculesDisponibles() {
         List<Vehicule> disponibles = vehiculeRepository.findByEtat(Vehicule.EtatVehicule.Non_loué);
 
@@ -84,7 +80,6 @@ public class VehiculeService {
                 System.out.println("Etat: " + v.getEtat());
                 Double noteDisp = v.calculerNoteMoyenne();
                 System.out.println("Note moyenne: " + (noteDisp != null ? noteDisp + "/5" : "Aucune note"));
-                // Afficher l'agent associé
                 if (v.getAgent() != null) {
                     System.out.println("Agent: " + v.getAgent().getPrenom() + " " + v.getAgent().getNom() +
                             " (" + v.getAgent().getEmail() + ")");
@@ -98,24 +93,14 @@ public class VehiculeService {
         System.out.println("Total véhicules disponibles: " + disponibles.size());
     }
 
-    /**
-     * Retourne tous les véhicules.
-     */
     public List<Vehicule> getTousLesVehicules() {
         return vehiculeRepository.findAll();
     }
 
-    /**
-     * Récupère un véhicule par son ID.
-     */
     public Vehicule getVehiculeById(int id) {
         return vehiculeRepository.findById(id).orElse(null);
     }
 
-    /**
-     * Récupère un véhicule disponible (etat = Non_loué) par son ID.
-     * Retourne null si le véhicule n'existe pas ou n'est pas disponible.
-     */
     public Vehicule getVehiculeDisponibleById(int id) {
         Vehicule v = getVehiculeById(id);
         if (v == null)
@@ -123,7 +108,6 @@ public class VehiculeService {
         return v.getEtat() == Vehicule.EtatVehicule.Non_loué ? v : null;
     }
 
-    // Ajouter un véhicule pour agent
     public void ajouterVehicule() {
         System.out.println("\n--- Ajout d'un vehicule ---");
         System.out.println("Type (Voiture(1) / Camion(2) / Moto(3)): ");
