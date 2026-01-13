@@ -24,16 +24,14 @@ public class Vehicule {
     private String rueLocalisation;
     private String cPostalLocalisation;
     private String villeLocalisation;
+
     @ManyToOne
     @JoinColumn(name = "parking_id")
     private Parking parkingPartenaire;
 
-    // Notes reçues - stockées dans une table séparée vehicule_notes
     @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<NoteVehicule> notesRecues = new ArrayList<>();
 
-    // Disponibilites - EAGER: charger immediatement pour eviter
-    // LazyInitializationException
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "vehicule_disponibilites", joinColumns = @JoinColumn(name = "vehicule_id"))
     @Column(name = "date_disponible")
@@ -43,33 +41,30 @@ public class Vehicule {
     private EtatVehicule etat;
 
     public enum EtatVehicule {
-        Loué,
-        Non_loué
+        Loué, Non_loué
     }
 
     @Enumerated(EnumType.STRING)
     private TypeVehicule type;
 
     public enum TypeVehicule {
-        Voiture,
-        Camion,
-        Moto
+        Voiture, Camion, Moto
     }
+
     @Enumerated(EnumType.STRING)
     private OptionRetour optionRetour;
 
     public enum OptionRetour {
-        retour_parking ,
-        retour_classique
-
+        retour_parking, retour_classique
     }
 
+    // --- ICI ÉTAIT L'ERREUR (CORRIGÉE) ---
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "agent_id")
     private Agent agent;
 
     public Vehicule(TypeVehicule type, String marque, String modele, String couleur, EtatVehicule etat,
-            String rueLocalisation, String cPostalLocalisation, String villeLocalisation) {
+                    String rueLocalisation, String cPostalLocalisation, String villeLocalisation) {
         this.type = type;
         this.marque = marque;
         this.modele = modele;
@@ -84,41 +79,31 @@ public class Vehicule {
         return rueLocalisation + ", " + cPostalLocalisation + " " + villeLocalisation;
     }
 
-    public void setParkingPartenaire(Parking parking) {
-    this.parkingPartenaire = parking;
-}
-    public Parking getParkingPartenaire() {
-    return this.parkingPartenaire;
-}
+    // Pas besoin de get/set ParkingPartenaire manuellement si tu as @Data, 
+    // mais les laisser ne fait pas d'erreur.
 
     public void ajouterDisponibilite(LocalDate date) {
         this.datesDisponibles.add(date);
     }
 
     public void ajouterNote(NoteVehicule note) {
-        if (note == null)
-            return;
+        if (note == null) return;
         this.notesRecues.add(note);
         note.setVehicule(this);
     }
 
     public Double calculerNoteMoyenne() {
-        if (notesRecues == null || notesRecues.isEmpty()) {
-            return null;
-        }
+        if (notesRecues == null || notesRecues.isEmpty()) return null;
         double noteMoyenne = notesRecues.stream()
                 .mapToDouble(NoteVehicule::calculerNoteGlobale)
                 .average()
                 .orElse(0.0);
-        noteMoyenne = Math.round(noteMoyenne * 100.0) / 100.0;
-        return noteMoyenne;
+        return Math.round(noteMoyenne * 100.0) / 100.0;
     }
-    public String getInfosRetourParking() {
-    if (this.parkingPartenaire == null) return "Retour classique en rue.";
 
-    Parking p = this.parkingPartenaire;
-    // On utilise getLocalisationComplete() au lieu de tout réécrire
-   // 3. Retour de la chaîne concaténée (bien fermer la ligne)
-    return "DEPOSER AU : " + p.getLocalisationComplete() + "\nCONTRAINTES : " + p.getContraintes();
-}
+    public String getInfosRetourParking() {
+        if (this.parkingPartenaire == null) return "Retour classique en rue.";
+        Parking p = this.parkingPartenaire;
+        return "DEPOSER AU : " + p.getLocalisationComplete() + "\nCONTRAINTES : " + p.getContraintes();
+    }
 }
