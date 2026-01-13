@@ -112,7 +112,7 @@ public class UtilisateurService {
     }
 
     // Afficher les vehicules de l'agent
-    public void afficherLesVehiculesDeAgent(Utilisateur agent) {
+    public void afficherLesVehiculesDeAgent(Agent agent) {
         List<Vehicule> vehicules = vehiculeRepository.findByAgent(agent);
         System.out.println("\n--- Liste des vehicules de l'agent " + " ---");
         for (Vehicule vehicule : vehicules) {
@@ -121,7 +121,7 @@ public class UtilisateurService {
     }
 
     // Supprimer un véhicule pour agent
-    public void supprimerVehicule(Utilisateur agent) {
+    public void supprimerVehicule(Agent agent) {
         afficherLesVehiculesDeAgent(agent);
         System.out.println("ID du vehicule a supprimer: ");
         int id = scanner.nextInt();
@@ -135,7 +135,7 @@ public class UtilisateurService {
     }
 
     // Modifier un véhicule pour agent
-    public void modifierVehicule(Utilisateur agent) {
+    public void modifierVehicule(Agent agent) {
         afficherLesVehiculesDeAgent(agent);
         System.out.println("ID du vehicule a modifier: ");
         int id = scanner.nextInt();
