@@ -157,6 +157,18 @@ public class DataInitializer implements CommandLineRunner {
                                 new ArrayList<>(),
                                 LocalDate.now().minusMonths(1));
                 utilisateurRepository.save(agentParticulier3);
+                /*//Pour parking - agent
+AgentParticulier paul = new AgentParticulier(0, "Durand", "Paul", "paul.durand@email.com", "paulpass", new ArrayList<>(), LocalDate.now().minusDays(3));
+utilisateurRepository.save(paul); // Sauvegardez-le pour qu'il ait un ID
+
+// 2. Créez le véhicule
+Vehicule veh1 = new Vehicule(Vehicule.TypeVehicule.Voiture, "Renault", "Clio", "Bleu", Vehicule.EtatVehicule.Non_loué, "Rue de la Paix", "75000", "Paris");
+
+// 3. LIEZ LES DEUX !
+v1.setAgent(paul); // Indiquez que Paul est le propriétaire
+
+// 4. Sauvegardez le véhicule
+vehiculeRepository.save(veh1);*/
 
 
                 // ========== Véhicules ==========
