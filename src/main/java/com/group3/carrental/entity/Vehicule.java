@@ -43,7 +43,7 @@ public class Vehicule {
     private EtatVehicule etat;
 
     public enum EtatVehicule {
-        Loué, Non_loué
+        Loué, Non_loué, indisponible
     }
 
     @Enumerated(EnumType.STRING)
