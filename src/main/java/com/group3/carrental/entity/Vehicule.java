@@ -24,6 +24,8 @@ public class Vehicule {
     private String rueLocalisation;
     private String cPostalLocalisation;
     private String villeLocalisation;
+    private double latitudeVehicule;
+    private double longitudeVehicule;
 
     @ManyToOne
     @JoinColumn(name = "parking_id")
@@ -58,42 +60,53 @@ public class Vehicule {
         retour_parking, retour_classique
     }
 
-    // --- ICI ÉTAIT L'ERREUR (CORRIGÉE) ---
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "agent_id")
     private Agent agent;
 
+    // 原kepeng构造函数（8参数）
     public Vehicule(TypeVehicule type, String marque, String modele, String couleur, EtatVehicule etat,
-                    String rueLocalisation, String cPostalLocalisation, String villeLocalisation) {
+            String rueLocalisation, String cPostalLocalisation, String villeLocalisation, double latitudeVehicule,
+            double longitudeVehicule) {
         this.type = type;
         this.marque = marque;
         this.modele = modele;
         this.couleur = couleur;
         this.etat = etat;
+        this.latitudeVehicule = latitudeVehicule;
+        this.longitudeVehicule = longitudeVehicule;
         this.rueLocalisation = rueLocalisation;
         this.cPostalLocalisation = cPostalLocalisation;
         this.villeLocalisation = villeLocalisation;
+    }
+
+    // agentProprietaire est un alias pour agent (compatibilité riad2)
+    public Agent getAgentProprietaire() {
+        return this.agent;
+    }
+
+    public void setAgentProprietaire(Agent agent) {
+        this.agent = agent;
     }
 
     public String getLocalisationComplete() {
         return rueLocalisation + ", " + cPostalLocalisation + " " + villeLocalisation;
     }
 
-    // Pas besoin de get/set ParkingPartenaire manuellement si tu as @Data, 
-    // mais les laisser ne fait pas d'erreur.
-
     public void ajouterDisponibilite(LocalDate date) {
         this.datesDisponibles.add(date);
     }
 
     public void ajouterNote(NoteVehicule note) {
-        if (note == null) return;
+        if (note == null)
+            return;
         this.notesRecues.add(note);
         note.setVehicule(this);
     }
 
     public Double calculerNoteMoyenne() {
-        if (notesRecues == null || notesRecues.isEmpty()) return null;
+        if (notesRecues == null || notesRecues.isEmpty())
+            return null;
         double noteMoyenne = notesRecues.stream()
                 .mapToDouble(NoteVehicule::calculerNoteGlobale)
                 .average()
@@ -102,7 +115,8 @@ public class Vehicule {
     }
 
     public String getInfosRetourParking() {
-        if (this.parkingPartenaire == null) return "Retour classique en rue.";
+        if (this.parkingPartenaire == null)
+            return "Retour classique en rue.";
         Parking p = this.parkingPartenaire;
         return "DEPOSER AU : " + p.getLocalisationComplete() + "\nCONTRAINTES : " + p.getContraintes();
     }

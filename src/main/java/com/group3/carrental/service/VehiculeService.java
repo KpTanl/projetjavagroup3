@@ -7,14 +7,12 @@ import java.util.Scanner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.entity.Vehicule.EtatVehicule;
 import com.group3.carrental.entity.Vehicule.TypeVehicule;
 import com.group3.carrental.repository.VehiculeRepository;
 
-/**
- * Service pour gérer les opérations sur les véhicules.
- */
 @Service
 public class VehiculeService {
 
@@ -42,7 +40,6 @@ public class VehiculeService {
                 System.out.println("Etat: " + v.getEtat());
                 Double note = v.calculerNoteMoyenne();
                 System.out.println("Note moyenne: " + (note != null ? note + "/5" : "Aucune note"));
-                // Afficher l'agent associé
                 if (v.getAgent() != null) {
                     System.out.println("Agent: " + v.getAgent().getPrenom() + " " + v.getAgent().getNom() +
                             " (" + v.getAgent().getEmail() + ")");
@@ -61,9 +58,6 @@ public class VehiculeService {
         System.out.println("Total vehicules en base: " + vehicules.size());
     }
 
-    /**
-     * Affiche uniquement les véhicules disponibles (etat = Non_loué).
-     */
     public void afficherVehiculesDisponibles() {
         List<Vehicule> disponibles = vehiculeRepository.findByEtat(Vehicule.EtatVehicule.Non_loué);
 
@@ -84,7 +78,6 @@ public class VehiculeService {
                 System.out.println("Etat: " + v.getEtat());
                 Double noteDisp = v.calculerNoteMoyenne();
                 System.out.println("Note moyenne: " + (noteDisp != null ? noteDisp + "/5" : "Aucune note"));
-                // Afficher l'agent associé
                 if (v.getAgent() != null) {
                     System.out.println("Agent: " + v.getAgent().getPrenom() + " " + v.getAgent().getNom() +
                             " (" + v.getAgent().getEmail() + ")");
@@ -98,24 +91,18 @@ public class VehiculeService {
         System.out.println("Total véhicules disponibles: " + disponibles.size());
     }
 
-    /**
-     * Retourne tous les véhicules.
-     */
     public List<Vehicule> getTousLesVehicules() {
         return vehiculeRepository.findAll();
     }
 
-    /**
-     * Récupère un véhicule par son ID.
-     */
+    public List<Vehicule> getVehiculesByAgentId(int agentId) {
+        return vehiculeRepository.findByAgentId(agentId);
+    }
+
     public Vehicule getVehiculeById(int id) {
         return vehiculeRepository.findById(id).orElse(null);
     }
 
-    /**
-     * Récupère un véhicule disponible (etat = Non_loué) par son ID.
-     * Retourne null si le véhicule n'existe pas ou n'est pas disponible.
-     */
     public Vehicule getVehiculeDisponibleById(int id) {
         Vehicule v = getVehiculeById(id);
         if (v == null)
@@ -123,7 +110,6 @@ public class VehiculeService {
         return v.getEtat() == Vehicule.EtatVehicule.Non_loué ? v : null;
     }
 
-    // Ajouter un véhicule pour agent
     public void ajouterVehicule() {
         System.out.println("\n--- Ajout d'un vehicule ---");
         System.out.println("Type (Voiture(1) / Camion(2) / Moto(3)): ");
@@ -173,8 +159,12 @@ public class VehiculeService {
         String codePostal = scanner.nextLine();
         System.out.println("Ville: ");
         String ville = scanner.nextLine();
+        System.out.println("Latitude: ");
+        double latitude = Double.parseDouble(scanner.nextLine());
+        System.out.println("Longitude: ");
+        double longitude = Double.parseDouble(scanner.nextLine());
         Vehicule vehicule = new Vehicule(type, inputMarque, inputModele,
-                inputCouleur, etat, rue, codePostal, ville);
+                inputCouleur, etat, rue, codePostal, ville, latitude, longitude);
         vehicule.ajouterDisponibilite(LocalDate.now().plusDays(1));
         vehiculeRepository.save(vehicule);
         System.out.println("Vehicule ajoute reussi !!");
@@ -223,7 +213,8 @@ public class VehiculeService {
                 .filter(v -> v.getMarque().equalsIgnoreCase(marqueSaisie))
                 .filter(v -> {
                     Double noteVehicule = v.calculerNoteMoyenne();
-                    if (noteSaisie == 0.0) return true;
+                    if (noteSaisie == 0.0)
+                        return true;
                     return noteVehicule != null && noteVehicule >= noteSaisie;
                 })
                 .filter(v -> v.getCouleur().equalsIgnoreCase(couleurSaisie))
@@ -243,22 +234,44 @@ public class VehiculeService {
             }
         }
     }
-    /**
- * Récupère la liste des véhicules appartenant à un agent spécifique.
- */
-public List<Vehicule> getVehiculesByAgentId(int agentId) {
-    // On récupère tous les véhicules et on filtre par l'ID de l'agent
-    // Note: C'est plus efficace de le faire via une requête Repository, 
-    // mais cette solution fonctionne directement avec votre code actuel.
-    return vehiculeRepository.findAll().stream()
-            .filter(v -> v.getAgent() != null && v.getAgent().getId() == agentId)
-            .toList();
-}
 
-/**
- * Sauvegarde les modifications d'un véhicule (utile pour l'option parking).
- */
-public void save(Vehicule vehicule) {
-    vehiculeRepository.save(vehicule);
-}
+    public void save(Vehicule vehicule) {
+        vehiculeRepository.save(vehicule);
+    }
+
+    public double calculerDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371;
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                        * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    public void suggererVehiculesProches(Utilisateur utilisateur, double rayonKm) {
+        List<Vehicule> tousLesVehicules = vehiculeRepository.findAll();
+
+        List<Vehicule> suggestions = tousLesVehicules.stream()
+                .filter(v -> v.getEtat() == Vehicule.EtatVehicule.Non_loué)
+                .filter(v -> {
+                    double dist = calculerDistance(
+                            utilisateur.getLatitudeHabitation(), utilisateur.getLongitudeHabitation(),
+                            v.getLatitudeVehicule(), v.getLongitudeVehicule());
+                    return dist <= rayonKm;
+                })
+                .toList();
+
+        if (suggestions.isEmpty()) {
+            System.out.println("Aucun véhicule trouvé dans un rayon de " + rayonKm + " km.");
+        } else {
+            System.out.println("\n--- SUGGESTIONS PROCHES DE CHEZ VOUS ---");
+            suggestions.forEach(v -> {
+                double d = calculerDistance(utilisateur.getLatitudeHabitation(), utilisateur.getLongitudeHabitation(),
+                        v.getLatitudeVehicule(), v.getLongitudeVehicule());
+                System.out.printf("- %s %s (à %.2f km)%n", v.getMarque(), v.getModele(), d);
+            });
+        }
+    }
 }

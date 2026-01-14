@@ -9,20 +9,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.group3.carrental.entity.Agent;
-import com.group3.carrental.entity.Assurance;import com.group3.carrental.entity.Contrat;import com.group3.carrental.entity.Contrat;
-import com.group3.carrental.entity.Message;
+import com.group3.carrental.entity.Assurance;
+import com.group3.carrental.entity.Contrat;
 import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Loueur;
 import com.group3.carrental.entity.AgentParticulier;
+import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.service.AssuranceService;
 import com.group3.carrental.service.ContratService;
 import com.group3.carrental.service.UtilisateurService;
 import com.group3.carrental.service.VehiculeService;
-import com.group3.carrental.service.ServiceMessagerie;
 
 @Component
 public class AppController {
-    private static final Scanner sc = new Scanner(System.in);
+    private static final Scanner sc = new Scanner(System.in).useLocale(java.util.Locale.US);
     private static UserRole currentUserRole = UserRole.Visitor;
     private Utilisateur currentUser = null;
 
@@ -30,16 +30,22 @@ public class AppController {
     private final VehiculeService vehiculeService;
     private final AssuranceService assuranceService;
     private final ContratService contratService;
-    private final ServiceMessagerie serviceMessagerie;
+    private final MessagerieController messagerieController;
+    private final UtilisateurController utilisateurController;
+    private final AgentController agentController;
 
     @Autowired
     public AppController(UtilisateurService utilisateurService, VehiculeService vehiculeService,
-            AssuranceService assuranceService, ContratService contratService, ServiceMessagerie serviceMessagerie) {
+            AssuranceService assuranceService, ContratService contratService,
+            MessagerieController messagerieController, UtilisateurController utilisateurController,
+            AgentController agentController) {
         this.utilisateurService = utilisateurService;
         this.vehiculeService = vehiculeService;
         this.assuranceService = assuranceService;
         this.contratService = contratService;
-        this.serviceMessagerie = serviceMessagerie;
+        this.messagerieController = messagerieController;
+        this.utilisateurController = utilisateurController;
+        this.agentController = agentController;
     }
 
     public enum UserRole {
@@ -122,7 +128,6 @@ public class AppController {
                 if (role == Utilisateur.Role.Loueur) {
                     newUser = new Loueur();
                 } else {
-                    // Par défaut un Agent Particulier si pas précisé
                     newUser = new AgentParticulier();
                 }
 
@@ -143,7 +148,7 @@ public class AppController {
                 vehiculeService.filtrerVehicules();
                 break;
             case 5:
-                // TODO: Afficher les agents
+                actionConsulterAgents();
                 break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
@@ -171,7 +176,10 @@ public class AppController {
         System.out.println("4. Consulter les assurances");
         System.out.println("5. Messagerie");
         System.out.println("6. Mon profil");
-        System.out.println("7. Mes contrats et PDF");
+        System.out.println("7. Suggestions autour de chez moi (Rayon X km)");
+        System.out.println("8. Noter");
+        System.out.println("9. Mes contrats terminés");
+        System.out.println("10. Mes contrats et PDF");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -183,18 +191,30 @@ public class AppController {
                 vehiculeService.filtrerVehicules();
                 break;
             case 3:
-                utilisateurService.louerVehicule(currentUser);
+                louerVehicule();
                 break;
             case 4:
                 afficherAssurances();
                 break;
             case 5:
-                displayMenuMessagerie();
+                messagerieController.displayMenuMessagerie(currentUser);
                 break;
             case 6:
-                afficherMonProfil();
+                utilisateurController.afficherMonProfil(currentUser);
                 break;
             case 7:
+                System.out.print("Entrez le rayon maximum souhaité (en km) : ");
+                double rayonsuggestion = sc.nextDouble();
+                sc.nextLine();
+                vehiculeService.suggererVehiculesProches(currentUser, rayonsuggestion);
+                break;
+            case 8:
+                utilisateurController.menuNotation(currentUser);
+                break;
+            case 9:
+                utilisateurController.menuMesContratsTermines(currentUser);
+                break;
+            case 10:
                 afficherMesContrats();
                 break;
             case 0:
@@ -208,9 +228,6 @@ public class AppController {
         }
     }
 
-    /**
-     * Afficher toutes les assurances disponibles
-     */
     private void afficherAssurances() {
         System.out.println("\n=== Assurances Disponibles ===");
         List<Assurance> assurances = assuranceService.getAllAssurances();
@@ -233,11 +250,135 @@ public class AppController {
         }
     }
 
+    private void louerVehicule() {
+        System.out.println("\n=== Location de Véhicule ===");
+
+        try {
+            vehiculeService.afficherVehiculesDisponibles();
+            System.out.print("\nEntrez l'ID du véhicule à louer (disponible) : ");
+            int vehiculeId = sc.nextInt();
+            sc.nextLine();
+
+            Vehicule vehiculeSelectionne = vehiculeService.getVehiculeDisponibleById(vehiculeId);
+            if (vehiculeSelectionne == null) {
+                System.out.println("Le véhicule choisi n'est pas disponible (non loué) ou n'existe pas.");
+                return;
+            }
+            System.out.println("Véhicule sélectionné: " + vehiculeSelectionne.getMarque() + " "
+                    + vehiculeSelectionne.getModele() + " (ID: " + vehiculeId + ")");
+
+            List<LocalDate> datesDisponibles = vehiculeSelectionne.getDatesDisponibles();
+            System.out.println("\nDates disponibles pour ce véhicule:");
+            if (datesDisponibles.isEmpty()) {
+                System.out.println("Aucune date disponible pour ce véhicule.");
+                return;
+            }
+
+            LocalDate dateDebut = null;
+            if (datesDisponibles.size() > 1) {
+                System.out.println("Nombre de dates disponibles: " + datesDisponibles.size());
+                System.out.println("Première date disponible: " + datesDisponibles.get(0));
+                System.out.println("Dernière date disponible: " + datesDisponibles.get(datesDisponibles.size() - 1));
+
+                System.out.print("\nSaisissez la date de début de location (format: AAAA-MM-JJ) : ");
+                String dateInput = sc.nextLine();
+                try {
+                    dateDebut = LocalDate.parse(dateInput);
+                    if (!datesDisponibles.contains(dateDebut)) {
+                        System.out.println("Cette date n'est pas disponible pour ce véhicule.");
+                        return;
+                    }
+                } catch (Exception e) {
+                    System.out.println("Format de date invalide. Utilisez AAAA-MM-JJ (ex: 2026-01-15)");
+                    return;
+                }
+            } else {
+                dateDebut = datesDisponibles.get(0);
+                System.out.println("Date de début: " + dateDebut);
+            }
+
+            System.out.print("Nombre de jours de location : ");
+            int nbJours = sc.nextInt();
+            sc.nextLine();
+
+            System.out.println("\n=== Assurances Disponibles ===");
+            List<Assurance> assurances = assuranceService.getAllAssurances();
+
+            if (assurances.isEmpty()) {
+                System.out.println("Aucune assurance disponible.");
+                return;
+            }
+
+            for (int i = 0; i < assurances.size(); i++) {
+                Assurance a = assurances.get(i);
+                double prix = assuranceService.calculerPrix(a, nbJours);
+                System.out.println((i + 1) + ". " + a.getNom() +
+                        " - " + a.getPrixParJour() + "€/jour" +
+                        " (Total: " + prix + "€ pour " + nbJours + " jours)");
+            }
+
+            System.out.print("\nChoisissez une assurance (numéro) : ");
+            int choixAssurance = sc.nextInt();
+            sc.nextLine();
+
+            if (choixAssurance < 1 || choixAssurance > assurances.size()) {
+                System.out.println("Choix invalide !");
+                return;
+            }
+
+            Assurance assuranceChoisie = assurances.get(choixAssurance - 1);
+            double prixAssurance = assuranceService.calculerPrix(assuranceChoisie, nbJours);
+
+            System.out.println("\n=== Récapitulatif de Location ===");
+            System.out.println("Véhicule: ID " + vehiculeId);
+            System.out.println("Date de début: " + dateDebut);
+            System.out.println("Durée: " + nbJours + " jours");
+            System.out.println("Assurance: " + assuranceChoisie.getNom());
+            System.out.println("Prix assurance: " + prixAssurance + "€");
+            System.out.println("\nPrix total estimé: " + prixAssurance + "€");
+
+            System.out.print("\nConfirmer la location ? (O/N) : ");
+            String confirmation = sc.nextLine();
+
+            if (confirmation.equalsIgnoreCase("O")) {
+                java.util.Date dateDebutContrat = java.util.Date.from(
+                        dateDebut.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                java.util.Date dateFinContrat = java.util.Date.from(
+                        dateDebut.plusDays(nbJours).atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+                try {
+                    Agent agentVehicule = vehiculeSelectionne.getAgent();
+                    Loueur loueurCourant = null;
+                    if (currentUser instanceof Loueur) {
+                        loueurCourant = (Loueur) currentUser;
+                    }
+
+                    contratService.creerContrat(dateDebutContrat, dateFinContrat, agentVehicule, loueurCourant,
+                            vehiculeSelectionne, prixAssurance);
+
+                    System.out.println("\nLocation confirmée !");
+                    System.out.println("Votre contrat a été créé avec succès.");
+                    System.out.println("Période de location: du " + dateDebut + " au " + dateDebut.plusDays(nbJours));
+                } catch (Exception e) {
+                    System.out.println("Erreur lors de la création du contrat: " + e.getMessage());
+                }
+            } else {
+                System.out.println("Location annulée.");
+            }
+
+        } catch (Exception e) {
+            System.out.println("Erreur lors de la location: " + e.getMessage());
+            sc.nextLine();
+        }
+    }
+
     private void displayMenuAgent() {
-        if (!(currentUser instanceof Agent agent)) {
+        if (!(currentUser instanceof Agent)) {
             System.out.println("Erreur: accès agent refusé pour cet utilisateur.");
             return;
         }
+        Agent agent = (Agent) currentUser;
+
         System.out.println("\nMenu de Agent : ");
         System.out.println("1. Ajouter mes vehicules");
         System.out.println("2. Supprimer mes vehicules");
@@ -246,7 +387,11 @@ public class AppController {
         System.out.println("5. Filtrer les voitures");
         System.out.println("6. Messagerie");
         System.out.println("7. Gérer l'option Parking Partenaire");
-        System.out.println("8. Mes contrats et PDF");
+        System.out.println("8. Consulter l'historique de mes véhicules");
+        System.out.println("9. Valider contrats (pré-signés)");
+        System.out.println("10. Noter Loueur");
+        System.out.println("11. Mes contrats terminés");
+        System.out.println("12. Mes contrats et PDF");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -267,12 +412,24 @@ public class AppController {
                 vehiculeService.filtrerVehicules();
                 break;
             case 6:
-                displayMenuMessagerie();
+                messagerieController.displayMenuMessagerie(currentUser);
                 break;
-            case 7 :
-                this.gererOptionsParkingAgent();
-            break;
+            case 7:
+                gererOptionsParkingAgent();
+                break;
             case 8:
+                agentController.consulterHistoriqueVehicules(currentUser);
+                break;
+            case 9:
+                utilisateurController.menuValidationContrats(agent);
+                break;
+            case 10:
+                utilisateurController.menuNotation(currentUser);
+                break;
+            case 11:
+                utilisateurController.menuMesContratsTermines(currentUser);
+                break;
+            case 12:
                 afficherMesContrats();
                 break;
             case 0:
@@ -285,16 +442,15 @@ public class AppController {
                 break;
         }
     }
+
     private void gererOptionsParkingAgent() {
-        if (!(currentUser instanceof com.group3.carrental.entity.Agent)) {
+        if (!(currentUser instanceof Agent)) {
             System.out.println("Erreur : Vous devez être un Agent pour accéder à cette option.");
             return;
         }
 
-        com.group3.carrental.entity.Agent agentActuel = (com.group3.carrental.entity.Agent) currentUser;
-        
-        // Récupération des véhicules via le service (basé sur l'ID de l'agent)
-        List<com.group3.carrental.entity.Vehicule> mesVehicules = vehiculeService.getVehiculesByAgentId(agentActuel.getId());
+        Agent agentActuel = (Agent) currentUser;
+        List<Vehicule> mesVehicules = vehiculeService.getVehiculesByAgentId(agentActuel.getId());
 
         if (mesVehicules == null || mesVehicules.isEmpty()) {
             System.out.println("Vous n'avez aucun véhicule enregistré.");
@@ -303,9 +459,9 @@ public class AppController {
 
         System.out.println("\n--- GESTION DES OPTIONS PARKING ---");
         for (int i = 0; i < mesVehicules.size(); i++) {
-            com.group3.carrental.entity.Vehicule v = mesVehicules.get(i);
-            System.out.println((i + 1) + ". " + v.getMarque() + " " + v.getModele() 
-            + " | Option actuelle : " + v.getOptionRetour());
+            Vehicule v = mesVehicules.get(i);
+            System.out.println((i + 1) + ". " + v.getMarque() + " " + v.getModele()
+                    + " | Option actuelle : " + v.getOptionRetour());
         }
 
         System.out.print("\nSélectionnez le numéro du véhicule à modifier (0 pour annuler) : ");
@@ -313,15 +469,14 @@ public class AppController {
         sc.nextLine();
 
         if (choix > 0 && choix <= mesVehicules.size()) {
-            com.group3.carrental.entity.Vehicule vSelectionne = mesVehicules.get(choix - 1);
-            
+            Vehicule vSelectionne = mesVehicules.get(choix - 1);
+
             System.out.println("Voulez-vous activer ou désactiver l'option ?");
             System.out.println("1. Activer (retour_parking)");
             System.out.println("2. Désactiver (retour_classique)");
             int action = sc.nextInt();
             sc.nextLine();
 
-            // Appel de votre logique métier située dans Agent.java
             if (action == 1) {
                 agentActuel.configurerOptionParking(vSelectionne, true);
                 System.out.println("Mise à jour réussie : Option activée.");
@@ -331,75 +486,40 @@ public class AppController {
             } else {
                 System.out.println("Action annulée : choix invalide.");
             }
-            
-            // Note : En situation réelle, il faudrait ici appeler vehiculeService.save(vSelectionne)
-            // pour persister le changement en base de données.
         }
     }
 
-    // ========== Mon profil (Loueur) ==========
-    private void afficherMonProfil() {
-        if (currentUser == null) {
-            System.out.println("Accès refusé : vous devez être connecté.");
+    private void actionConsulterAgents() {
+        System.out.println("\n--- CONSULTATION DES AGENTS ---");
+        List<Utilisateur> agents = utilisateurService.findAllAgents();
+
+        if (agents.isEmpty()) {
+            System.out.println("Désolé, aucun agent n'est inscrit pour le moment.");
             return;
         }
 
-        boolean retour = false;
-        while (!retour) {
-            System.out.println("\n--- Mon profil ---");
-            System.out.println("ID          : " + currentUser.getId());
-            System.out.println("Nom         : " + currentUser.getNom());
-            System.out.println("Prénom      : " + currentUser.getPrenom());
-            System.out.println("Email       : " + currentUser.getEmail());
-            System.out.println("Mot de passe: " + currentUser.getMotDePasse());
+        for (int i = 0; i < agents.size(); i++) {
+            Utilisateur a = agents.get(i);
+            System.out.println((i + 1) + ". " + a.getPrenom() + " " + a.getNom() + " (Email: " + a.getEmail() + ")");
+        }
 
-            System.out.println("\n1. Modifier nom");
-            System.out.println("2. Modifier prénom");
-            System.out.println("3. Modifier email");
-            System.out.println("4. Modifier mot de passe");
-            System.out.println("5. Historique des locations");
-            System.out.println("0. Retour");
+        System.out.print("\nEntrez le numéro de l'agent pour voir ses véhicules (ou 0 pour annuler) : ");
+        if (sc.hasNextInt()) {
             int choix = sc.nextInt();
             sc.nextLine();
 
-            switch (choix) {
-                case 1:
-                    System.out.print("Nouveau nom : ");
-                    String newNom = sc.nextLine();
-                    currentUser.modifierProfil(newNom, null, null, null);
-                    utilisateurService.mettreAJour(currentUser);
-                    System.out.println("Nom mis à jour.");
-                    break;
-                case 2:
-                    System.out.print("Nouveau prénom : ");
-                    String newPrenom = sc.nextLine();
-                    currentUser.modifierProfil(null, newPrenom, null, null);
-                    utilisateurService.mettreAJour(currentUser);
-                    System.out.println("Prénom mis à jour.");
-                    break;
-                case 3:
-                    System.out.print("Nouvel email : ");
-                    String newEmail = sc.nextLine();
-                    currentUser.modifierProfil(null, null, newEmail, null);
-                    utilisateurService.mettreAJour(currentUser);
-                    System.out.println("Email mis à jour.");
-                    break;
-                case 4:
-                    System.out.print("Nouveau mot de passe : ");
-                    String newMotDePasse = sc.nextLine();
-                    currentUser.modifierProfil(null, null, null, newMotDePasse);
-                    utilisateurService.mettreAJour(currentUser);
-                    System.out.println("Mot de passe mis à jour.");
-                    break;
-                case 5:
-                    afficherHistoriqueLocations();
-                    break;
-                case 0:
-                    retour = true;
-                    break;
-                default:
-                    System.out.println("Choix invalide !");
+            if (choix > 0 && choix <= agents.size()) {
+                Utilisateur agentChoisi = agents.get(choix - 1);
+
+                System.out.println("\n-----------------------------------------");
+                System.out.println("VÉHICULES PROPOSÉS PAR " + agentChoisi.getPrenom().toUpperCase());
+                System.out.println("-----------------------------------------");
+                utilisateurService.afficherLesVehiculesDeAgent(agentChoisi);
+                System.out.println("-----------------------------------------");
             }
+        } else {
+            sc.next();
+            System.out.println("Saisie invalide.");
         }
     }
 
@@ -434,162 +554,11 @@ public class AppController {
         }
     }
 
-    // ========== Messagerie ==========
-    private void displayMenuMessagerie() {
-        if (currentUser == null) {
-            System.out.println("Accès refusé : vous devez être connecté.");
-            return;
-        }
-
-        boolean back = false;
-        while (!back) {
-            System.out.println("\n--- Messagerie ---");
-            System.out.println("1. Envoyer un message");
-            System.out.println("2. Voir ma boîte de réception");
-            System.out.println("3. Voir une conversation");
-            System.out.println("0. Retour");
-
-            int choice = sc.nextInt();
-            sc.nextLine();
-
-            switch (choice) {
-                case 1:
-                    menuEnvoyerMessage();
-                    break;
-                case 2:
-                    menuAfficherInbox();
-                    break;
-                case 3:
-                    menuAfficherConversation();
-                    break;
-                case 0:
-                    back = true;
-                    break;
-                default:
-                    System.out.println("Choix invalide !");
-            }
-        }
-    }
-
-    private void menuEnvoyerMessage() {
-        Integer destinataireId = choisirUtilisateurParNom();
-        if (destinataireId == null)
-            return;
-
-        System.out.print("Contenu du message : ");
-        String contenu = sc.nextLine();
-
-        try {
-            Message msg = serviceMessagerie.envoyerMessage(
-                    currentUser.getId(),
-                    destinataireId,
-                    contenu);
-            System.out.println("Message envoyé ! (id=" + msg.getId() + ", date=" + msg.getDateEnvoi() + ")");
-        } catch (Exception e) {
-            System.out.println("Erreur : " + e.getMessage());
-        }
-    }
-
-    private void menuAfficherInbox() {
-        try {
-            List<Message> inbox = serviceMessagerie.consulterMessages(currentUser.getId());
-            if (inbox.isEmpty()) {
-                System.out.println("(Aucun message reçu)");
-                return;
-            }
-
-            System.out.println("\n--- Boîte de réception ---");
-            for (Message m : inbox) {
-                System.out.println("[" + m.getDateEnvoi() + "] de "
-                        + m.getExpediteur().getPrenom() + " " + m.getExpediteur().getNom()
-                        + " : " + m.getContenu());
-            }
-        } catch (Exception e) {
-            System.out.println("Erreur : " + e.getMessage());
-        }
-    }
-
-    private void menuAfficherConversation() {
-        Integer otherId = choisirUtilisateurParNom();
-        if (otherId == null)
-            return;
-
-        try {
-            List<Message> conv = serviceMessagerie.consulterConversation(currentUser.getId(), otherId);
-            if (conv.isEmpty()) {
-                System.out.println("(Aucun message entre vous)");
-                return;
-            }
-
-            System.out.println("\n--- Conversation ---");
-            for (Message m : conv) {
-                String who = (m.getExpediteur().getId() == currentUser.getId()) ? "Moi" : m.getExpediteur().getPrenom();
-                System.out.println("[" + m.getDateEnvoi() + "] " + who + " : " + m.getContenu());
-            }
-        } catch (Exception e) {
-            System.out.println("Erreur : " + e.getMessage());
-        }
-    }
-
-    // 来自 jihane 分支的新功能 - 按名字搜索用户
-    private Integer choisirUtilisateurParNom() {
-        System.out.print("Nom du destinataire : ");
-        String nom = sc.nextLine().trim();
-
-        System.out.print("Prénom (optionnel, Entrée si inconnu) : ");
-        String prenom = sc.nextLine().trim();
-
-        List<Utilisateur> candidats;
-        try {
-            if (prenom.isEmpty()) {
-                candidats = serviceMessagerie.rechercherUtilisateursParNom(nom);
-            } else {
-                candidats = serviceMessagerie.rechercherUtilisateursParNomPrenom(nom, prenom);
-            }
-        } catch (Exception e) {
-            System.out.println("Erreur : " + e.getMessage());
-            return null;
-        }
-
-        // enlever soi-même
-        candidats.removeIf(u -> u.getId() == currentUser.getId());
-
-        if (candidats.isEmpty()) {
-            System.out.println("Aucun utilisateur trouvé.");
-            return null;
-        }
-
-        System.out.println("\n--- Résultats ---");
-        for (int i = 0; i < candidats.size(); i++) {
-            Utilisateur u = candidats.get(i);
-            System.out.println((i + 1) + ". " + u.getNom() + " " + u.getPrenom() + " (" + u.getRole() + ")");
-        }
-
-        System.out.print("Choisis un numéro (0 = annuler) : ");
-        String choix = sc.nextLine().trim();
-
-        int idx;
-        try {
-            idx = Integer.parseInt(choix);
-        } catch (NumberFormatException e) {
-            System.out.println("Choix invalide.");
-            return null;
-        }
-
-        if (idx == 0)
-            return null;
-        if (idx < 1 || idx > candidats.size()) {
-            System.out.println("Choix invalide.");
-            return null;
-        }
-
-        return candidats.get(idx - 1).getId();
-    }
     private void afficherVehiculesARendre(List<Contrat> contratsARendre) {
         System.out.println("\n========================================");
         System.out.println("    VEHICULES A RENDRE");
         System.out.println("========================================");
-        
+
         for (int i = 0; i < contratsARendre.size(); i++) {
             Contrat c = contratsARendre.get(i);
             System.out.println("\n--- Véhicule " + (i + 1) + " ---");
@@ -599,13 +568,13 @@ public class AppController {
             System.out.println("Date de fin: " + c.getDateFin());
             System.out.println("Agent: " + c.getAgent().getPrenom() + " " + c.getAgent().getNom());
         }
-        
+
         System.out.println("\n1. Rendre un véhicule");
         System.out.println("0. Continuer vers le menu");
         System.out.print("Votre choix: ");
         int choix = sc.nextInt();
         sc.nextLine();
-        
+
         if (choix == 1) {
             rendreVehicule(contratsARendre);
         }
@@ -618,33 +587,33 @@ public class AppController {
             System.out.print("Numéro du véhicule à rendre (1-" + contratsARendre.size() + "): ");
             int num = sc.nextInt();
             sc.nextLine();
-            
+
             if (num < 1 || num > contratsARendre.size()) {
                 System.out.println("Choix invalide.");
                 return;
             }
-            
+
             traiterRetourVehicule(contratsARendre.get(num - 1));
         }
     }
 
     private void traiterRetourVehicule(Contrat contrat) {
-        System.out.println("\n=== Retour du véhicule: " + contrat.getVehicule().getMarque() + " " 
-            + contrat.getVehicule().getModele() + " ===");
-        
+        System.out.println("\n=== Retour du véhicule: " + contrat.getVehicule().getMarque() + " "
+                + contrat.getVehicule().getModele() + " ===");
+
         // Photo de kilométrage
         System.out.println("\n--- Photo du kilométrage ---");
         System.out.println("Veuillez saisir le chemin du fichier photo (ex: C:/photos/kilometrage.jpg)");
         System.out.print("Chemin: ");
         String cheminPhoto = sc.nextLine();
-        
+
         if (cheminPhoto.isEmpty()) {
             cheminPhoto = "Non fourni";
         }
-        
+
         // Marquer le contrat comme rendu
         contratService.rendreVehicule(contrat.getId(), cheminPhoto);
-        
+
         System.out.println("\n========================================");
         System.out.println("  VEHICULE RENDU AVEC SUCCES !");
         System.out.println("========================================");
@@ -659,8 +628,8 @@ public class AppController {
             // Pour l'agent, récupérer tous les contrats et filtrer par agent
             List<Contrat> tousContrats = contratService.getTousLesContrats();
             List<Contrat> contratsAgent = tousContrats.stream()
-                .filter(c -> c.getAgent() != null && c.getAgent().getId() == agent.getId())
-                .toList();
+                    .filter(c -> c.getAgent() != null && c.getAgent().getId() == agent.getId())
+                    .toList();
             afficherListeContrats(contratsAgent);
         }
     }
@@ -707,10 +676,10 @@ public class AppController {
             }
 
             Contrat contratSelectionne = contrats.get(num - 1);
-            
+
             System.out.print("Chemin du dossier de destination (ex: C:/contrats): ");
             String dossier = sc.nextLine();
-            
+
             if (dossier.isEmpty()) {
                 dossier = System.getProperty("user.home") + "/Downloads";
                 System.out.println("Utilisation du dossier par défaut: " + dossier);

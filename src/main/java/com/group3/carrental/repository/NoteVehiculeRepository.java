@@ -1,9 +1,14 @@
 package com.group3.carrental.repository;
 
-import com.group3.carrental.entity.NoteVehicule;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.group3.carrental.entity.NoteVehicule;
+
 @Repository
-public interface NoteVehiculeRepository extends JpaRepository<NoteVehicule,  Long> {
+public interface NoteVehiculeRepository extends JpaRepository<NoteVehicule, Long> {
+    Optional<NoteVehicule> findByContrat_Id(Long contratId);
+    boolean existsByContrat_Id(Long contratId);
 }

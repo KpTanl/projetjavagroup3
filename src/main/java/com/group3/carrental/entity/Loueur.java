@@ -21,6 +21,15 @@ public class Loueur extends Utilisateur implements Commun {
     private List<NoteLoueur> notesRecues;
 
     public Loueur(int id, String nom, String prenom, String email, String motDePasse,
+            List<Contrat> historiqueLocations, List<NoteLoueur> notesRecues,
+            double latitudeHabitation, double longitudeHabitation) {
+        super(id, nom, prenom, email, motDePasse, Role.Loueur, latitudeHabitation, longitudeHabitation);
+        this.historiqueLocations = historiqueLocations;
+        this.notesRecues = notesRecues;
+    }
+
+    // 构造函数（不带坐标 - kepeng版本兼容DataInitializer）
+    public Loueur(int id, String nom, String prenom, String email, String motDePasse,
             List<Contrat> historiqueLocations, List<NoteLoueur> notesRecues) {
         super(id, nom, prenom, email, motDePasse, Role.Loueur);
         this.historiqueLocations = historiqueLocations;
