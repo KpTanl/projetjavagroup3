@@ -64,6 +64,10 @@ public class UtilisateurService {
         return utilisateurRepository.save(utilisateur);
     }
 
+    public Utilisateur findByEmail(String email) {
+        return utilisateurRepository.findByEmail(email).orElse(null);
+    }
+
     public void ajouterVehicule(Utilisateur currentUser) {
         if (!(currentUser instanceof Agent agent)) {
             System.out.println("Erreur: Seul un Agent peut ajouter un véhicule.");

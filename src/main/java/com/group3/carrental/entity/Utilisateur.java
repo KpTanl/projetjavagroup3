@@ -22,6 +22,15 @@ public abstract class Utilisateur extends Compte {
     protected double latitudeHabitation;
     protected double longitudeHabitation;
 
+    // Parrainage (Referral System)
+    @ManyToOne
+    @JoinColumn(name = "parrain_id")
+    protected Utilisateur parrain;
+
+    protected double soldePorteMonnaie = 0.0;
+
+    protected boolean bonusParrainageRecu = false;
+
     public enum Role {
         Loueur,
         Agent
