@@ -13,6 +13,7 @@ import com.group3.carrental.entity.Contrat;
 import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.service.ContratService;
+import com.group3.carrental.service.UtilisateurService;
 import com.group3.carrental.service.VehiculeService;
 
 @Component
@@ -20,11 +21,144 @@ public class AgentController {
     private static final Scanner sc = new Scanner(System.in);
     private final VehiculeService vehiculeService;
     private final ContratService contratService;
+    private final UtilisateurService utilisateurService;
+    private final MessagerieController messagerieController;
+    private final UtilisateurController utilisateurController;
 
     @Autowired
-    public AgentController(VehiculeService vehiculeService, ContratService contratService) {
+    public AgentController(VehiculeService vehiculeService, ContratService contratService,
+            UtilisateurService utilisateurService, MessagerieController messagerieController,
+            UtilisateurController utilisateurController) {
         this.vehiculeService = vehiculeService;
         this.contratService = contratService;
+        this.utilisateurService = utilisateurService;
+        this.messagerieController = messagerieController;
+        this.utilisateurController = utilisateurController;
+    }
+
+    /**
+     * Affiche le menu Agent et gère les choix.
+     * 
+     * @param currentUser l'utilisateur courant
+     * @return le nouveau rôle après l'action (null si déconnexion)
+     */
+    public Utilisateur displayMenuAgent(Utilisateur currentUser) {
+        if (!(currentUser instanceof Agent)) {
+            System.out.println("Erreur: accès agent refusé pour cet utilisateur.");
+            return currentUser;
+        }
+        Agent agent = (Agent) currentUser;
+
+        System.out.println("\nMenu de Agent : ");
+        System.out.println("1. Ajouter mes vehicules");
+        System.out.println("2. Supprimer mes vehicules");
+        System.out.println("3. Modifier mes vehicules");
+        System.out.println("4. Afficher mes vehicules");
+        System.out.println("5. Filtrer les voitures");
+        System.out.println("6. Messagerie");
+        System.out.println("7. Gérer l'option Parking Partenaire");
+        System.out.println("8. Consulter l'historique de mes véhicules");
+        System.out.println("9. Valider contrats (pré-signés)");
+        System.out.println("10. Noter Loueur");
+        System.out.println("11. Mes contrats terminés");
+        System.out.println("12. Mes contrats et PDF");
+        System.out.println("0. Quitter");
+        int choice = sc.nextInt();
+        sc.nextLine();
+        switch (choice) {
+            case 1:
+                utilisateurService.ajouterVehicule(agent);
+                break;
+            case 2:
+                utilisateurService.supprimerVehicule(agent);
+                break;
+            case 3:
+                utilisateurService.modifierVehicule(agent);
+                break;
+            case 4:
+                utilisateurService.afficherLesVehiculesDeAgent(agent);
+                break;
+            case 5:
+                vehiculeService.filtrerVehicules();
+                break;
+            case 6:
+                messagerieController.displayMenuMessagerie(currentUser);
+                break;
+            case 7:
+                gererOptionsParkingAgent(currentUser);
+                break;
+            case 8:
+                consulterHistoriqueVehicules(currentUser);
+                break;
+            case 9:
+                utilisateurController.menuValidationContrats(agent);
+                break;
+            case 10:
+                utilisateurController.menuNotation(currentUser);
+                break;
+            case 11:
+                utilisateurController.menuMesContratsTermines(currentUser);
+                break;
+            case 12:
+                afficherMesContrats(currentUser);
+                break;
+            case 0:
+                System.out.println("vous avez choisi de quitter!");
+                return null; // Signal déconnexion
+            default:
+                System.out.println("Choix invalide !");
+                break;
+        }
+        return currentUser;
+    }
+
+    /**
+     * Gérer les options de parking pour les véhicules de l'agent.
+     */
+    public void gererOptionsParkingAgent(Utilisateur currentUser) {
+        if (!(currentUser instanceof Agent)) {
+            System.out.println("Erreur : Vous devez être un Agent pour accéder à cette option.");
+            return;
+        }
+
+        Agent agentActuel = (Agent) currentUser;
+        List<Vehicule> mesVehicules = vehiculeService.getVehiculesByAgentId(agentActuel.getId());
+
+        if (mesVehicules == null || mesVehicules.isEmpty()) {
+            System.out.println("Vous n'avez aucun véhicule enregistré.");
+            return;
+        }
+
+        System.out.println("\n--- GESTION DES OPTIONS PARKING ---");
+        for (int i = 0; i < mesVehicules.size(); i++) {
+            Vehicule v = mesVehicules.get(i);
+            System.out.println((i + 1) + ". " + v.getMarque() + " " + v.getModele()
+                    + " | Option actuelle : " + v.getOptionRetour());
+        }
+
+        System.out.print("\nSélectionnez le numéro du véhicule à modifier (0 pour annuler) : ");
+        int choix = sc.nextInt();
+        sc.nextLine();
+
+        if (choix > 0 && choix <= mesVehicules.size()) {
+            Vehicule vSelectionne = mesVehicules.get(choix - 1);
+
+            System.out.println("Voulez-vous activer ou désactiver l'option ?");
+            System.out.println("1. Activer (retour_parking)");
+            System.out.println("2. Désactiver (retour_classique)");
+            int action = sc.nextInt();
+            sc.nextLine();
+
+            if (action == 1) {
+                agentActuel.configurerOptionParking(vSelectionne, true);
+                System.out.println("Mise à jour réussie : Option activée.");
+            } else if (action == 2) {
+                agentActuel.configurerOptionParking(vSelectionne, false);
+                System.out.println("Mise à jour réussie : Option désactivée.");
+            } else {
+                System.out.println("Action annulée : choix invalide.");
+            }
+        }
     }
 
     /**
@@ -86,6 +220,77 @@ public class AgentController {
             System.out.println("  Prix total : " + c.getPrixTotal() + "€");
             System.out.println("  Statut     : " + (c.getStatut() != null ? c.getStatut() : "Non défini"));
             System.out.println("------------------------------------");
+        }
+    }
+
+    /**
+     * Afficher les contrats de l'agent.
+     */
+    private void afficherMesContrats(Utilisateur currentUser) {
+        if (!(currentUser instanceof Agent agent)) {
+            return;
+        }
+        List<Contrat> tousContrats = contratService.getTousLesContrats();
+        List<Contrat> contratsAgent = tousContrats.stream()
+                .filter(c -> c.getAgent() != null && c.getAgent().getId() == agent.getId())
+                .toList();
+        afficherListeContrats(contratsAgent, currentUser);
+    }
+
+    private void afficherListeContrats(List<Contrat> contrats, Utilisateur currentUser) {
+        if (contrats.isEmpty()) {
+            System.out.println("\nAucun contrat trouvé.");
+            return;
+        }
+
+        System.out.println("\n========================================");
+        System.out.println("         MES CONTRATS");
+        System.out.println("========================================");
+
+        for (int i = 0; i < contrats.size(); i++) {
+            Contrat c = contrats.get(i);
+            System.out.println("\n--- Contrat " + (i + 1) + " ---");
+            System.out.println("ID: " + c.getId());
+            System.out.println("Véhicule: " + c.getVehicule().getMarque() + " " + c.getVehicule().getModele());
+            System.out.println("Du " + c.getDateDeb() + " au " + c.getDateFin());
+            System.out.println("Prix total: " + c.getPrixTotal() + " EUR");
+            System.out.println("Statut: " + (c.getStatut() != null ? c.getStatut() : "Non défini"));
+            System.out.println("Loueur: " + c.getLoueur().getPrenom() + " " + c.getLoueur().getNom());
+        }
+
+        System.out.println("\n1. Télécharger le PDF d'un contrat");
+        System.out.println("0. Retour");
+        System.out.print("Votre choix: ");
+        int choix = sc.nextInt();
+        sc.nextLine();
+
+        if (choix == 1) {
+            System.out.print("Numéro du contrat (1-" + contrats.size() + "): ");
+            int num = sc.nextInt();
+            sc.nextLine();
+
+            if (num < 1 || num > contrats.size()) {
+                System.out.println("Choix invalide.");
+                return;
+            }
+
+            Contrat contratSelectionne = contrats.get(num - 1);
+
+            System.out.print("Chemin du dossier de destination (ex: C:/contrats): ");
+            String dossier = sc.nextLine();
+
+            if (dossier.isEmpty()) {
+                dossier = System.getProperty("user.home") + "/Downloads";
+                System.out.println("Utilisation du dossier par défaut: " + dossier);
+            }
+
+            String cheminPdf = contratService.genererPdfContrat(contratSelectionne.getId(), dossier);
+            if (cheminPdf != null) {
+                System.out.println("\nPDF généré avec succès!");
+                System.out.println("Emplacement: " + cheminPdf);
+            } else {
+                System.out.println("\nErreur lors de la génération du PDF.");
+            }
         }
     }
 }
