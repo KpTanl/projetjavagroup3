@@ -9,6 +9,7 @@ import com.group3.carrental.entity.NoteVehicule;
 
 @Repository
 public interface NoteVehiculeRepository extends JpaRepository<NoteVehicule, Long> {
-    Optional<NoteVehicule> findByContrat_Id(Long contratId);
+
     boolean existsByContrat_Id(Long contratId);
+    Optional<NoteVehicule> findTopByContrat_IdOrderByIdDesc(Long contratId);
 }
