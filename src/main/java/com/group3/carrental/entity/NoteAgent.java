@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Entity
-@Table(name = "note_agent")
+@Table(name = "note_agent", uniqueConstraints = @UniqueConstraint(columnNames = {"contrat_id"}))
 public class NoteAgent extends Note {
 
     private int noteGestionVehicule;

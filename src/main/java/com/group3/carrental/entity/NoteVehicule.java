@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Entity
-@Table(name = "note_vehicule")
+@Table(name = "note_vehicule", uniqueConstraints = @UniqueConstraint(columnNames = {"contrat_id"}))
 public class NoteVehicule extends Note {
 
     private int noteProprete;
@@ -48,4 +48,5 @@ public class NoteVehicule extends Note {
     public double calculerNoteGlobale() {
         return (noteProprete + noteUsure + noteConfort) / 3.0;
     }
+    
 }
