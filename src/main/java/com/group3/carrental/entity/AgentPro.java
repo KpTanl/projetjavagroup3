@@ -3,7 +3,9 @@ package com.group3.carrental.entity;
 import java.time.LocalDate;
 import java.util.List;
 import jakarta.persistence.*;
+import lombok.Data;
 
+@Data
 @Entity
 @DiscriminatorValue("AgentPro")
 public class AgentPro extends Agent {

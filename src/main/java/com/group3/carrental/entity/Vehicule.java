@@ -63,10 +63,8 @@ public class Vehicule {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "agent_id")
     private Agent agent;
+    private int kilometrage;
 
-    private int kilometrage; // Kilométrage actuel du véhicule
-
-    // 原kepeng构造函数（8参数）
     public Vehicule(TypeVehicule type, String marque, String modele, String couleur, EtatVehicule etat,
             String rueLocalisation, String cPostalLocalisation, String villeLocalisation, double latitudeVehicule,
             double longitudeVehicule) {
