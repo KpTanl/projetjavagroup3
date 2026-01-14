@@ -7,6 +7,7 @@ import java.util.Scanner;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Lazy;
 
 import com.group3.carrental.entity.Agent;
 import com.group3.carrental.entity.Contrat;
@@ -30,7 +31,7 @@ public class AgentController {
     @Autowired
     public AgentController(VehiculeService vehiculeService, ContratService contratService,
             UtilisateurService utilisateurService, MessagerieController messagerieController,
-            UtilisateurController utilisateurController, OptionService optionService) {
+            @Lazy UtilisateurController utilisateurController, OptionService optionService) {
         this.vehiculeService = vehiculeService;
         this.contratService = contratService;
         this.utilisateurService = utilisateurService;
@@ -64,8 +65,9 @@ public class AgentController {
         System.out.println("9. Gérer option signature manuelle (contrats)");
         System.out.println("10. Valider contrats (pré-signés)");
         System.out.println("11. Noter Loueur");
-        System.out.println("12. Mes contrats terminés");
-        System.out.println("13. Mes contrats et PDF");
+        System.out.println("12. Droit de réponse (discussion sur notes)");
+        System.out.println("13. Mes contrats terminés");
+        System.out.println("14. Mes contrats et PDF");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -112,9 +114,12 @@ public class AgentController {
                 utilisateurController.menuNotation(currentUser);
                 break;
             case 12:
-                utilisateurController.menuMesContratsTermines(currentUser);
+                utilisateurController.menuDiscussionNotes(currentUser);
                 break;
             case 13:
+                utilisateurController.menuMesContratsTermines(currentUser);
+                break;
+            case 14:
                 afficherMesContrats(currentUser);
                 break;
             case 0:

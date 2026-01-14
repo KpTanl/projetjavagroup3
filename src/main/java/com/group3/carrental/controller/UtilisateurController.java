@@ -12,7 +12,10 @@ import com.group3.carrental.entity.Agent;
 import com.group3.carrental.entity.Contrat;
 import com.group3.carrental.entity.Loueur;
 import com.group3.carrental.entity.Utilisateur;
+import com.group3.carrental.entity.DiscussionNoteMessage;
+import com.group3.carrental.entity.DiscussionNoteMessage.Cible;
 import com.group3.carrental.service.ContratService;
+import com.group3.carrental.service.DiscussionNoteService;
 import com.group3.carrental.service.NoteAffichageService;
 import com.group3.carrental.service.NoteService;
 import com.group3.carrental.service.UtilisateurService;
@@ -26,17 +29,20 @@ public class UtilisateurController {
     private final ContratService contratService;
     private final NoteService noteService;
     private final NoteAffichageService noteAffichageService;
+    private final DiscussionNoteService discussionNoteService;
+
 
     @Autowired
     public UtilisateurController(UtilisateurService utilisateurService,
             ContratService contratService,
             NoteService noteService,
-            NoteAffichageService noteAffichageService) {
+            NoteAffichageService noteAffichageService,
+            DiscussionNoteService discussionNoteService) {
         this.utilisateurService = utilisateurService;
         this.contratService = contratService;
         this.noteService = noteService;
         this.noteAffichageService = noteAffichageService;
-    }
+        this.discussionNoteService = discussionNoteService;}
 
     public void afficherMonProfil(Utilisateur currentUser) {
         if (currentUser == null) {
@@ -60,6 +66,7 @@ public class UtilisateurController {
             System.out.println("5. Historique des locations");
             System.out.println("6. Noter");
             System.out.println("7. Afficher notes d'un contrat");
+            System.out.println("8. Discussion (répondre aux commentaires d'un contrat)");
             System.out.println("0. Retour");
 
             int choix = sc.nextInt();
@@ -107,6 +114,13 @@ public class UtilisateurController {
                     Long contratId = sc.nextLong();
                     sc.nextLine();
                     afficherNotesContrat(contratId);
+                    break;
+
+                case 8:
+                    System.out.print("ID du contrat : ");
+                    Long idDisc = sc.nextLong();
+                    sc.nextLine();
+                    menuDiscussion(currentUser, idDisc);
                     break;
 
                 case 0:
@@ -311,6 +325,13 @@ public class UtilisateurController {
             System.out.println("Commentaire: " + n.getCommentaire());
         }, () -> System.out.println("\n-- Note Loueur -- Aucune"));
 
+        System.out.println("\n--- Discussion / Droit de réponse ---");
+        try {
+            afficherDiscussion(contratId);
+        } catch (Exception e) {
+            System.out.println("(Impossible d'afficher la discussion : " + e.getMessage() + ")");
+        }
+
     }
 
     public void menuValidationContrats(Agent agent) {
@@ -436,6 +457,116 @@ public class UtilisateurController {
             System.out.println("Véhicule : " + c.getVehicule().getMarque() + " " + c.getVehicule().getModele());
 
         System.out.println("=======================");
+    }
+
+    private void menuDiscussion(Utilisateur currentUser, Long contratId) {
+        boolean retour = false;
+
+        while (!retour) {
+            System.out.println("\n=== Discussion contrat #" + contratId + " ===");
+            afficherDiscussion(contratId);
+
+            System.out.println("\n1. Répondre à la note Véhicule");
+            System.out.println("2. Répondre à la note Agent");
+            System.out.println("3. Répondre à la note Loueur");
+            System.out.println("0. Retour");
+
+            int choix = sc.nextInt();
+            sc.nextLine();
+
+            try {
+                switch (choix) {
+                    case 1:
+                        ajouterMessage(currentUser, contratId, Cible.NOTE_VEHICULE);
+                        break;
+                    case 2:
+                        ajouterMessage(currentUser, contratId, Cible.NOTE_AGENT);
+                        break;
+                    case 3:
+                        ajouterMessage(currentUser, contratId, Cible.NOTE_LOUEUR);
+                        break;
+                    case 0:
+                        retour = true;
+                        break;
+                    default:
+                        System.out.println("Choix invalide.");
+                }
+            } catch (Exception e) {
+                System.out.println("Erreur: " + e.getMessage());
+            }
+        }
+    }
+
+    public void menuDiscussionNotes(Utilisateur currentUser) {
+        if (currentUser == null) {
+            System.out.println("Accès refusé : vous devez être connecté.");
+            return;
+        }
+
+        List<Contrat> termines;
+
+        if (currentUser instanceof Loueur loueur) {
+            termines = contratService.getContratsTerminesAccepteesParLoueur(loueur.getId());
+        } else if (currentUser instanceof Agent agent) {
+            termines = contratService.getContratsTerminesAccepteesParAgent(agent.getId());
+        } else {
+            System.out.println("Rôle non supporté.");
+            return;
+        }
+
+        if (termines.isEmpty()) {
+            System.out.println("Aucun contrat terminé + accepté.");
+            return;
+        }
+
+        System.out.println("\n--- Contrats terminés (avec discussion) ---");
+        for (Contrat c : termines) {
+            System.out.println("Contrat #" + c.getId()
+                    + " | Véhicule=" + (c.getVehicule() != null ? (c.getVehicule().getMarque() + " " + c.getVehicule().getModele()) : "?")
+                    + " | Agent=" + (c.getAgent() != null ? (c.getAgent().getPrenom() + " " + c.getAgent().getNom()) : "?")
+                    + " | Loueur=" + (c.getLoueur() != null ? (c.getLoueur().getPrenom() + " " + c.getLoueur().getNom()) : "?"));
+        }
+
+        System.out.print("Entrer l'ID du contrat : ");
+        Long contratId = sc.nextLong();
+        sc.nextLine();
+
+        try {
+            menuDiscussion(currentUser, contratId); // <-- réutilise ton menu privé existant
+        } catch (Exception e) {
+            System.out.println("Erreur: " + e.getMessage());
+        }
+    }
+
+
+    private void afficherDiscussion(Long contratId) {
+        List<DiscussionNoteMessage> messages = discussionNoteService.getDiscussion(contratId);
+
+        if (messages.isEmpty()) {
+            System.out.println("(Aucun message)");
+            return;
+        }
+
+        for (DiscussionNoteMessage m : messages) {
+            String auteur = (m.getAuteur() != null)
+                    ? m.getAuteur().getPrenom() + " " + m.getAuteur().getNom()
+                    : "Auteur ?";
+
+            System.out.println(
+                    "[" + m.getDateCreation() + "] "
+                    + "(" + m.getCible() + ") "
+                    + auteur + " : "
+                    + m.getContenu()
+            );
+        }
+    }
+
+    private void ajouterMessage(Utilisateur currentUser, Long contratId, Cible cible) {
+        System.out.print("Votre message : ");
+        String contenu = sc.nextLine();
+
+        discussionNoteService.ajouterMessage(contratId, currentUser, cible, contenu);
+        System.out.println("Message envoyé.");
     }
 
 }
