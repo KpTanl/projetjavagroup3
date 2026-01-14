@@ -12,11 +12,14 @@ import com.group3.carrental.entity.Agent;
 import com.group3.carrental.entity.Assurance;
 import com.group3.carrental.entity.Contrat;
 import com.group3.carrental.entity.Message;
+import com.group3.carrental.entity.Parking;
 import com.group3.carrental.entity.Utilisateur;
+import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.entity.Loueur;
 import com.group3.carrental.entity.AgentParticulier;
 import com.group3.carrental.service.AssuranceService;
 import com.group3.carrental.service.ContratService;
+import com.group3.carrental.service.ParkingService;
 import com.group3.carrental.service.UtilisateurService;
 import com.group3.carrental.service.VehiculeService;
 import com.group3.carrental.service.ServiceMessagerie;
@@ -32,15 +35,17 @@ public class AppController {
     private final AssuranceService assuranceService;
     private final ContratService contratService;
     private final ServiceMessagerie serviceMessagerie;
+    private final ParkingService parkingService ;
 
     @Autowired
     public AppController(UtilisateurService utilisateurService, VehiculeService vehiculeService,
-            AssuranceService assuranceService, ContratService contratService, ServiceMessagerie serviceMessagerie) {
+            AssuranceService assuranceService, ContratService contratService, ServiceMessagerie serviceMessagerie, ParkingService parkingService) {
         this.utilisateurService = utilisateurService;
         this.vehiculeService = vehiculeService;
         this.assuranceService = assuranceService;
         this.contratService = contratService;
         this.serviceMessagerie = serviceMessagerie;
+        this.parkingService = parkingService;
     }
 
     public enum UserRole {
@@ -164,6 +169,7 @@ public class AppController {
         System.out.println("4. Consulter les assurances");
         System.out.println("5. Messagerie");
         System.out.println("6. Mon profil");
+        System.out.println("7. Trouver un parking partenaire");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -186,6 +192,9 @@ public class AppController {
             case 6:
                 afficherMonProfil();
                 break;
+            case 7 :
+                utilisateurService.gererSelectionParkingPourLoueur();
+                break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
                 currentUserRole = UserRole.Visitor;
@@ -196,7 +205,7 @@ public class AppController {
                 break;
         }
     }
-
+    
     /**
      * Afficher toutes les assurances disponibles
      */
@@ -235,6 +244,7 @@ public class AppController {
         System.out.println("5. Filtrer les voitures");
         System.out.println("6. Messagerie");
         System.out.println("7. Gérer l'option Parking Partenaire");
+         System.out.println("8. Associér un vehicule à un Parking");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -260,6 +270,9 @@ public class AppController {
             case 7 :
                 this.gererOptionsParkingAgent();
             break;
+            case 8:
+                this.associerVehiculeAParking(agent); 
+                break;
             case 0:
                 System.out.println("vous avez choisi de quitter!");
                 currentUserRole = UserRole.Visitor;
@@ -271,56 +284,121 @@ public class AppController {
         }
     }
     private void gererOptionsParkingAgent() {
-        if (!(currentUser instanceof com.group3.carrental.entity.Agent)) {
-            System.out.println("Erreur : Vous devez être un Agent pour accéder à cette option.");
-            return;
-        }
+    if (!(currentUser instanceof com.group3.carrental.entity.Agent)) {
+        System.out.println("Erreur : Vous devez être un Agent pour accéder à cette option.");
+        return;
+    }
 
-        com.group3.carrental.entity.Agent agentActuel = (com.group3.carrental.entity.Agent) currentUser;
+    com.group3.carrental.entity.Agent agentActuel = (com.group3.carrental.entity.Agent) currentUser;
+    
+    // Récupération des véhicules via le service (données fraîches de la BDD)
+    List<com.group3.carrental.entity.Vehicule> mesVehicules = vehiculeService.getVehiculesByAgentId(agentActuel.getId());
+
+    if (mesVehicules == null || mesVehicules.isEmpty()) {
+        System.out.println("Vous n'avez aucun véhicule enregistré.");
+        return;
+    }
+
+    System.out.println("\n--- GESTION DES OPTIONS PARKING ---");
+    for (int i = 0; i < mesVehicules.size(); i++) {
+        com.group3.carrental.entity.Vehicule v = mesVehicules.get(i);
+        System.out.println((i + 1) + ". " + v.getMarque() + " " + v.getModele() 
+        + " | Option actuelle : " + v.getOptionRetour());
+    }
+
+    System.out.print("\nSélectionnez le numéro du véhicule à modifier (0 pour annuler) : ");
+    int choix = sc.nextInt();
+    sc.nextLine();
+
+    if (choix > 0 && choix <= mesVehicules.size()) {
+        com.group3.carrental.entity.Vehicule vSelectionne = mesVehicules.get(choix - 1);
         
-        // Récupération des véhicules via le service (basé sur l'ID de l'agent)
-        List<com.group3.carrental.entity.Vehicule> mesVehicules = vehiculeService.getVehiculesByAgentId(agentActuel.getId());
-
-        if (mesVehicules == null || mesVehicules.isEmpty()) {
-            System.out.println("Vous n'avez aucun véhicule enregistré.");
-            return;
-        }
-
-        System.out.println("\n--- GESTION DES OPTIONS PARKING ---");
-        for (int i = 0; i < mesVehicules.size(); i++) {
-            com.group3.carrental.entity.Vehicule v = mesVehicules.get(i);
-            System.out.println((i + 1) + ". " + v.getMarque() + " " + v.getModele() 
-            + " | Option actuelle : " + v.getOptionRetour());
-        }
-
-        System.out.print("\nSélectionnez le numéro du véhicule à modifier (0 pour annuler) : ");
-        int choix = sc.nextInt();
+        System.out.println("Voulez-vous activer ou désactiver l'option ?");
+        System.out.println("1. Activer (retour_parking)");
+        System.out.println("2. Désactiver (retour_classique)");
+        int action = sc.nextInt();
         sc.nextLine();
 
-        if (choix > 0 && choix <= mesVehicules.size()) {
-            com.group3.carrental.entity.Vehicule vSelectionne = mesVehicules.get(choix - 1);
-            
-            System.out.println("Voulez-vous activer ou désactiver l'option ?");
-            System.out.println("1. Activer (retour_parking)");
-            System.out.println("2. Désactiver (retour_classique)");
-            int action = sc.nextInt();
-            sc.nextLine();
-
-            // Appel de votre logique métier située dans Agent.java
-            if (action == 1) {
-                agentActuel.configurerOptionParking(vSelectionne, true);
-                System.out.println("Mise à jour réussie : Option activée.");
-            } else if (action == 2) {
-                agentActuel.configurerOptionParking(vSelectionne, false);
-                System.out.println("Mise à jour réussie : Option désactivée.");
-            } else {
-                System.out.println("Action annulée : choix invalide.");
-            }
-            
-            // Note : En situation réelle, il faudrait ici appeler vehiculeService.save(vSelectionne)
-            // pour persister le changement en base de données.
+        if (action == 1) {
+            // Modification de l'objet
+            agentActuel.configurerOptionParking(vSelectionne, true);
+            // SAUVEGARDE DANS LA BASE DE DONNÉES
+            vehiculeService.save(vSelectionne);
+            System.out.println("Mise à jour réussie : Option activée et enregistrée.");
+        } else if (action == 2) {
+            // Modification de l'objet
+            agentActuel.configurerOptionParking(vSelectionne, false);
+            // SAUVEGARDE DANS LA BASE DE DONNÉES
+            vehiculeService.save(vSelectionne);
+            System.out.println("Mise à jour réussie : Option désactivée et enregistrée.");
+        } else {
+            System.out.println("Action annulée : choix invalide.");
         }
     }
+}
+    private void associerVehiculeAParking(Utilisateur utilisateur) {
+    // Utilisation du service pour récupérer les véhicules
+    List<Vehicule> mesVehicules = vehiculeService.getVehiculesByAgentId(utilisateur.getId());
+
+    if (mesVehicules.isEmpty()) {
+        System.out.println("Aucun véhicule trouvé.");
+        return;
+    }
+
+    System.out.println("\n--- Sélection du véhicule ---");
+    for (int i = 0; i < mesVehicules.size(); i++) {
+        Vehicule v = mesVehicules.get(i);
+        String statutOption = (v.getOptionRetour() == Vehicule.OptionRetour.retour_parking) ? "[OPTION ACTIVE]" : "[OPTION DESACTIVEE]";
+        System.out.println((i + 1) + ". " + v.getMarque() + " " + v.getModele() + " " + statutOption);
+    }
+
+    System.out.print("Choisissez un véhicule (numéro) : ");
+    int index = sc.nextInt() - 1; // On utilise 'sc'
+    sc.nextLine(); 
+    
+    if (index < 0 || index >= mesVehicules.size()) {
+        System.out.println("Choix invalide.");
+        return;
+    }
+
+    Vehicule vChoisi = mesVehicules.get(index);
+
+    // VERIFICATION : L'option doit être activée (Menu 7)
+    if (vChoisi.getOptionRetour() != Vehicule.OptionRetour.retour_parking) {
+        System.out.println(" Erreur : Activez d'abord l'option 'Parking Partenaire' (Option 7) pour ce véhicule !");
+        return;
+    }
+
+    // LISTE DES PARKINGS
+    List<Parking> parkings = parkingService.getAllParkings();
+    if (parkings.isEmpty()) {
+        System.out.println("Aucun parking partenaire n'est enregistré.");
+        return;
+    }
+
+    System.out.println("\n--- Choisissez un parking partenaire ---");
+    for (Parking p : parkings) {
+        System.out.println("ID: " + p.getId() + " - " + p.getVilleP() + " (" + p.getVehiculesGares().size() + "/" + p.getNb_places_max() + " places)");
+    }
+
+    System.out.print("Entrez l'ID du parking : ");
+    Long pId = sc.nextLong();
+    sc.nextLine();
+
+    Parking pChoisi = parkingService.getParkingById(pId);
+
+    if (pChoisi != null) {
+        // Appel de la méthode métier dans ton entité Parking
+        if (pChoisi.ajouterVehicule(vChoisi)) {
+            vehiculeService.save(vChoisi); // Persistance
+            System.out.println("Succès ! Le véhicule est maintenant associé au parking de " + pChoisi.getVilleP());
+            System.out.println(vChoisi.getInfosRetourParking());
+        }
+    } else {
+        System.out.println("Parking introuvable.");
+    }
+}
+    
 
     // ========== Mon profil (Loueur) ==========
     private void afficherMonProfil() {

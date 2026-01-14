@@ -84,7 +84,7 @@ public class Loueur extends Utilisateur implements Commun {
         boolean succes = p.ajouterVehicule(v);
 
         if (succes) {
-            System.out.println("Assignation réussie au parking : " + p.getIdP());
+            System.out.println("Assignation réussie au parking : " + p.getNomP());
         } else {
             System.out.println("Echec de l'assignation (Parking complet ou option non activée)");
         }

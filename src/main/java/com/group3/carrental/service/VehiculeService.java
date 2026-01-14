@@ -258,7 +258,7 @@ public List<Vehicule> getVehiculesByAgentId(int agentId) {
 /**
  * Sauvegarde les modifications d'un véhicule (utile pour l'option parking).
  */
-public void save(Vehicule vehicule) {
-    vehiculeRepository.save(vehicule);
+public void save(Vehicule v) {
+    vehiculeRepository.save(v);
 }
 }
