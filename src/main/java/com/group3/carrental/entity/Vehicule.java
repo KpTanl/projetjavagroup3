@@ -63,8 +63,7 @@ public class Vehicule {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "agent_id")
     private Agent agent;
-
-    private int kilometrage; // Kilométrage actuel du véhicule
+    private int kilometrage;
 
     // Date de suppression programmée (null = pas de suppression prévue)
     private LocalDate dateSuppressionPrevue;

@@ -123,13 +123,13 @@ public abstract class Agent extends Utilisateur implements Commun {
     }
 
     @Override
-    public Vehicule FiltreVehicule() {
+    public Vehicule filtreVehicule() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public void ConsulterProfilsAgents() {
+    public void consulterProfilsAgents() {
         // TODO Auto-generated method stub
     }
 

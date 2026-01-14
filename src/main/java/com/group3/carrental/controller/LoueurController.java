@@ -80,7 +80,7 @@ public class LoueurController {
                 vehiculeService.filtrerVehicules();
                 break;
             case 3:
-                louerVehicule(currentUser);
+                utilisateurController.louerVehicule(currentUser);
                 break;
             case 4:
                 afficherAssurances();
@@ -406,17 +406,20 @@ public class LoueurController {
         contratService.rendreVehicule(contrat.getId(), cheminPhoto);
 
         // Parrainage: Récompenser le parrain si c'est la première location terminée
-        Loueur loueur = contrat.getLoueur();
-        if (loueur.getParrain() != null && !loueur.isBonusParrainageRecu()) {
-            Utilisateur parrain = loueur.getParrain();
-            double bonus = 50.0;
-            parrain.setSoldePorteMonnaie(parrain.getSoldePorteMonnaie() + bonus);
-            loueur.setBonusParrainageRecu(true);
-            utilisateurService.mettreAJour(parrain);
-            utilisateurService.mettreAJour(loueur);
-            System.out.println("\n*** PARRAINAGE ***");
-            System.out.println("Félicitations ! Votre parrain " + parrain.getPrenom() + " " + parrain.getNom()
-                    + " a reçu " + bonus + "€ de crédit !");
+        Utilisateur loueur = contrat.getLoueur();
+        if (loueur instanceof Loueur) {
+            Loueur loueurCast = (Loueur) loueur;
+            if (loueurCast.getParrain() != null && !loueurCast.isBonusParrainageRecu()) {
+                Utilisateur parrain = loueurCast.getParrain();
+                double bonus = 50.0;
+                parrain.setSoldePorteMonnaie(parrain.getSoldePorteMonnaie() + bonus);
+                loueurCast.setBonusParrainageRecu(true);
+                utilisateurService.mettreAJour(parrain);
+                utilisateurService.mettreAJour(loueurCast);
+                System.out.println("\n*** PARRAINAGE ***");
+                System.out.println("Félicitations ! Votre parrain " + parrain.getPrenom() + " " + parrain.getNom()
+                        + " a reçu " + bonus + "€ de crédit !");
+            }
         }
 
         System.out.println("\n========================================");

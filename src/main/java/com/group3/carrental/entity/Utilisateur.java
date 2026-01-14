@@ -53,10 +53,6 @@ public abstract class Utilisateur extends Compte {
         this.longitudeHabitation = longitudeHabitation;
     }
 
-    public void seConnecter() {
-
-    }
-
     public void modifierProfil(String nom, String prenom, String email, String motDePasse) {
         if (nom != null && !nom.isEmpty()) {
             this.nom = nom;
@@ -70,10 +66,6 @@ public abstract class Utilisateur extends Compte {
         if (motDePasse != null && !motDePasse.isEmpty()) {
             this.motDePasse = motDePasse;
         }
-    }
-
-    public void signerContrat() {
-
     }
 
 }

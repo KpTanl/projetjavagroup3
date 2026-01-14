@@ -90,10 +90,10 @@ this.nomP = nomP;
     // À ajouter dans Parking.java
 public void afficherDetails() {
     System.out.println("\n-------------------------------------------");
-    System.out.println("📍 ADRESSE : " + getLocalisationComplete());
-    System.out.println("⚠️ CONTRAINTES : " + (contraintes != null ? contraintes : "Aucune"));
-    System.out.println("ℹ️ INFOS : Parking partenaire Vienci - Durée longue autorisée");
-    System.out.println("💰 RÉDUCTION : -" + reductionloueur + "€ sur votre location");
+    System.out.println("ADRESSE : " + getLocalisationComplete());
+    System.out.println("CONTRAINTES : " + (contraintes != null ? contraintes : "Aucune"));
+    System.out.println("INFOS : Parking partenaire Vienci - Durée longue autorisée");
+    System.out.println("RÉDUCTION : -" + reductionloueur + "€ sur votre location");
     System.out.println("-------------------------------------------");
 }
 

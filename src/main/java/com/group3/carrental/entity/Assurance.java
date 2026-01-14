@@ -55,7 +55,7 @@ public class Assurance {
     }
     
 
-    private double getPrixPourVehicule(Vehicule vehicule) {
+    public double getPrixPourVehicule(Vehicule vehicule) {
         if (grilleTarifaire == null || grilleTarifaire.isEmpty()) {
             return prixParJour;
         }
@@ -76,7 +76,7 @@ public class Assurance {
     }
     
 
-    private Map<String, Double> parseGrille() {
+    public Map<String, Double> parseGrille() {
         Map<String, Double> grille = new HashMap<>();
         
         if (grilleTarifaire == null || grilleTarifaire.isEmpty()) {

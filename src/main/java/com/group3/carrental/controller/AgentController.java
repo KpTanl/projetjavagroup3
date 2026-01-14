@@ -9,12 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.group3.carrental.entity.Agent;
+import com.group3.carrental.entity.Assurance;
 import com.group3.carrental.entity.Contrat;
+import com.group3.carrental.entity.Parking;
 import com.group3.carrental.entity.PrestataireEntretien;
 import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.repository.PrestataireEntretienRepository;
 import com.group3.carrental.repository.UtilisateurRepository;
+import com.group3.carrental.service.AssuranceService;
 import com.group3.carrental.service.ContratService;
 import com.group3.carrental.service.OptionService;
 import com.group3.carrental.service.UtilisateurService;
@@ -27,6 +30,7 @@ public class AgentController {
     private final ContratService contratService;
     private final UtilisateurService utilisateurService;
     private final OptionService optionService;
+    private final AssuranceService assuranceService;
     private final MessagerieController messagerieController;
     private final UtilisateurController utilisateurController;
     private final PrestataireEntretienRepository prestataireRepository;
@@ -35,12 +39,14 @@ public class AgentController {
     @Autowired
     public AgentController(VehiculeService vehiculeService, ContratService contratService,
             UtilisateurService utilisateurService, OptionService optionService,
-            MessagerieController messagerieController, UtilisateurController utilisateurController,
+            AssuranceService assuranceService, MessagerieController messagerieController,
+            UtilisateurController utilisateurController,
             PrestataireEntretienRepository prestataireRepository, UtilisateurRepository utilisateurRepository) {
         this.vehiculeService = vehiculeService;
         this.contratService = contratService;
         this.utilisateurService = utilisateurService;
         this.optionService = optionService;
+        this.assuranceService = assuranceService;
         this.messagerieController = messagerieController;
         this.utilisateurController = utilisateurController;
         this.prestataireRepository = prestataireRepository;
@@ -422,6 +428,8 @@ public class AgentController {
         System.out.println("\n✓ Option résiliée (si elle existait).");
     }
 
+    <<<<<<<HEAD
+
     /**
      * Gérer les disponibilités des véhicules de l'agent.
      */
@@ -560,5 +568,5 @@ public class AgentController {
 
         // 3. Appel au service
         optionService.commanderEntretien(agentComplet, sesVehicules.get(vIdx - 1), prestataires.get(eIdx - 1));
-    }
-}
+    }}
+
