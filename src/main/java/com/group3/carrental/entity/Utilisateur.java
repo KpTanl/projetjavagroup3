@@ -44,10 +44,6 @@ public abstract class Utilisateur extends Compte {
         this.longitudeHabitation = longitudeHabitation;
     }
 
-    public void seConnecter() {
-
-    }
-
     public void modifierProfil(String nom, String prenom, String email, String motDePasse) {
         if (nom != null && !nom.isEmpty()) {
             this.nom = nom;

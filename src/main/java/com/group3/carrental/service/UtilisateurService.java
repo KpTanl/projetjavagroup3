@@ -47,7 +47,13 @@ public class UtilisateurService {
     }
 
     public Optional<Utilisateur> login(String email, String motDePasse) {
-        return utilisateurRepository.findByEmailAndMotDePasse(email, motDePasse);
+        Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findByEmail(email);
+        
+        if (utilisateurOpt.isPresent() && utilisateurOpt.get().seConnecter(motDePasse)) {
+            return utilisateurOpt;
+        }
+        
+        return Optional.empty();
     }
 
     public Utilisateur register(Utilisateur utilisateur) {
