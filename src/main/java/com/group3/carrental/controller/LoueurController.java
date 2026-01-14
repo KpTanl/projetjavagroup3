@@ -14,6 +14,7 @@ import com.group3.carrental.entity.Contrat;
 import com.group3.carrental.entity.Loueur;
 import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Vehicule;
+import com.group3.carrental.entity.Parking;
 import com.group3.carrental.service.AssuranceService;
 import com.group3.carrental.service.ContratService;
 import com.group3.carrental.service.UtilisateurService;
@@ -219,13 +220,40 @@ public class LoueurController {
             Assurance assuranceChoisie = assurances.get(choixAssurance - 1);
             double prixAssurance = assuranceService.calculerPrix(assuranceChoisie, nbJours);
 
+            // OPTION PARKING
+            Parking parkingSelectionne = null;
+            System.out.print("\nVoulez-vous choisir un parking pour le dépôt ? (O/N) : ");
+            String choixParking = sc.nextLine();
+            if (choixParking.equalsIgnoreCase("O")) {
+                parkingSelectionne = utilisateurService.gererSelectionParkingPourLoueur();
+            }
+
+            double prixParkingOuReduction = (parkingSelectionne != null) ? parkingSelectionne.getReductionloueur() : 0;
+            double prixTotal = prixAssurance - prixParkingOuReduction;
+
+            // AFFICHAGE DES PRIX
+            System.out.println("\n--- Détails du paiement ---");
+            System.out.println("Prix assurance : " + prixAssurance + " euros");
+            if (parkingSelectionne != null) {
+                System.out.println("Réduction parking (Loueur) : -" + prixParkingOuReduction + " euros");
+            }
+            System.out.println("PRIX TOTAL ESTIMÉ : " + prixTotal + " euros");
+
+            //RECAPITULATIF
             System.out.println("\n=== Récapitulatif de Location ===");
             System.out.println("Véhicule: ID " + vehiculeId);
             System.out.println("Date de début: " + dateDebut);
             System.out.println("Durée: " + nbJours + " jours");
             System.out.println("Assurance: " + assuranceChoisie.getNom());
             System.out.println("Prix assurance: " + prixAssurance + "€");
-            System.out.println("\nPrix total estimé: " + prixAssurance + "€");
+
+            if (parkingSelectionne != null) {
+                System.out.println("Lieu de dépôt : " + parkingSelectionne.getNomP() + " ("
+                        + parkingSelectionne.getVilleP() + ")");
+                System.out.println("Réduction parking (Loueur) : -" + prixParkingOuReduction + " euros");
+            }
+
+            System.out.println("\nPrix total estimé: " + prixTotal + "€");
 
             System.out.print("\nConfirmer la location ? (O/N) : ");
             String confirmation = sc.nextLine();
@@ -243,8 +271,8 @@ public class LoueurController {
                         loueurCourant = (Loueur) currentUser;
                     }
 
-                    contratService.creerContrat(dateDebutContrat, dateFinContrat, agentVehicule, loueurCourant,
-                            vehiculeSelectionne, prixAssurance);
+                    contratService.creerContratPresigne(dateDebutContrat, dateFinContrat, agentVehicule, loueurCourant,
+                            vehiculeSelectionne, prixTotal);
 
                     System.out.println("\nLocation confirmée !");
                     System.out.println("Votre contrat a été créé avec succès.");
