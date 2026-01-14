@@ -235,6 +235,9 @@ public class VehiculeService {
         }
     }
 
+    /**
+     * Sauvegarde les modifications d'un véhicule (utile pour l'option parking).
+     */
     public void save(Vehicule vehicule) {
         vehiculeRepository.save(vehicule);
     }

@@ -120,4 +120,5 @@ public class Vehicule {
         Parking p = this.parkingPartenaire;
         return "DEPOSER AU : " + p.getLocalisationComplete() + "\nCONTRAINTES : " + p.getContraintes();
     }
+    
 }
