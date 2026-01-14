@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.group3.carrental.entity.Agent;
 import com.group3.carrental.entity.Assurance;
 import com.group3.carrental.entity.Loueur;
+import com.group3.carrental.entity.Parking;
 import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.entity.Vehicule.EtatVehicule;
@@ -28,18 +29,21 @@ public class UtilisateurService {
     private final AssuranceService assuranceService;
     private final ContratService contratService;
     private final VehiculeService vehiculeService;
+    private final ParkingService parkingService;
 
     @Autowired
     public UtilisateurService(UtilisateurRepository utilisateurRepository,
             VehiculeRepository vehiculeRepository,
             AssuranceService assuranceService,
             ContratService contratService,
-            VehiculeService vehiculeService) {
+            VehiculeService vehiculeService,
+            ParkingService parkingService) {
         this.utilisateurRepository = utilisateurRepository;
         this.vehiculeRepository = vehiculeRepository;
         this.assuranceService = assuranceService;
         this.contratService = contratService;
         this.vehiculeService = vehiculeService;
+        this.parkingService = parkingService;
     }
 
     public Optional<Utilisateur> login(String email, String motDePasse) {
@@ -255,13 +259,36 @@ public class UtilisateurService {
             Assurance assuranceChoisie = assurances.get(choixAssurance - 1);
             double prixAssurance = assuranceService.calculerPrix(assuranceChoisie, nbJours);
 
+            // OPTION PARKING
+            Parking parkingSelectionne = null;
+            System.out.print("\nVoulez-vous choisir un parking pour le dépôt ? (O/N) : ");
+            if (scanner.nextLine().equalsIgnoreCase("O")) {
+                parkingSelectionne = gererSelectionParkingPourLoueur();
+            }
+
+            double prixParkingOuReduction = (parkingSelectionne != null) ? parkingSelectionne.getReductionloueur() : 0;
+            double prixTotal = prixAssurance - prixParkingOuReduction;
+
+            // AFFICHAGE DES PRIX
+            System.out.println("\n--- Détails du paiement ---");
+            System.out.println("Prix assurance : " + prixAssurance + " euros");
+            if (parkingSelectionne != null) {
+                System.out.println("Réduction parking (Loueur) : -" + prixParkingOuReduction + " euros");
+            }
+            System.out.println("PRIX TOTAL ESTIMÉ : " + prixTotal + " euros");
+
+            // RÉCAPITULATIF
             System.out.println("\n=== Récapitulatif de Location ===");
             System.out.println("Véhicule: ID " + vehiculeId);
             System.out.println("Date de début: " + dateDebut);
             System.out.println("Durée: " + nbJours + " jours");
             System.out.println("Assurance: " + assuranceChoisie.getNom());
             System.out.println("Prix assurance: " + prixAssurance + "€");
-            System.out.println("Prix total estimé: " + prixAssurance + "€");
+            if (parkingSelectionne != null) {
+                System.out.println("Lieu de dépôt : " + parkingSelectionne.getNomP() + " ("
+                        + parkingSelectionne.getVilleP() + ")");
+            }
+            System.out.println("Prix total estimé: " + prixTotal + "€");
 
             System.out.print("\nConfirmer la location ? (O/N) : ");
             String confirmation = scanner.nextLine();
@@ -284,7 +311,7 @@ public class UtilisateurService {
                     agentVehicule,
                     loueurCourant,
                     vehiculeSelectionne,
-                    prixAssurance);
+                    prixTotal);
 
             System.out.println("\n Location demandée !");
             System.out.println("Contrat pré-signé créé. L'agent doit maintenant l'accepter/refuser.");
@@ -293,6 +320,48 @@ public class UtilisateurService {
         } catch (Exception e) {
             System.out.println("Erreur lors de la location: " + e.getMessage());
         }
+    }
+
+    /**
+     * Permet au loueur de sélectionner un parking partenaire pour le dépôt.
+     */
+    public Parking gererSelectionParkingPourLoueur() {
+        List<Parking> tousLesParkings = parkingService.getAllParkings();
+        List<String> villesDispo = Parking.getVillesDisponibles(tousLesParkings);
+
+        if (villesDispo.isEmpty()) {
+            System.out.println("Aucun parking avec des places disponibles actuellement.");
+            return null;
+        }
+
+        System.out.println("\n--- Villes avec parkings partenaires ---");
+        villesDispo.forEach(v -> System.out.println("- " + v));
+
+        System.out.print("\nDans quelle ville souhaitez-vous déposer le véhicule ? ");
+        String villeSaisie = scanner.nextLine().trim();
+
+        List<Parking> parkingsDeLaVille = tousLesParkings.stream()
+                .filter(p -> p.getVilleP() != null && p.getVilleP().equalsIgnoreCase(villeSaisie))
+                .toList();
+
+        if (parkingsDeLaVille.isEmpty()) {
+            System.out.println("Désolé, pas de parking partenaire dans cette ville.");
+            return null;
+        }
+
+        for (int i = 0; i < parkingsDeLaVille.size(); i++) {
+            System.out.println((i + 1) + " - " + parkingsDeLaVille.get(i).getNomP());
+        }
+
+        System.out.print("\nChoisissez un numéro : ");
+        int index = lireIntSafe();
+
+        if (index > 0 && index <= parkingsDeLaVille.size()) {
+            Parking choisi = parkingsDeLaVille.get(index - 1);
+            choisi.afficherDetails();
+            return choisi;
+        }
+        return null;
     }
 
     private int lireIntSafe() {

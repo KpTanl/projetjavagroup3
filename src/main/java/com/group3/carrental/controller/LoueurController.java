@@ -16,6 +16,7 @@ import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.service.AssuranceService;
 import com.group3.carrental.service.ContratService;
+import com.group3.carrental.service.UtilisateurService;
 import com.group3.carrental.service.VehiculeService;
 
 @Component
@@ -26,16 +27,18 @@ public class LoueurController {
     private final ContratService contratService;
     private final MessagerieController messagerieController;
     private final UtilisateurController utilisateurController;
+    private final UtilisateurService utilisateurService;
 
     @Autowired
     public LoueurController(VehiculeService vehiculeService, AssuranceService assuranceService,
             ContratService contratService, MessagerieController messagerieController,
-            UtilisateurController utilisateurController) {
+            UtilisateurController utilisateurController, UtilisateurService utilisateurService) {
         this.vehiculeService = vehiculeService;
         this.assuranceService = assuranceService;
         this.contratService = contratService;
         this.messagerieController = messagerieController;
         this.utilisateurController = utilisateurController;
+        this.utilisateurService = utilisateurService;
     }
 
     /**
@@ -64,6 +67,7 @@ public class LoueurController {
         System.out.println("8. Noter");
         System.out.println("9. Mes contrats terminés");
         System.out.println("10. Mes contrats et PDF");
+        System.out.println("11. Trouver un parking partenaire");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -100,6 +104,9 @@ public class LoueurController {
                 break;
             case 10:
                 afficherMesContrats(currentUser);
+                break;
+            case 11:
+                utilisateurService.gererSelectionParkingPourLoueur();
                 break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
