@@ -30,7 +30,9 @@ import com.group3.carrental.repository.ParkingRepository;
 import com.group3.carrental.repository.EntrepriseRepository;
 import com.group3.carrental.repository.ContratRepository;
 import com.group3.carrental.repository.OptionPayanteAgentRepository;
+import com.group3.carrental.repository.PrestataireEntretienRepository;
 import com.group3.carrental.entity.OptionPayanteAgent;
+import com.group3.carrental.entity.PrestataireEntretien;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -45,6 +47,7 @@ public class DataInitializer implements CommandLineRunner {
         private final ContratRepository contratRepository;
         private final ParkingRepository parkingRepository;
         private final OptionPayanteAgentRepository optionPayanteAgentRepository;
+        private final PrestataireEntretienRepository prestataireRepository;
 
         @Autowired
         public DataInitializer(VehiculeRepository vehiculeRepository,
@@ -56,7 +59,8 @@ public class DataInitializer implements CommandLineRunner {
                         NoteVehiculeRepository noteVehiculeRepository,
                         ContratRepository contratRepository,
                         ParkingRepository parkingRepository,
-                        OptionPayanteAgentRepository optionPayanteAgentRepository) {
+                        OptionPayanteAgentRepository optionPayanteAgentRepository,
+                        PrestataireEntretienRepository prestataireRepository) {
                 this.vehiculeRepository = vehiculeRepository;
                 this.utilisateurRepository = utilisateurRepository;
                 this.assuranceRepository = assuranceRepository;
@@ -67,6 +71,7 @@ public class DataInitializer implements CommandLineRunner {
                 this.contratRepository = contratRepository;
                 this.parkingRepository = parkingRepository;
                 this.optionPayanteAgentRepository = optionPayanteAgentRepository;
+                this.prestataireRepository = prestataireRepository;
         }
 
         @Override
@@ -404,5 +409,22 @@ public class DataInitializer implements CommandLineRunner {
                 optionPayanteAgentRepository.save(opt2);
 
                 System.out.println("   - 2 options payantes créées pour agentPro1");
+
+                // ========== Prestataires d'Entretien ==========
+                PrestataireEntretien p1 = new PrestataireEntretien("12345678900011", "CleanAuto",
+                                "Nettoyage intérieur/extérieur");
+                PrestataireEntretien p2 = new PrestataireEntretien("98765432100022", "FastRepair",
+                                "Réparations rapides");
+                PrestataireEntretien p3 = new PrestataireEntretien("45678912300033", "AutoService+",
+                                "Entretien complet");
+                PrestataireEntretien p4 = new PrestataireEntretien("74185296300044", "ProGarage",
+                                "Garage professionnel");
+
+                prestataireRepository.save(p1);
+                prestataireRepository.save(p2);
+                prestataireRepository.save(p3);
+                prestataireRepository.save(p4);
+
+                System.out.println("   - 4 prestataires d'entretien créés");
         }
 }
