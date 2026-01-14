@@ -337,6 +337,28 @@ public class LoueurController {
         System.out.println("\n=== Retour du véhicule: " + contrat.getVehicule().getMarque() + " "
                 + contrat.getVehicule().getModele() + " ===");
 
+        Vehicule vehicule = contrat.getVehicule();
+
+        // Kilométrage
+        System.out.println("\n--- Kilométrage ---");
+        System.out.println("Kilométrage actuel enregistré: " + vehicule.getKilometrage() + " km");
+        System.out.print("Nouveau kilométrage du véhicule (en km): ");
+        int nouveauKilometrage = sc.nextInt();
+        sc.nextLine();
+
+        if (nouveauKilometrage < vehicule.getKilometrage()) {
+            System.out.println("Attention: Le nouveau kilométrage est inférieur au précédent!");
+            System.out.print("Confirmez-vous? (oui/non): ");
+            String confirmation = sc.nextLine().toLowerCase();
+            if (!confirmation.equals("oui")) {
+                System.out.println("Opération annulée.");
+                return;
+            }
+        }
+
+        int distanceParcourue = nouveauKilometrage - vehicule.getKilometrage();
+        System.out.println("Distance parcourue: " + distanceParcourue + " km");
+
         // Photo de kilométrage
         System.out.println("\n--- Photo du kilométrage ---");
         System.out.println("Veuillez saisir le chemin du fichier photo (ex: C:/photos/kilometrage.jpg)");
@@ -347,12 +369,17 @@ public class LoueurController {
             cheminPhoto = "Non fourni";
         }
 
+        // Mettre à jour le kilométrage
+        vehicule.setKilometrage(nouveauKilometrage);
+        vehiculeService.save(vehicule);
+
         // Marquer le contrat comme rendu
         contratService.rendreVehicule(contrat.getId(), cheminPhoto);
 
         System.out.println("\n========================================");
         System.out.println("  VEHICULE RENDU AVEC SUCCES !");
         System.out.println("========================================");
+        System.out.println("Kilométrage enregistré: " + nouveauKilometrage + " km");
         System.out.println("Photo enregistrée: " + cheminPhoto);
     }
 
@@ -420,4 +447,5 @@ public class LoueurController {
             }
         }
     }
+
 }
