@@ -75,6 +75,8 @@ public class AppController {
         System.out.println("Au revoir !");
     }
 
+    
+    // Menu de Visitor
     private void displayMenuVisitor() {
         System.out.println("\nMenu de Visitor : ");
         System.out.println("1. Se connecter");
@@ -160,6 +162,7 @@ public class AppController {
         }
     }
 
+    // Menu de Loueur
     private void displayMenuLoueur() {
         // Vérifier s'il y a des véhicules à rendre
         if (currentUser instanceof com.group3.carrental.entity.Loueur loueur) {
@@ -371,7 +374,8 @@ public class AppController {
             sc.nextLine();
         }
     }
-
+    
+    // Menu de Agent
     private void displayMenuAgent() {
         if (!(currentUser instanceof Agent)) {
             System.out.println("Erreur: accès agent refusé pour cet utilisateur.");
