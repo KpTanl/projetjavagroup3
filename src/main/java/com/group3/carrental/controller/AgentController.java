@@ -9,9 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.group3.carrental.entity.Agent;
+import com.group3.carrental.entity.Assurance;
 import com.group3.carrental.entity.Contrat;
+import com.group3.carrental.entity.Parking;
 import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Vehicule;
+import com.group3.carrental.service.AssuranceService;
 import com.group3.carrental.service.ContratService;
 import com.group3.carrental.service.OptionService;
 import com.group3.carrental.service.UtilisateurService;
@@ -24,17 +27,20 @@ public class AgentController {
     private final ContratService contratService;
     private final UtilisateurService utilisateurService;
     private final OptionService optionService;
+    private final AssuranceService assuranceService;
     private final MessagerieController messagerieController;
     private final UtilisateurController utilisateurController;
 
     @Autowired
     public AgentController(VehiculeService vehiculeService, ContratService contratService,
             UtilisateurService utilisateurService, OptionService optionService,
-            MessagerieController messagerieController, UtilisateurController utilisateurController) {
+            AssuranceService assuranceService, MessagerieController messagerieController,
+            UtilisateurController utilisateurController) {
         this.vehiculeService = vehiculeService;
         this.contratService = contratService;
         this.utilisateurService = utilisateurService;
         this.optionService = optionService;
+        this.assuranceService = assuranceService;
         this.messagerieController = messagerieController;
         this.utilisateurController = utilisateurController;
     }
@@ -66,6 +72,7 @@ public class AgentController {
         System.out.println("11. Mes contrats terminés");
         System.out.println("12. Mes contrats et PDF");
         System.out.println("13. Gérer mes options payantes");
+        System.out.println("14. Louer un véhicule");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -108,6 +115,9 @@ public class AgentController {
                 break;
             case 13:
                 gererOptionsPayantes(currentUser);
+                break;
+            case 14:
+                utilisateurController.louerVehicule(currentUser);
                 break;
             case 0:
                 System.out.println("Vous avez choisi de quitter !");
@@ -405,4 +415,5 @@ public class AgentController {
         optionService.annulerOption(optionId);
         System.out.println("\n✓ Option résiliée (si elle existait).");
     }
+
 }

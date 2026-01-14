@@ -80,7 +80,7 @@ public class LoueurController {
                 vehiculeService.filtrerVehicules();
                 break;
             case 3:
-                louerVehicule(currentUser);
+                utilisateurController.louerVehicule(currentUser);
                 break;
             case 4:
                 afficherAssurances();
@@ -138,172 +138,6 @@ public class LoueurController {
         for (Assurance assurance : assurances) {
             double prix5jours = assuranceService.calculerPrix(assurance, 5);
             System.out.println("- " + assurance.getNom() + ": " + prix5jours + "€");
-        }
-    }
-
-    private void louerVehicule(Utilisateur currentUser) {
-        System.out.println("\n=== Location de Véhicule ===");
-
-        try {
-            vehiculeService.afficherVehiculesDisponibles();
-            System.out.print("\nEntrez l'ID du véhicule à louer (disponible) : ");
-            int vehiculeId = sc.nextInt();
-            sc.nextLine();
-
-            Vehicule vehiculeSelectionne = vehiculeService.getVehiculeDisponibleById(vehiculeId);
-            if (vehiculeSelectionne == null) {
-                System.out.println("Le véhicule choisi n'est pas disponible (non loué) ou n'existe pas.");
-                return;
-            }
-            System.out.println("Véhicule sélectionné: " + vehiculeSelectionne.getMarque() + " "
-                    + vehiculeSelectionne.getModele() + " (ID: " + vehiculeId + ")");
-
-            List<LocalDate> datesDisponibles = vehiculeSelectionne.getDatesDisponibles();
-            System.out.println("\nDates disponibles pour ce véhicule:");
-            if (datesDisponibles.isEmpty()) {
-                System.out.println("Aucune date disponible pour ce véhicule.");
-                return;
-            }
-
-            LocalDate dateDebut = null;
-            if (datesDisponibles.size() > 1) {
-                System.out.println("Nombre de dates disponibles: " + datesDisponibles.size());
-                System.out.println("Première date disponible: " + datesDisponibles.get(0));
-                System.out.println("Dernière date disponible: " + datesDisponibles.get(datesDisponibles.size() - 1));
-
-                System.out.print("\nSaisissez la date de début de location (format: AAAA-MM-JJ) : ");
-                String dateInput = sc.nextLine();
-                try {
-                    dateDebut = LocalDate.parse(dateInput);
-                    if (!datesDisponibles.contains(dateDebut)) {
-                        System.out.println("Cette date n'est pas disponible pour ce véhicule.");
-                        return;
-                    }
-                } catch (Exception e) {
-                    System.out.println("Format de date invalide. Utilisez AAAA-MM-JJ (ex: 2026-01-15)");
-                    return;
-                }
-            } else {
-                dateDebut = datesDisponibles.get(0);
-                System.out.println("Date de début: " + dateDebut);
-            }
-
-            System.out.print("Nombre de jours de location : ");
-            int nbJours = sc.nextInt();
-            sc.nextLine();
-
-            System.out.println("\n=== Assurances Disponibles ===");
-            List<Assurance> assurances = assuranceService.getAllAssurances();
-
-            if (assurances.isEmpty()) {
-                System.out.println("Aucune assurance disponible.");
-                return;
-            }
-
-            for (int i = 0; i < assurances.size(); i++) {
-                Assurance a = assurances.get(i);
-                double prix = assuranceService.calculerPrix(a, nbJours);
-                System.out.println((i + 1) + ". " + a.getNom() +
-                        " - " + a.getPrixParJour() + "€/jour" +
-                        " (Total: " + prix + "€ pour " + nbJours + " jours)");
-            }
-
-            System.out.print("\nChoisissez une assurance (numéro) : ");
-            int choixAssurance = sc.nextInt();
-            sc.nextLine();
-
-            if (choixAssurance < 1 || choixAssurance > assurances.size()) {
-                System.out.println("Choix invalide !");
-                return;
-            }
-
-            Assurance assuranceChoisie = assurances.get(choixAssurance - 1);
-            double prixAssurance = assuranceService.calculerPrix(assuranceChoisie, nbJours);
-
-            // OPTION PARKING
-            Parking parkingSelectionne = null;
-            System.out.print("\nVoulez-vous choisir un parking pour le dépôt ? (O/N) : ");
-            String choixParking = sc.nextLine();
-            if (choixParking.equalsIgnoreCase("O")) {
-                parkingSelectionne = utilisateurService.gererSelectionParkingPourLoueur();
-            }
-
-            double prixParkingOuReduction = (parkingSelectionne != null) ? parkingSelectionne.getReductionloueur() : 0;
-            double prixTotal = prixAssurance - prixParkingOuReduction;
-
-            // AFFICHAGE DES PRIX
-            System.out.println("\n--- Détails du paiement ---");
-            System.out.println("Prix assurance : " + prixAssurance + " euros");
-            if (parkingSelectionne != null) {
-                System.out.println("Réduction parking (Loueur) : -" + prixParkingOuReduction + " euros");
-            }
-            System.out.println("PRIX TOTAL ESTIMÉ : " + prixTotal + " euros");
-
-            // RECAPITULATIF
-            System.out.println("\n=== Récapitulatif de Location ===");
-            System.out.println("Véhicule: ID " + vehiculeId);
-            System.out.println("Date de début: " + dateDebut);
-            System.out.println("Durée: " + nbJours + " jours");
-            System.out.println("Assurance: " + assuranceChoisie.getNom());
-            System.out.println("Prix assurance: " + prixAssurance + "€");
-
-            if (parkingSelectionne != null) {
-                System.out.println("Lieu de dépôt : " + parkingSelectionne.getNomP() + " ("
-                        + parkingSelectionne.getVilleP() + ")");
-                System.out.println("Réduction parking (Loueur) : -" + prixParkingOuReduction + " euros");
-            }
-
-            System.out.println("\nPrix total estimé: " + prixTotal + "€");
-
-            System.out.print("\nConfirmer la location ? (O/N) : ");
-            String confirmation = sc.nextLine();
-
-            if (confirmation.equalsIgnoreCase("O")) {
-                java.util.Date dateDebutContrat = java.util.Date.from(
-                        dateDebut.atStartOfDay(ZoneId.systemDefault()).toInstant());
-                java.util.Date dateFinContrat = java.util.Date.from(
-                        dateDebut.plusDays(nbJours).atStartOfDay(ZoneId.systemDefault()).toInstant());
-
-                try {
-                    Agent agentVehicule = vehiculeSelectionne.getAgent();
-                    Loueur loueurCourant = null;
-                    if (currentUser instanceof Loueur) {
-                        loueurCourant = (Loueur) currentUser;
-                    }
-
-                    // Utilisation du crédit de parrainage
-                    double creditUtilise = 0;
-                    if (loueurCourant != null && loueurCourant.getSoldePorteMonnaie() > 0) {
-                        System.out.println("\n*** CRÉDIT DISPONIBLE ***");
-                        System.out.println("Vous avez " + loueurCourant.getSoldePorteMonnaie() + "€ de crédit.");
-                        System.out.print("Voulez-vous utiliser votre crédit ? (O/N) : ");
-                        String utiliserCredit = sc.nextLine();
-                        if (utiliserCredit.equalsIgnoreCase("O")) {
-                            creditUtilise = Math.min(prixTotal, loueurCourant.getSoldePorteMonnaie());
-                            prixTotal -= creditUtilise;
-                            loueurCourant.setSoldePorteMonnaie(loueurCourant.getSoldePorteMonnaie() - creditUtilise);
-                            utilisateurService.mettreAJour(loueurCourant);
-                            System.out.println("Crédit utilisé : -" + creditUtilise + "€");
-                            System.out.println("Nouveau prix total : " + prixTotal + "€");
-                        }
-                    }
-
-                    contratService.creerContratPresigne(dateDebutContrat, dateFinContrat, agentVehicule, loueurCourant,
-                            vehiculeSelectionne, prixTotal);
-
-                    System.out.println("\nLocation confirmée !");
-                    System.out.println("Votre contrat a été créé avec succès.");
-                    System.out.println("Période de location: du " + dateDebut + " au " + dateDebut.plusDays(nbJours));
-                } catch (Exception e) {
-                    System.out.println("Erreur lors de la création du contrat: " + e.getMessage());
-                }
-            } else {
-                System.out.println("Location annulée.");
-            }
-
-        } catch (Exception e) {
-            System.out.println("Erreur lors de la location: " + e.getMessage());
-            sc.nextLine();
         }
     }
 
@@ -394,17 +228,20 @@ public class LoueurController {
         contratService.rendreVehicule(contrat.getId(), cheminPhoto);
 
         // Parrainage: Récompenser le parrain si c'est la première location terminée
-        Loueur loueur = contrat.getLoueur();
-        if (loueur.getParrain() != null && !loueur.isBonusParrainageRecu()) {
-            Utilisateur parrain = loueur.getParrain();
-            double bonus = 50.0;
-            parrain.setSoldePorteMonnaie(parrain.getSoldePorteMonnaie() + bonus);
-            loueur.setBonusParrainageRecu(true);
-            utilisateurService.mettreAJour(parrain);
-            utilisateurService.mettreAJour(loueur);
-            System.out.println("\n*** PARRAINAGE ***");
-            System.out.println("Félicitations ! Votre parrain " + parrain.getPrenom() + " " + parrain.getNom()
+        Utilisateur loueur = contrat.getLoueur();
+        if (loueur instanceof Loueur) {
+            Loueur loueurCast = (Loueur) loueur;
+            if (loueurCast.getParrain() != null && !loueurCast.isBonusParrainageRecu()) {
+                Utilisateur parrain = loueurCast.getParrain();
+                double bonus = 50.0;
+                parrain.setSoldePorteMonnaie(parrain.getSoldePorteMonnaie() + bonus);
+                loueurCast.setBonusParrainageRecu(true);
+                utilisateurService.mettreAJour(parrain);
+                utilisateurService.mettreAJour(loueurCast);
+                System.out.println("\n*** PARRAINAGE ***");
+                System.out.println("Félicitations ! Votre parrain " + parrain.getPrenom() + " " + parrain.getNom()
                     + " a reçu " + bonus + "€ de crédit !");
+            }
         }
 
         System.out.println("\n========================================");
