@@ -16,23 +16,29 @@ import com.group3.carrental.repository.ContratRepository;
 public class ContratService {
 
     private final ContratRepository contratRepository;
+    private final OptionService optionService;
 
-    public ContratService(ContratRepository contratRepository) {
+    public ContratService(ContratRepository contratRepository, OptionService optionService) {
         this.contratRepository = contratRepository;
-    }
-
-    public Contrat creerContrat(Date dateDeb, Date dateFin, Agent agent, Utilisateur loueur, Vehicule vehicule,
-            double prixTotal) {
-        Contrat contrat = new Contrat(dateDeb, dateFin, agent, loueur, vehicule, prixTotal);
-        contrat.setStatut(Contrat.Statut.Presigne);
-        return contratRepository.save(contrat);
+        this.optionService = optionService;
     }
 
     public Contrat creerContratPresigne(Date dateDeb, Date dateFin,
             Agent agent, Utilisateur loueur,
             Vehicule vehicule, double prixTotal) {
+
         Contrat contrat = new Contrat(dateDeb, dateFin, agent, loueur, vehicule, prixTotal);
+
         contrat.setStatut(Contrat.Statut.Presigne);
+
+        boolean optionManuelle = optionService.hasActiveOption(
+                agent.getId(),
+                OptionService.OPT_SIGNATURE_MANUELLE);
+
+        if (!optionManuelle) {
+            contrat.setStatut(Contrat.Statut.Accepte);
+        }
+
         return contratRepository.save(contrat);
     }
 
@@ -127,8 +133,6 @@ public class ContratService {
         contratRepository.deleteById(id);
     }
 
-    
-
     /**
      * Récupérer les contrats à rendre pour un loueur (date de fin passée, statut !=
      * Rendu)
@@ -166,7 +170,6 @@ public class ContratService {
         }
     }
 
-    
     public Contrat save(Contrat c) {
         return contratRepository.save(c);
     }

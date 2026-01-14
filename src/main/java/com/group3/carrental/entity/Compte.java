@@ -25,6 +25,7 @@ public abstract class Compte {
 
     /**
      * Vérifie si le mot de passe fourni correspond au mot de passe du compte
+     * 
      * @param motDePasseSaisi Le mot de passe à vérifier
      * @return true si le mot de passe est correct, false sinon
      */
