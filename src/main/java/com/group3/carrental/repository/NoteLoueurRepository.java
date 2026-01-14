@@ -9,6 +9,7 @@ import com.group3.carrental.entity.NoteLoueur;
 
 @Repository
 public interface NoteLoueurRepository extends JpaRepository<NoteLoueur, Long> {
-    Optional<NoteLoueur> findByContrat_Id(Long contratId);
+
     boolean existsByContrat_Id(Long contratId);
+    Optional<NoteLoueur> findTopByContrat_IdOrderByIdDesc(Long contratId);
 }
