@@ -33,4 +33,8 @@ public class OptionService {
             optionRepository.save(opt); // Met à jour le statut estActive à false
         }
     }
+
+    public java.util.List<OptionPayanteAgent> getOptionsByAgent(Agent agent) {
+        return optionRepository.findByAgent(agent);
+    }
 }

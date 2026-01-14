@@ -29,6 +29,8 @@ import com.group3.carrental.repository.NoteVehiculeRepository;
 import com.group3.carrental.repository.ParkingRepository;
 import com.group3.carrental.repository.EntrepriseRepository;
 import com.group3.carrental.repository.ContratRepository;
+import com.group3.carrental.repository.OptionPayanteAgentRepository;
+import com.group3.carrental.entity.OptionPayanteAgent;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -42,6 +44,7 @@ public class DataInitializer implements CommandLineRunner {
         private final NoteVehiculeRepository noteVehiculeRepository;
         private final ContratRepository contratRepository;
         private final ParkingRepository parkingRepository;
+        private final OptionPayanteAgentRepository optionPayanteAgentRepository;
 
         @Autowired
         public DataInitializer(VehiculeRepository vehiculeRepository,
@@ -52,7 +55,8 @@ public class DataInitializer implements CommandLineRunner {
                         NoteLoueurRepository noteLoueurRepository,
                         NoteVehiculeRepository noteVehiculeRepository,
                         ContratRepository contratRepository,
-                        ParkingRepository parkingRepository) {
+                        ParkingRepository parkingRepository,
+                        OptionPayanteAgentRepository optionPayanteAgentRepository) {
                 this.vehiculeRepository = vehiculeRepository;
                 this.utilisateurRepository = utilisateurRepository;
                 this.assuranceRepository = assuranceRepository;
@@ -62,6 +66,7 @@ public class DataInitializer implements CommandLineRunner {
                 this.noteVehiculeRepository = noteVehiculeRepository;
                 this.contratRepository = contratRepository;
                 this.parkingRepository = parkingRepository;
+                this.optionPayanteAgentRepository = optionPayanteAgentRepository;
         }
 
         @Override
@@ -388,5 +393,16 @@ public class DataInitializer implements CommandLineRunner {
                 System.out.println("   - 2 parkings (Paris, Toulouse)");
                 System.out.println("   - 5 contrats démo terminés");
                 System.out.println("   - 4 notes véhicule + 2 notes agent");
+
+                // ========== Options Payantes Agent (Démo) ==========
+                OptionPayanteAgent opt1 = new OptionPayanteAgent("Mise en avant premium", 50.0f, agentPro1);
+                opt1.souscrire(); // Active l'option
+                optionPayanteAgentRepository.save(opt1);
+
+                OptionPayanteAgent opt2 = new OptionPayanteAgent("Support prioritaire", 20.0f, agentPro1);
+                // On ne l'active pas par défaut pour tester
+                optionPayanteAgentRepository.save(opt2);
+
+                System.out.println("   - 2 options payantes créées pour agentPro1");
         }
 }
