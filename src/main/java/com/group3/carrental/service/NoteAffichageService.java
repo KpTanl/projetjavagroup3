@@ -27,14 +27,14 @@ public class NoteAffichageService {
     }
 
     public Optional<NoteVehicule> getNoteVehiculeParContrat(Long contratId) {
-        return noteVehiculeRepository.findByContrat_Id(contratId);
+        return noteVehiculeRepository.findTopByContrat_IdOrderByIdDesc(contratId);
     }
 
     public Optional<NoteAgent> getNoteAgentParContrat(Long contratId) {
-        return noteAgentRepository.findByContrat_Id(contratId);
+        return noteAgentRepository.findTopByContrat_IdOrderByIdDesc(contratId);
     }
 
     public Optional<NoteLoueur> getNoteLoueurParContrat(Long contratId) {
-        return noteLoueurRepository.findByContrat_Id(contratId);
+        return noteLoueurRepository.findTopByContrat_IdOrderByIdDesc(contratId);
     }
 }
