@@ -68,8 +68,4 @@ public abstract class Utilisateur extends Compte {
         }
     }
 
-    public void signerContrat() {
-
-    }
-
 }
