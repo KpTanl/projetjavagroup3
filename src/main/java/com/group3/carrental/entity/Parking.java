@@ -2,10 +2,10 @@ package com.group3.carrental.entity;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -14,10 +14,9 @@ import lombok.NoArgsConstructor;
 public class Parking implements Services {
     // propriétés
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private String idP;
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+private String nomP;
     private String VilleP;
     private String rueP;
     private String CodePostalP;
@@ -31,10 +30,9 @@ public class Parking implements Services {
     private String contraintes;
 
     // Constructeurs
-    public Parking(String idP, String VilleP, String rueP, String CodePostalP, int nb_places_max,
+    public Parking( String nomP,String VilleP, String rueP, String CodePostalP, int nb_places_max,
             double prixstockage_jour, double reductionloueur, String contraintes) {
-
-        this.idP = idP;
+this.nomP = nomP;
         this.VilleP = VilleP;
         this.rueP = rueP;
         this.CodePostalP = CodePostalP;
@@ -89,6 +87,15 @@ public class Parking implements Services {
         }
         return villes;
     }
+    // À ajouter dans Parking.java
+public void afficherDetails() {
+    System.out.println("\n-------------------------------------------");
+    System.out.println("📍 ADRESSE : " + getLocalisationComplete());
+    System.out.println("⚠️ CONTRAINTES : " + (contraintes != null ? contraintes : "Aucune"));
+    System.out.println("ℹ️ INFOS : Parking partenaire Vienci - Durée longue autorisée");
+    System.out.println("💰 RÉDUCTION : -" + reductionloueur + "€ sur votre location");
+    System.out.println("-------------------------------------------");
+}
 
     // ==================== Services Interface ====================
     @Override
