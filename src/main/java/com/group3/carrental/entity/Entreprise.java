@@ -39,17 +39,17 @@ public class Entreprise extends Compte implements Services {
     }
 
     @Override
-    public void Souscrire() {
+    public void souscrire() {
         // TODO Auto-generated method stub
     }
 
     @Override
-    public void Resilier() {
+    public void resilier() {
         // TODO Auto-generated method stub
     }
 
     @Override
-    public void Renouveler() {
+    public void renouveler() {
         // TODO Auto-generated method stub
     }
 }
