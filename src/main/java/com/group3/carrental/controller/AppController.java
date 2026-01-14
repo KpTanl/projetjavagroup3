@@ -29,8 +29,10 @@ public class AppController {
         Exit
     }
 
+    //menu princiapl
     public void startApp() {
         while (currentUserRole != UserRole.Exit) {
+            System.out.println("\n=== Menu Principal ===");
             switch (currentUserRole) {
                 case Visitor:
                     handleVisitorMenu();

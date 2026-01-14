@@ -97,6 +97,19 @@ public class VisitorController {
                 newUser.setMotDePasse(userMotDePasse);
                 newUser.setRole(role);
 
+                // Parrainage (Referral)
+                System.out.println("Email du parrain (laisser vide si aucun) : ");
+                String emailParrain = sc.nextLine().trim();
+                if (!emailParrain.isEmpty()) {
+                    Utilisateur parrain = utilisateurService.findByEmail(emailParrain);
+                    if (parrain != null) {
+                        newUser.setParrain(parrain);
+                        System.out.println("Parrain trouvé : " + parrain.getPrenom() + " " + parrain.getNom());
+                    } else {
+                        System.out.println("Aucun utilisateur trouvé avec cet email. Inscription sans parrain.");
+                    }
+                }
+
                 utilisateurService.register(newUser);
                 System.out.println("Inscription reussie ! Vous pouvez maintenant vous connecter.");
                 break;

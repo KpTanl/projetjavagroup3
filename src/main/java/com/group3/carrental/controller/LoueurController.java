@@ -239,7 +239,7 @@ public class LoueurController {
             }
             System.out.println("PRIX TOTAL ESTIMÉ : " + prixTotal + " euros");
 
-            //RECAPITULATIF
+            // RECAPITULATIF
             System.out.println("\n=== Récapitulatif de Location ===");
             System.out.println("Véhicule: ID " + vehiculeId);
             System.out.println("Date de début: " + dateDebut);
@@ -269,6 +269,23 @@ public class LoueurController {
                     Loueur loueurCourant = null;
                     if (currentUser instanceof Loueur) {
                         loueurCourant = (Loueur) currentUser;
+                    }
+
+                    // Utilisation du crédit de parrainage
+                    double creditUtilise = 0;
+                    if (loueurCourant != null && loueurCourant.getSoldePorteMonnaie() > 0) {
+                        System.out.println("\n*** CRÉDIT DISPONIBLE ***");
+                        System.out.println("Vous avez " + loueurCourant.getSoldePorteMonnaie() + "€ de crédit.");
+                        System.out.print("Voulez-vous utiliser votre crédit ? (O/N) : ");
+                        String utiliserCredit = sc.nextLine();
+                        if (utiliserCredit.equalsIgnoreCase("O")) {
+                            creditUtilise = Math.min(prixTotal, loueurCourant.getSoldePorteMonnaie());
+                            prixTotal -= creditUtilise;
+                            loueurCourant.setSoldePorteMonnaie(loueurCourant.getSoldePorteMonnaie() - creditUtilise);
+                            utilisateurService.mettreAJour(loueurCourant);
+                            System.out.println("Crédit utilisé : -" + creditUtilise + "€");
+                            System.out.println("Nouveau prix total : " + prixTotal + "€");
+                        }
                     }
 
                     contratService.creerContratPresigne(dateDebutContrat, dateFinContrat, agentVehicule, loueurCourant,
@@ -375,6 +392,20 @@ public class LoueurController {
 
         // Marquer le contrat comme rendu
         contratService.rendreVehicule(contrat.getId(), cheminPhoto);
+
+        // Parrainage: Récompenser le parrain si c'est la première location terminée
+        Loueur loueur = contrat.getLoueur();
+        if (loueur.getParrain() != null && !loueur.isBonusParrainageRecu()) {
+            Utilisateur parrain = loueur.getParrain();
+            double bonus = 50.0;
+            parrain.setSoldePorteMonnaie(parrain.getSoldePorteMonnaie() + bonus);
+            loueur.setBonusParrainageRecu(true);
+            utilisateurService.mettreAJour(parrain);
+            utilisateurService.mettreAJour(loueur);
+            System.out.println("\n*** PARRAINAGE ***");
+            System.out.println("Félicitations ! Votre parrain " + parrain.getPrenom() + " " + parrain.getNom()
+                    + " a reçu " + bonus + "€ de crédit !");
+        }
 
         System.out.println("\n========================================");
         System.out.println("  VEHICULE RENDU AVEC SUCCES !");
