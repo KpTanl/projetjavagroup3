@@ -1,36 +1,66 @@
 package com.group3.carrental.service;
 
+import com.group3.carrental.entity.Agent;
+import com.group3.carrental.entity.OptionPayanteAgent;
 import com.group3.carrental.repository.OptionPayanteAgentRepository;
-import com.group3.carrental.repository.UtilisateurRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.group3.carrental.entity.OptionPayanteAgent;
-import com.group3.carrental.entity.Agent;
+import java.util.List;
 
 @Service
 public class OptionService {
-    @Autowired
-    private OptionPayanteAgentRepository optionRepository;
-    @Autowired
-    private UtilisateurRepository utilisateurRepository;
 
-    public void souscrireNouvelleOption(Agent agent, String type, float prix) {
-        // 1. Création de l'objet
-        OptionPayanteAgent nouvelleOption = new OptionPayanteAgent(type, prix, agent);
+    public static final String OPT_SIGNATURE_MANUELLE = "SIGNATURE_MANUELLE_CONTRAT";
 
-        // 2. Appel de la méthode de l'interface
-        nouvelleOption.souscrire();
+    private final OptionPayanteAgentRepository optionRepository;
 
-        // 3. Sauvegarde
-        optionRepository.save(nouvelleOption);
+    public OptionService(OptionPayanteAgentRepository optionRepository) {
+        this.optionRepository = optionRepository;
     }
 
-    public void annulerOption(Long optionId) {
-        OptionPayanteAgent opt = optionRepository.findById(optionId).orElse(null);
-        if (opt != null) {
-            opt.resilier();
-            optionRepository.save(opt); // Met à jour le statut estActive à false
+    public boolean hasActiveOption(int agentId, String type) {
+        return optionRepository
+                .findFirstByAgentIdAndTypeAndEstActiveTrue(agentId, type)
+                .isPresent();
+    }
+
+    public List<OptionPayanteAgent> getOptionsByAgent(int agentId) {
+        return optionRepository.findByAgentId(agentId);
+    }
+
+    public OptionPayanteAgent activerOption(Agent agent, String type, float prixMensuel) {
+        OptionPayanteAgent opt = optionRepository
+                .findFirstByAgentIdAndType(agent.getId(), type)
+                .orElse(null);
+
+        if (opt == null) {
+            opt = new OptionPayanteAgent(type, prixMensuel, agent);
         }
+
+        if (!opt.isEstActive()) {
+            opt.souscrire();
+        }
+
+        return optionRepository.save(opt);
+    }
+
+    public OptionPayanteAgent desactiverOption(Agent agent, String type) {
+        OptionPayanteAgent opt = optionRepository
+                .findFirstByAgentIdAndType(agent.getId(), type)
+                .orElseThrow(() -> new IllegalArgumentException("Option introuvable pour cet agent."));
+
+        if (opt.isEstActive()) {
+            opt.resilier();
+        }
+
+        return optionRepository.save(opt);
+    }
+
+    public OptionPayanteAgent toggleOption(Agent agent, String type, float prixMensuel) {
+        boolean active = hasActiveOption(agent.getId(), type);
+        if (active) {
+            return desactiverOption(agent, type);
+        }
+        return activerOption(agent, type, prixMensuel);
     }
 }

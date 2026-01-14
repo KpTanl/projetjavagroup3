@@ -24,6 +24,5 @@ public abstract class Compte {
     }
 
     public void seConnecter() {
-        // TODO: Implémenter la logique de connexion
     }
 }

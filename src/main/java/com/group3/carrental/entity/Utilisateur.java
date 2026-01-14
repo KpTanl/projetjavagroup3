@@ -45,7 +45,6 @@ public abstract class Utilisateur extends Compte {
     }
 
     public void seConnecter() {
-
     }
 
     public void modifierProfil(String nom, String prenom, String email, String motDePasse) {

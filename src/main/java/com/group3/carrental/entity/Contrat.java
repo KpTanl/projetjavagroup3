@@ -154,8 +154,6 @@ public class Contrat {
         return nomFichier;
     }
 
-    public class StatutContrat {
-    }
 
     public boolean estTermine() {
         if (this.dateFin == null)

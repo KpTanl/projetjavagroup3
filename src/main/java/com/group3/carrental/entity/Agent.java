@@ -11,7 +11,6 @@ import lombok.Data;
 @DiscriminatorValue("Agent")
 public abstract class Agent extends Utilisateur implements Commun {
 
-    // EAGER: charger immediatement pour eviter LazyInitializationException
     @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<NoteAgent> notesRecues;
 

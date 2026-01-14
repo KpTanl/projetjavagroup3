@@ -15,6 +15,7 @@ import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.service.ContratService;
 import com.group3.carrental.service.UtilisateurService;
 import com.group3.carrental.service.VehiculeService;
+import com.group3.carrental.service.OptionService;
 
 @Component
 public class AgentController {
@@ -24,16 +25,18 @@ public class AgentController {
     private final UtilisateurService utilisateurService;
     private final MessagerieController messagerieController;
     private final UtilisateurController utilisateurController;
+    private final OptionService optionService;
 
     @Autowired
     public AgentController(VehiculeService vehiculeService, ContratService contratService,
             UtilisateurService utilisateurService, MessagerieController messagerieController,
-            UtilisateurController utilisateurController) {
+            UtilisateurController utilisateurController, OptionService optionService) {
         this.vehiculeService = vehiculeService;
         this.contratService = contratService;
         this.utilisateurService = utilisateurService;
         this.messagerieController = messagerieController;
         this.utilisateurController = utilisateurController;
+        this.optionService = optionService;
     }
 
     /**
@@ -58,10 +61,11 @@ public class AgentController {
         System.out.println("6. Messagerie");
         System.out.println("7. Gérer l'option Parking Partenaire");
         System.out.println("8. Consulter l'historique de mes véhicules");
-        System.out.println("9. Valider contrats (pré-signés)");
-        System.out.println("10. Noter Loueur");
-        System.out.println("11. Mes contrats terminés");
-        System.out.println("12. Mes contrats et PDF");
+        System.out.println("9. Gérer option signature manuelle (contrats)");
+        System.out.println("10. Valider contrats (pré-signés)");
+        System.out.println("11. Noter Loueur");
+        System.out.println("12. Mes contrats terminés");
+        System.out.println("13. Mes contrats et PDF");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -91,15 +95,26 @@ public class AgentController {
                 consulterHistoriqueVehicules(currentUser);
                 break;
             case 9:
-                utilisateurController.menuValidationContrats(agent);
+                menuOptionSignatureManuelle(agent);
                 break;
             case 10:
-                utilisateurController.menuNotation(currentUser);
+                boolean optionManuelle = optionService.hasActiveOption(
+                        agent.getId(),
+                        OptionService.OPT_SIGNATURE_MANUELLE
+                );
+                if (!optionManuelle) {
+                    System.out.println("Option non active : les contrats sont acceptés automatiquement à la création.");
+                    break;
+                }
+                utilisateurController.menuValidationContrats(agent);
                 break;
             case 11:
-                utilisateurController.menuMesContratsTermines(currentUser);
+                utilisateurController.menuNotation(currentUser);
                 break;
             case 12:
+                utilisateurController.menuMesContratsTermines(currentUser);
+                break;
+            case 13:
                 afficherMesContrats(currentUser);
                 break;
             case 0:
@@ -291,6 +306,30 @@ public class AgentController {
             } else {
                 System.out.println("\nErreur lors de la génération du PDF.");
             }
+        }
+    }
+    private void menuOptionSignatureManuelle(Agent agent) {
+        final float PRIX_MENSUEL = 9.99f; // mets le prix demandé dans l'énoncé si vous en avez un
+
+        boolean active = optionService.hasActiveOption(agent.getId(), OptionService.OPT_SIGNATURE_MANUELLE);
+
+        System.out.println("\n=== Option: Signature manuelle des contrats ===");
+        System.out.println("Statut actuel : " + (active ? "ACTIVE" : "INACTIVE"));
+        System.out.println("1. " + (active ? "Désactiver" : "Activer"));
+        System.out.println("0. Retour");
+        System.out.print("Votre choix : ");
+
+        int choix = sc.nextInt();
+        sc.nextLine();
+
+        try {
+            if (choix == 1) {
+                optionService.toggleOption(agent, OptionService.OPT_SIGNATURE_MANUELLE, PRIX_MENSUEL);
+                boolean newState = optionService.hasActiveOption(agent.getId(), OptionService.OPT_SIGNATURE_MANUELLE);
+                System.out.println("Nouveau statut : " + (newState ? "ACTIVE" : "INACTIVE"));
+            }
+        } catch (Exception e) {
+            System.out.println("Erreur: " + e.getMessage());
         }
     }
 }

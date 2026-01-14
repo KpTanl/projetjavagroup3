@@ -16,9 +16,8 @@ public class AgentPro extends Agent {
     public AgentPro(int id, String nom, String prenom, String email, String motDePasse,
             List<NoteAgent> notesRecues, LocalDate dateRecuFacture,
             long nSiret, String nomSociete,
-            double latitudeHabitation, double longitudeHabitation) { // 1. Ajout ici
+            double latitudeHabitation, double longitudeHabitation) {
 
-        // 2. On les passe au constructeur de Agent (qui doit lui aussi les accepter)
         super(id, nom, prenom, email, motDePasse, notesRecues, dateRecuFacture,
                 latitudeHabitation, longitudeHabitation);
 
