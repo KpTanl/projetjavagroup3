@@ -66,9 +66,10 @@ public class LoueurController {
         System.out.println("6. Mon profil");
         System.out.println("7. Suggestions autour de chez moi (Rayon X km)");
         System.out.println("8. Noter");
-        System.out.println("9. Mes contrats terminés");
-        System.out.println("10. Mes contrats et PDF");
-        System.out.println("11. Trouver un parking partenaire");
+        System.out.println("9. Droit de réponse (discussion sur notes)");
+        System.out.println("10. Mes contrats terminés");
+        System.out.println("11. Mes contrats et PDF");
+        System.out.println("12. Trouver un parking partenaire");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -101,12 +102,15 @@ public class LoueurController {
                 utilisateurController.menuNotation(currentUser);
                 break;
             case 9:
-                utilisateurController.menuMesContratsTermines(currentUser);
+                utilisateurController.menuDiscussionNotes(currentUser);
                 break;
             case 10:
-                afficherMesContrats(currentUser);
+                utilisateurController.menuMesContratsTermines(currentUser);
                 break;
             case 11:
+                afficherMesContrats(currentUser);
+                break;
+            case 12:
                 utilisateurService.gererSelectionParkingPourLoueur();
                 break;
             case 0:

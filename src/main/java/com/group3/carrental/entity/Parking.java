@@ -14,9 +14,9 @@ import lombok.AllArgsConstructor;
 public class Parking implements Services {
     // propriétés
     @Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
-private String nomP;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String nomP;
     private String VilleP;
     private String rueP;
     private String CodePostalP;
@@ -30,9 +30,9 @@ private String nomP;
     private String contraintes;
 
     // Constructeurs
-    public Parking( String nomP,String VilleP, String rueP, String CodePostalP, int nb_places_max,
+    public Parking(String nomP, String VilleP, String rueP, String CodePostalP, int nb_places_max,
             double prixstockage_jour, double reductionloueur, String contraintes) {
-this.nomP = nomP;
+        this.nomP = nomP;
         this.VilleP = VilleP;
         this.rueP = rueP;
         this.CodePostalP = CodePostalP;
@@ -87,15 +87,16 @@ this.nomP = nomP;
         }
         return villes;
     }
+
     // À ajouter dans Parking.java
-public void afficherDetails() {
-    System.out.println("\n-------------------------------------------");
-    System.out.println("ADRESSE : " + getLocalisationComplete());
-    System.out.println("CONTRAINTES : " + (contraintes != null ? contraintes : "Aucune"));
-    System.out.println("INFOS : Parking partenaire Vienci - Durée longue autorisée");
-    System.out.println("RÉDUCTION : -" + reductionloueur + "€ sur votre location");
-    System.out.println("-------------------------------------------");
-}
+    public void afficherDetails() {
+        System.out.println("\n-------------------------------------------");
+        System.out.println("ADRESSE : " + getLocalisationComplete());
+        System.out.println("CONTRAINTES : " + (contraintes != null ? contraintes : "Aucune"));
+        System.out.println("ℹINFOS : Parking partenaire Vienci - Durée longue autorisée");
+        System.out.println("RÉDUCTION : -" + reductionloueur + "€ sur votre location");
+        System.out.println("-------------------------------------------");
+    }
 
     // ==================== Services Interface ====================
     @Override
@@ -114,6 +115,3 @@ public void afficherDetails() {
     }
 
 }
-
-
-
