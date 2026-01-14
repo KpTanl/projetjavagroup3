@@ -81,7 +81,7 @@ public class LoueurController {
                 vehiculeService.filtrerVehicules();
                 break;
             case 3:
-                utilisateurController.louerVehicule(currentUser);
+                louerVehicule(currentUser);
                 break;
             case 4:
                 afficherAssurances();
