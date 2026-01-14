@@ -1,4 +1,4 @@
-package com.group3.carrental.entity;
+    package com.group3.carrental.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -37,19 +37,19 @@ public class OptionPayanteAgent implements Services {
     public void souscrire() {
         this.estActive = true;
         this.dateRenouvellement = new Date();
-        System.out.println("[INFO] Option " + type + " activée pour l'agent " + agent.getNom());
+        System.out.println("[INFO] Option " + type + " activee pour l'agent " + agent.getNom());
     }
 
     @Override
     public void resilier() {
         this.estActive = false;
-        System.out.println("[INFO] Option " + type + " résiliée.");
+        System.out.println("[INFO] Option " + type + " resiliee.");
     }
 
     @Override
     public void renouveler() {
         if (this.estActive) {
-            System.out.println("[INFO] Option " + type + " renouvelée.");
+            System.out.println("[INFO] Option " + type + " renouvelee.");
         }
     }
 }
