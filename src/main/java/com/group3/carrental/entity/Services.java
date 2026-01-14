@@ -1,9 +1,9 @@
 package com.group3.carrental.entity;
 
 public interface Services {
-    void Souscrire();
+    void souscrire();
 
-    void Resilier();
+    void resilier();
 
-    void Renouveler();
+    void renouveler();
 }

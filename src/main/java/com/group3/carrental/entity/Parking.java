@@ -99,17 +99,17 @@ public void afficherDetails() {
 
     // ==================== Services Interface ====================
     @Override
-    public void Souscrire() {
+    public void souscrire() {
 
     }
 
     @Override
-    public void Resilier() {
+    public void resilier() {
 
     }
 
     @Override
-    public void Renouveler() {
+    public void renouveler() {
 
     }
 
