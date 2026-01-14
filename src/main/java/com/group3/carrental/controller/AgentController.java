@@ -428,8 +428,6 @@ public class AgentController {
         System.out.println("\n✓ Option résiliée (si elle existait).");
     }
 
-    <<<<<<<HEAD
-
     /**
      * Gérer les disponibilités des véhicules de l'agent.
      */
