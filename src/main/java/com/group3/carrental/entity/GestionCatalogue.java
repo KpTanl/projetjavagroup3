@@ -19,7 +19,6 @@ public class GestionCatalogue {
     System.out.println("Nom : " + agent.getPrenom() + " " + agent.getNom());
     System.out.println("Email : " + agent.getEmail());
     
-    // Calcul de la note moyenne de l'agent si tu as une classe NoteAgent
     System.out.println("Statut : " + agent.getRole()); 
     System.out.println("----------------------------------");
     System.out.println("VÉHICULES PROPOSÉS AU CATALOGUE :");
