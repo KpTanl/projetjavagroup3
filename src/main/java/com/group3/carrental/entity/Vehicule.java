@@ -17,7 +17,6 @@ public class Vehicule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
     private String marque;
     private String modele;
     private String couleur;
@@ -71,6 +70,7 @@ public class Vehicule {
     public Vehicule(TypeVehicule type, String marque, String modele, String couleur, EtatVehicule etat,
             String rueLocalisation, String cPostalLocalisation, String villeLocalisation, double latitudeVehicule,
             double longitudeVehicule) {
+                this.id = id;
         this.type = type;
         this.marque = marque;
         this.modele = modele;
