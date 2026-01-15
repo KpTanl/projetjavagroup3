@@ -262,19 +262,33 @@ public class LoueurController {
             }
 
             double prixParkingOuReduction = (parkingSelectionne != null) ? parkingSelectionne.getReductionloueur() : 0;
-            double prixTotal = prixAssurance - prixParkingOuReduction;
+
+            // Calcul du prix du véhicule (prix journalier défini par l'agent)
+            double prixVehicule = vehiculeSelectionne.getPrixJournalier() * nbJours;
+
+            // Calcul des frais de plateforme (10% + 2€ par jour)
+            double fraisPlateforme = (prixVehicule * 0.10) + (2.0 * nbJours);
+
+            // Prix total = prix véhicule + frais plateforme + assurance - réduction parking
+            double prixTotal = prixVehicule + fraisPlateforme + prixAssurance - prixParkingOuReduction;
 
             // AFFICHAGE DES PRIX
             System.out.println("\n--- Détails du paiement ---");
+            System.out.println("Prix véhicule : " + prixVehicule + " euros (" + vehiculeSelectionne.getPrixJournalier()
+                    + "€/jour x " + nbJours + " jours)");
+            System.out.println(
+                    "Frais de plateforme : " + String.format("%.2f", fraisPlateforme) + " euros (10% + 2€/jour)");
             System.out.println("Prix assurance : " + prixAssurance + " euros");
             if (parkingSelectionne != null) {
                 System.out.println("Réduction parking (Loueur) : -" + prixParkingOuReduction + " euros");
             }
-            System.out.println("PRIX TOTAL ESTIMÉ : " + prixTotal + " euros");
+            System.out.println("PRIX TOTAL ESTIMÉ : " + String.format("%.2f", prixTotal) + " euros");
 
             // RECAPITULATIF
             System.out.println("\n=== Récapitulatif de Location ===");
-            System.out.println("Véhicule: ID " + vehiculeId);
+            System.out.println("Véhicule: ID " + vehiculeId + " - " + vehiculeSelectionne.getMarque() + " "
+                    + vehiculeSelectionne.getModele());
+            System.out.println("Prix journalier: " + vehiculeSelectionne.getPrixJournalier() + "€/jour");
             System.out.println("Date de début: " + dateDebut);
             System.out.println("Durée: " + nbJours + " jours");
             System.out.println("Assurance: " + assuranceChoisie.getNom());
@@ -286,7 +300,7 @@ public class LoueurController {
                 System.out.println("Réduction parking (Loueur) : -" + prixParkingOuReduction + " euros");
             }
 
-            System.out.println("\nPrix total estimé: " + prixTotal + "€");
+            System.out.println("\nPrix total estimé: " + String.format("%.2f", prixTotal) + "€");
 
             System.out.print("\nConfirmer la location ? (O/N) : ");
             String confirmation = sc.nextLine();
