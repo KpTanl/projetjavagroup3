@@ -186,9 +186,7 @@ public class LoueurController {
                 System.out.println("\nDate de début imposée: " + dateDebut);
             } else {
                 System.out.println("\nDates disponibles pour ce véhicule:");
-                System.out.println("Nombre de dates disponibles: " + datesDisponibles.size());
-                System.out.println("Première date disponible: " + datesDisponibles.get(0));
-                System.out.println("Dernière date disponible: " + datesDisponibles.get(datesDisponibles.size() - 1));
+                System.out.println("Disponibilité: " + VehiculeService.formaterDisponibilites(datesDisponibles));
 
                 System.out.print("\nSaisissez la date de début de location (format: AAAA-MM-JJ) : ");
                 String dateInput = sc.nextLine();
@@ -207,6 +205,25 @@ public class LoueurController {
             System.out.print("Nombre de jours de location : ");
             int nbJours = sc.nextInt();
             sc.nextLine();
+
+            // Vérifier que TOUTES les dates de la période de location sont disponibles
+            if (!datesDisponibles.isEmpty()) {
+                LocalDate dateFinLocation = dateDebut.plusDays(nbJours - 1);
+                List<LocalDate> datesManquantes = new java.util.ArrayList<>();
+                LocalDate dateCheck = dateDebut;
+                while (!dateCheck.isAfter(dateFinLocation)) {
+                    if (!datesDisponibles.contains(dateCheck)) {
+                        datesManquantes.add(dateCheck);
+                    }
+                    dateCheck = dateCheck.plusDays(1);
+                }
+
+                if (!datesManquantes.isEmpty()) {
+                    System.out.println("Erreur : Le véhicule n'est pas disponible pour toute la période demandée.");
+                    System.out.println("Dates non disponibles : " + datesManquantes);
+                    return;
+                }
+            }
 
             System.out.println("\n=== Assurances Disponibles ===");
             List<Assurance> assurances = assuranceService.getAllAssurances();

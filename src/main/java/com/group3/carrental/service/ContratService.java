@@ -11,16 +11,20 @@ import com.group3.carrental.entity.Contrat;
 import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.repository.ContratRepository;
+import com.group3.carrental.repository.VehiculeRepository;
 
 @Service
 public class ContratService {
 
     private final ContratRepository contratRepository;
     private final OptionService optionService;
+    private final VehiculeRepository vehiculeRepository;
 
-    public ContratService(ContratRepository contratRepository, OptionService optionService) {
+    public ContratService(ContratRepository contratRepository, OptionService optionService,
+            VehiculeRepository vehiculeRepository) {
         this.contratRepository = contratRepository;
         this.optionService = optionService;
+        this.vehiculeRepository = vehiculeRepository;
     }
 
     public Contrat creerContratPresigne(Date dateDeb, Date dateFin,
@@ -38,6 +42,16 @@ public class ContratService {
         if (!optionManuelle) {
             contrat.setStatut(Contrat.Statut.Accepte);
         }
+
+        // Retirer les dates louées de la liste de disponibilité du véhicule
+        java.time.LocalDate start = dateDeb.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+        java.time.LocalDate end = dateFin.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+        java.time.LocalDate current = start;
+        while (!current.isAfter(end)) {
+            vehicule.getDatesDisponibles().remove(current);
+            current = current.plusDays(1);
+        }
+        vehiculeRepository.save(vehicule);
 
         return contratRepository.save(contrat);
     }
