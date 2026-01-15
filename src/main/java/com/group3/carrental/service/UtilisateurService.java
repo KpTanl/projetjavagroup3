@@ -48,11 +48,11 @@ public class UtilisateurService {
 
     public Optional<Utilisateur> login(String email, String motDePasse) {
         Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findByEmail(email);
-        
+
         if (utilisateurOpt.isPresent() && utilisateurOpt.get().seConnecter(motDePasse)) {
             return utilisateurOpt;
         }
-        
+
         return Optional.empty();
     }
 
@@ -126,18 +126,14 @@ public class UtilisateurService {
         double latitude = Double.parseDouble(scanner.nextLine());
         System.out.println("Longitude: ");
         double longitude = Double.parseDouble(scanner.nextLine());
-        
-        Vehicule vehicule = new Vehicule();
-        vehicule.setType(type);
-        vehicule.setMarque(inputMarque);
-        vehicule.setModele(inputModele);
-        vehicule.setCouleur(inputCouleur);
-        vehicule.setEtat(etat);
-        vehicule.setRueLocalisation(rue);
-        vehicule.setCPostalLocalisation(codePostal);
-        vehicule.setVilleLocalisation(ville);
-        vehicule.setLatitudeVehicule(latitude);
-        vehicule.setLongitudeVehicule(longitude);
+
+        // Demander le prix journalier du véhicule
+        System.out.println("Prix journalier (€/jour): ");
+        double prixJournalier = Double.parseDouble(scanner.nextLine());
+
+        Vehicule vehicule = new Vehicule(type, inputMarque, inputModele,
+                inputCouleur, etat, rue, codePostal, ville, latitude, longitude);
+        vehicule.setPrixJournalier(prixJournalier);
 
         // Demander les dates de disponibilité (optionnel - vide = toujours disponible)
         System.out.println("\n--- Dates de disponibilité ---");
@@ -183,7 +179,15 @@ public class UtilisateurService {
             }
             System.out.println("Disponibilité ajoutée du " + dateDebut + " au " + dateFin);
         } else {
-            System.out.println("Le véhicule sera toujours disponible.");
+            // 默认60天可用
+            LocalDate today = LocalDate.now();
+            LocalDate sixtyDaysLater = today.plusDays(60);
+            LocalDate current = today;
+            while (!current.isAfter(sixtyDaysLater)) {
+                vehicule.ajouterDisponibilite(current);
+                current = current.plusDays(1);
+            }
+            System.out.println("Le véhicule sera disponible du " + today + " au " + sixtyDaysLater + " (60 jours).");
         }
 
         vehicule.setAgent(agent);
@@ -262,11 +266,9 @@ public class UtilisateurService {
                 System.out.println("Détails: Le véhicule a peut-être des dépendances non gérées.");
             }
         } else {
-            System.out.println("Erreur: Véhicule a " + contratsActifsOuFuturs.size() + " contrat(s) actif(s) ou futur(s).");
-            System.out.println("Impossible de supprimer un véhicule avec des locations en cours.");
-        }   
+            System.out.println("Erreur: Véhicule a des contrats actifs ou futurs.");
+        }
     }
-
 
     public void modifierVehicule(Agent agent) {
         List<Vehicule> vehicules = vehiculeRepository.findByAgent(agent);
@@ -361,6 +363,23 @@ public class UtilisateurService {
                 return;
             }
 
+            // Vérifier que TOUTES les dates de la période de location sont disponibles
+            LocalDate dateFin = dateDebut.plusDays(nbJours - 1);
+            List<LocalDate> datesManquantes = new java.util.ArrayList<>();
+            LocalDate dateCheck = dateDebut;
+            while (!dateCheck.isAfter(dateFin)) {
+                if (!datesDisponibles.contains(dateCheck)) {
+                    datesManquantes.add(dateCheck);
+                }
+                dateCheck = dateCheck.plusDays(1);
+            }
+
+            if (!datesManquantes.isEmpty()) {
+                System.out.println("Erreur : Le véhicule n'est pas disponible pour toute la période demandée.");
+                System.out.println("Dates non disponibles : " + datesManquantes);
+                return;
+            }
+
             List<Assurance> assurances = assuranceService.getAllAssurances();
             if (assurances.isEmpty()) {
                 System.out.println("Aucune assurance disponible.");
@@ -394,19 +413,33 @@ public class UtilisateurService {
             }
 
             double prixParkingOuReduction = (parkingSelectionne != null) ? parkingSelectionne.getReductionloueur() : 0;
-            double prixTotal = prixAssurance - prixParkingOuReduction;
+
+            // Calcul du prix du véhicule (prix journalier défini par l'agent)
+            double prixVehicule = vehiculeSelectionne.getPrixJournalier() * nbJours;
+
+            // Calcul des frais de plateforme (10% + 2€ par jour)
+            double fraisPlateforme = (prixVehicule * 0.10) + (2.0 * nbJours);
+
+            // Prix total = prix véhicule + frais plateforme + assurance - réduction parking
+            double prixTotal = prixVehicule + fraisPlateforme + prixAssurance - prixParkingOuReduction;
 
             // AFFICHAGE DES PRIX
             System.out.println("\n--- Détails du paiement ---");
+            System.out.println("Prix véhicule : " + prixVehicule + " euros (" + vehiculeSelectionne.getPrixJournalier()
+                    + "€/jour x " + nbJours + " jours)");
+            System.out.println(
+                    "Frais de plateforme : " + String.format("%.2f", fraisPlateforme) + " euros (10% + 2€/jour)");
             System.out.println("Prix assurance : " + prixAssurance + " euros");
             if (parkingSelectionne != null) {
                 System.out.println("Réduction parking : -" + prixParkingOuReduction + " euros");
             }
-            System.out.println("PRIX TOTAL ESTIMÉ : " + prixTotal + " euros");
+            System.out.println("PRIX TOTAL ESTIMÉ : " + String.format("%.2f", prixTotal) + " euros");
 
             // RÉCAPITULATIF
             System.out.println("\n=== Récapitulatif de Location ===");
-            System.out.println("Véhicule: ID " + vehiculeId);
+            System.out.println("Véhicule: ID " + vehiculeId + " - " + vehiculeSelectionne.getMarque() + " "
+                    + vehiculeSelectionne.getModele());
+            System.out.println("Prix journalier: " + vehiculeSelectionne.getPrixJournalier() + "€/jour");
             System.out.println("Date de début: " + dateDebut);
             System.out.println("Durée: " + nbJours + " jours");
             System.out.println("Assurance: " + assuranceChoisie.getNom());
@@ -415,7 +448,7 @@ public class UtilisateurService {
                 System.out.println("Lieu de dépôt : " + parkingSelectionne.getNomP() + " ("
                         + parkingSelectionne.getVilleP() + ")");
             }
-            System.out.println("Prix total estimé: " + prixTotal + "€");
+            System.out.println("Prix total estimé: " + String.format("%.2f", prixTotal) + "€");
 
             System.out.print("\nConfirmer la location ? (O/N) : ");
             String confirmation = scanner.nextLine();
@@ -430,7 +463,7 @@ public class UtilisateurService {
             java.util.Date dateFinContrat = java.util.Date.from(
                     dateDebut.plusDays(nbJours).atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-                Agent agentVehicule = vehiculeSelectionne.getAgent();
+            Agent agentVehicule = vehiculeSelectionne.getAgent();
 
             // Gestion du crédit du portefeuille (pour loueur ou agent)
             double creditUtilise = 0;

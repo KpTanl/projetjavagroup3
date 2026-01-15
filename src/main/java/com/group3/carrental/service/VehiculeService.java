@@ -19,6 +19,62 @@ public class VehiculeService {
     Scanner scanner = new Scanner(System.in);
     private final VehiculeRepository vehiculeRepository;
 
+    /**
+     * Formate les dates disponibles en affichant les plages continues.
+     * Si les dates ne sont pas continues, affiche plusieurs plages.
+     * Exemple: "2026-01-01 à 2026-01-15, 2026-02-01 à 2026-02-15"
+     */
+    public static String formaterDisponibilites(List<LocalDate> dates) {
+        if (dates == null || dates.isEmpty()) {
+            return "Aucune";
+        }
+
+        // Trier les dates
+        List<LocalDate> sortedDates = dates.stream().sorted().toList();
+
+        StringBuilder sb = new StringBuilder();
+        LocalDate debutPlage = sortedDates.get(0);
+        LocalDate finPlage = debutPlage;
+        int totalJours = 0;
+
+        for (int i = 1; i < sortedDates.size(); i++) {
+            LocalDate current = sortedDates.get(i);
+            // Si la date actuelle est le lendemain de la fin de la plage, étendre la plage
+            if (current.equals(finPlage.plusDays(1))) {
+                finPlage = current;
+            } else {
+                // Sinon, terminer la plage précédente et en commencer une nouvelle
+                int joursPlage = (int) java.time.temporal.ChronoUnit.DAYS.between(debutPlage, finPlage) + 1;
+                totalJours += joursPlage;
+                if (sb.length() > 0) {
+                    sb.append(", ");
+                }
+                if (debutPlage.equals(finPlage)) {
+                    sb.append(debutPlage);
+                } else {
+                    sb.append(debutPlage).append(" à ").append(finPlage);
+                }
+                debutPlage = current;
+                finPlage = current;
+            }
+        }
+
+        // Ajouter la dernière plage
+        int joursPlage = (int) java.time.temporal.ChronoUnit.DAYS.between(debutPlage, finPlage) + 1;
+        totalJours += joursPlage;
+        if (sb.length() > 0) {
+            sb.append(", ");
+        }
+        if (debutPlage.equals(finPlage)) {
+            sb.append(debutPlage);
+        } else {
+            sb.append(debutPlage).append(" à ").append(finPlage);
+        }
+
+        sb.append(" (").append(totalJours).append(" jours)");
+        return sb.toString();
+    }
+
     @Autowired
     public VehiculeService(VehiculeRepository vehiculeRepository) {
         this.vehiculeRepository = vehiculeRepository;
@@ -38,6 +94,7 @@ public class VehiculeService {
                 System.out.println("Vehicule: " + v.getMarque() + " " + v.getModele());
                 System.out.println("Lieu: " + v.getLocalisationComplete());
                 System.out.println("Etat: " + v.getEtat());
+                System.out.println("Prix journalier: " + v.getPrixJournalier() + "€/jour");
                 Double note = v.calculerNoteMoyenne();
                 System.out.println("Note moyenne: " + (note != null ? note + "/5" : "Aucune note"));
                 if (v.getAgent() != null) {
@@ -46,12 +103,7 @@ public class VehiculeService {
                 } else {
                     System.out.println("Agent: Non assigné");
                 }
-                System.out.print("Dates disponibles: ");
-                if (v.getDatesDisponibles().isEmpty()) {
-                    System.out.println("Aucune");
-                } else {
-                    System.out.println(v.getDatesDisponibles());
-                }
+                System.out.println("Dates disponibles: " + formaterDisponibilites(v.getDatesDisponibles()));
                 System.out.println("------------------------------------");
             }
         }
@@ -77,6 +129,7 @@ public class VehiculeService {
                 System.out.println("Vehicule: " + v.getMarque() + " " + v.getModele());
                 System.out.println("Lieu: " + v.getLocalisationComplete());
                 System.out.println("Etat: " + v.getEtat());
+                System.out.println("Prix journalier: " + v.getPrixJournalier() + "€/jour");
                 Double noteDisp = v.calculerNoteMoyenne();
                 System.out.println("Note moyenne: " + (noteDisp != null ? noteDisp + "/5" : "Aucune note"));
                 if (v.getAgent() != null) {
@@ -89,7 +142,7 @@ public class VehiculeService {
                 if (v.getDatesDisponibles().isEmpty()) {
                     System.out.println("Disponibilité: Toujours disponible");
                 } else {
-                    System.out.println("Dates disponibles: " + v.getDatesDisponibles());
+                    System.out.println("Disponibilité: " + formaterDisponibilites(v.getDatesDisponibles()));
                 }
                 System.out.println("------------------------------------");
             }
@@ -154,11 +207,11 @@ public class VehiculeService {
                 case "2":
                     etat = EtatVehicule.Non_loué;
                     break;
-                case "3": 
-                etat = EtatVehicule.Indisponible;
-                System.out.println("Le véhicule est marqué comme : indisponible à la location");
-                break;
-            
+                case "3":
+                    etat = EtatVehicule.Indisponible;
+                    System.out.println("Le véhicule est marqué comme : indisponible à la location");
+                    break;
+
                 default:
                     System.out.println("Type invalide. Veuillez choisir un type valide.");
                     break;
@@ -295,8 +348,9 @@ public class VehiculeService {
             });
         }
     }
+
     public void saveVehicule(Vehicule v) {
-    // vehiculeRepository est normalement déjà injecté dans ton service
-    vehiculeRepository.save(v);
-}
+        // vehiculeRepository est normalement déjà injecté dans ton service
+        vehiculeRepository.save(v);
+    }
 }

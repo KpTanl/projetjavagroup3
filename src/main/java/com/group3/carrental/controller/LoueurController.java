@@ -186,9 +186,7 @@ public class LoueurController {
                 System.out.println("\nDate de début imposée: " + dateDebut);
             } else {
                 System.out.println("\nDates disponibles pour ce véhicule:");
-                System.out.println("Nombre de dates disponibles: " + datesDisponibles.size());
-                System.out.println("Première date disponible: " + datesDisponibles.get(0));
-                System.out.println("Dernière date disponible: " + datesDisponibles.get(datesDisponibles.size() - 1));
+                System.out.println("Disponibilité: " + VehiculeService.formaterDisponibilites(datesDisponibles));
 
                 System.out.print("\nSaisissez la date de début de location (format: AAAA-MM-JJ) : ");
                 String dateInput = sc.nextLine();
@@ -207,6 +205,25 @@ public class LoueurController {
             System.out.print("Nombre de jours de location : ");
             int nbJours = sc.nextInt();
             sc.nextLine();
+
+            // Vérifier que TOUTES les dates de la période de location sont disponibles
+            if (!datesDisponibles.isEmpty()) {
+                LocalDate dateFinLocation = dateDebut.plusDays(nbJours - 1);
+                List<LocalDate> datesManquantes = new java.util.ArrayList<>();
+                LocalDate dateCheck = dateDebut;
+                while (!dateCheck.isAfter(dateFinLocation)) {
+                    if (!datesDisponibles.contains(dateCheck)) {
+                        datesManquantes.add(dateCheck);
+                    }
+                    dateCheck = dateCheck.plusDays(1);
+                }
+
+                if (!datesManquantes.isEmpty()) {
+                    System.out.println("Erreur : Le véhicule n'est pas disponible pour toute la période demandée.");
+                    System.out.println("Dates non disponibles : " + datesManquantes);
+                    return;
+                }
+            }
 
             System.out.println("\n=== Assurances Disponibles ===");
             List<Assurance> assurances = assuranceService.getAllAssurances();
@@ -245,19 +262,33 @@ public class LoueurController {
             }
 
             double prixParkingOuReduction = (parkingSelectionne != null) ? parkingSelectionne.getReductionloueur() : 0;
-            double prixTotal = prixAssurance - prixParkingOuReduction;
+
+            // Calcul du prix du véhicule (prix journalier défini par l'agent)
+            double prixVehicule = vehiculeSelectionne.getPrixJournalier() * nbJours;
+
+            // Calcul des frais de plateforme (10% + 2€ par jour)
+            double fraisPlateforme = (prixVehicule * 0.10) + (2.0 * nbJours);
+
+            // Prix total = prix véhicule + frais plateforme + assurance - réduction parking
+            double prixTotal = prixVehicule + fraisPlateforme + prixAssurance - prixParkingOuReduction;
 
             // AFFICHAGE DES PRIX
             System.out.println("\n--- Détails du paiement ---");
+            System.out.println("Prix véhicule : " + prixVehicule + " euros (" + vehiculeSelectionne.getPrixJournalier()
+                    + "€/jour x " + nbJours + " jours)");
+            System.out.println(
+                    "Frais de plateforme : " + String.format("%.2f", fraisPlateforme) + " euros (10% + 2€/jour)");
             System.out.println("Prix assurance : " + prixAssurance + " euros");
             if (parkingSelectionne != null) {
                 System.out.println("Réduction parking (Loueur) : -" + prixParkingOuReduction + " euros");
             }
-            System.out.println("PRIX TOTAL ESTIMÉ : " + prixTotal + " euros");
+            System.out.println("PRIX TOTAL ESTIMÉ : " + String.format("%.2f", prixTotal) + " euros");
 
             // RECAPITULATIF
             System.out.println("\n=== Récapitulatif de Location ===");
-            System.out.println("Véhicule: ID " + vehiculeId);
+            System.out.println("Véhicule: ID " + vehiculeId + " - " + vehiculeSelectionne.getMarque() + " "
+                    + vehiculeSelectionne.getModele());
+            System.out.println("Prix journalier: " + vehiculeSelectionne.getPrixJournalier() + "€/jour");
             System.out.println("Date de début: " + dateDebut);
             System.out.println("Durée: " + nbJours + " jours");
             System.out.println("Assurance: " + assuranceChoisie.getNom());
@@ -269,7 +300,7 @@ public class LoueurController {
                 System.out.println("Réduction parking (Loueur) : -" + prixParkingOuReduction + " euros");
             }
 
-            System.out.println("\nPrix total estimé: " + prixTotal + "€");
+            System.out.println("\nPrix total estimé: " + String.format("%.2f", prixTotal) + "€");
 
             System.out.print("\nConfirmer la location ? (O/N) : ");
             String confirmation = sc.nextLine();
