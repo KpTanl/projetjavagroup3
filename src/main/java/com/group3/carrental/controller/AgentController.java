@@ -14,10 +14,13 @@ import com.group3.carrental.entity.Contrat;
 import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.entity.OptionPayanteAgent;
+import com.group3.carrental.entity.PrestataireEntretien;
 import com.group3.carrental.service.ContratService;
 import com.group3.carrental.service.UtilisateurService;
 import com.group3.carrental.service.VehiculeService;
 import com.group3.carrental.service.OptionService;
+import com.group3.carrental.repository.PrestataireEntretienRepository;
+import com.group3.carrental.repository.UtilisateurRepository;
 
 @Component
 public class AgentController {
@@ -28,17 +31,22 @@ public class AgentController {
     private final MessagerieController messagerieController;
     private final UtilisateurController utilisateurController;
     private final OptionService optionService;
+    private final PrestataireEntretienRepository prestataireRepository;
+    private final UtilisateurRepository utilisateurRepository;
 
     @Autowired
     public AgentController(VehiculeService vehiculeService, ContratService contratService,
             UtilisateurService utilisateurService, MessagerieController messagerieController,
-            @Lazy UtilisateurController utilisateurController, OptionService optionService) {
+            @Lazy UtilisateurController utilisateurController, OptionService optionService,
+            PrestataireEntretienRepository prestataireRepository, UtilisateurRepository utilisateurRepository) {
         this.vehiculeService = vehiculeService;
         this.contratService = contratService;
         this.utilisateurService = utilisateurService;
         this.messagerieController = messagerieController;
         this.utilisateurController = utilisateurController;
         this.optionService = optionService;
+        this.prestataireRepository = prestataireRepository;
+        this.utilisateurRepository = utilisateurRepository;
     }
 
     /**
@@ -70,6 +78,7 @@ public class AgentController {
         System.out.println("13. Mes contrats terminés");
         System.out.println("14. Mes contrats et PDF");
         System.out.println("15. Gestion des options");
+        System.out.println("16. Commander un entretien ponctuel");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -125,6 +134,9 @@ public class AgentController {
                 break;
             case 15:
                 gererMesOptions(agent);
+                break;
+            case 16:
+                commanderEntretienPonctuel(agent);
                 break;
             case 0:
                 System.out.println("vous avez choisi de quitter!");
@@ -446,5 +458,61 @@ public class AgentController {
 
         optionService.annulerOption(optionId);
         System.out.println("\n✓ Option résiliée (si elle existait).");
+    }
+
+    /**
+     * Commander un entretien ponctuel pour un véhicule.
+     */
+    private void commanderEntretienPonctuel(Agent agent) {
+        // Recharge l'agent depuis la base pour ouvrir une session propre
+        Agent agentComplet = (Agent) utilisateurRepository.findById(agent.getId()).orElse(null);
+
+        if (agentComplet == null) {
+            System.out.println("Erreur: agent non trouvé.");
+            return;
+        }
+
+        // 1. Sélection du véhicule de l'agent
+        List<Vehicule> sesVehicules = agentComplet.getVehiculesEnLocation();
+        if (sesVehicules.isEmpty()) {
+            System.out.println("Vous n'avez pas de véhicules enregistrés.");
+            return;
+        }
+
+        System.out.println("\nSélectionnez le véhicule à entretenir :");
+        for (int i = 0; i < sesVehicules.size(); i++) {
+            System.out
+                    .println((i + 1) + ". " + sesVehicules.get(i).getMarque() + " " + sesVehicules.get(i).getModele());
+        }
+        int vIdx = sc.nextInt();
+        sc.nextLine();
+
+        if (vIdx < 1 || vIdx > sesVehicules.size()) {
+            System.out.println("Choix invalide.");
+            return;
+        }
+
+        // 2. Sélection de l'entreprise (Prestataire)
+        List<PrestataireEntretien> prestataires = prestataireRepository.findAll();
+        if (prestataires.isEmpty()) {
+            System.out.println("Aucun prestataire d'entretien disponible.");
+            return;
+        }
+
+        System.out.println("\nChoisissez un prestataire d'entretien :");
+        for (int i = 0; i < prestataires.size(); i++) {
+            System.out.println((i + 1) + ". " + prestataires.get(i).getNomSociete() + " ("
+                    + prestataires.get(i).getActivite() + ")");
+        }
+        int eIdx = sc.nextInt();
+        sc.nextLine();
+
+        if (eIdx < 1 || eIdx > prestataires.size()) {
+            System.out.println("Choix invalide.");
+            return;
+        }
+
+        // 3. Appel au service
+        optionService.commanderEntretien(agentComplet, sesVehicules.get(vIdx - 1), prestataires.get(eIdx - 1));
     }
 }
