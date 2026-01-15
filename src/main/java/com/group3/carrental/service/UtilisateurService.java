@@ -201,22 +201,31 @@ public class UtilisateurService {
         if (vehicules.isEmpty()) {
             System.out.println("Aucun véhicule trouvé.");
         } else {
-            for (Vehicule v : vehicules) {
-                System.out.println("- " + v.getMarque() + " " + v.getModele());
+            for (int i = 0; i < vehicules.size(); i++) {
+                Vehicule v = vehicules.get(i);
+                System.out.println((i + 1) + ". " + v.getMarque() + " " + v.getModele() + 
+                                   " (" + v.getCouleur() + ") - État: " + v.getEtat());
             }
         }
     }
 
     public void supprimerVehicule(Agent agent) {
-        afficherLesVehiculesDeAgent(agent);
-        System.out.print("ID du vehicule à supprimer: ");
-        int id = lireIntSafe();
-
-        Vehicule vehicule = vehiculeRepository.findById(id).orElse(null);
-        if (vehicule == null || vehicule.getAgent() == null || vehicule.getAgent().getId() != agent.getId()) {
-            System.out.println("Erreur: Véhicule introuvable ou ne vous appartient pas.");
+        List<Vehicule> vehicules = vehiculeRepository.findByAgent(agent);
+        if (vehicules.isEmpty()) {
+            System.out.println("Aucun véhicule à supprimer.");
             return;
         }
+
+        afficherLesVehiculesDeAgent(agent);
+        System.out.print("Numéro du vehicule à supprimer: ");
+        int numero = lireIntSafe();
+
+        if (numero < 1 || numero > vehicules.size()) {
+            System.out.println("Erreur: Numéro invalide.");
+            return;
+        }
+
+        Vehicule vehicule = vehicules.get(numero - 1);
 
         // Vérifier s'il y a des contrats actifs ou futurs
         List<com.group3.carrental.entity.Contrat> contrats = contratService.getContratsParVehicule(vehicule.getId());
@@ -232,24 +241,52 @@ public class UtilisateurService {
                 .toList();
 
         if (contratsActifsOuFuturs.isEmpty()) {
-            // Pas de contrats actifs - suppression immédiate
-            vehiculeRepository.delete(vehicule);
-            System.out.println("Véhicule supprimé !");
+            // Pas de contrats actifs - suppression possible
+            try {
+                // 1. Supprimer TOUS les contrats associés (terminés inclus)
+                List<com.group3.carrental.entity.Contrat> tousLesContrats = 
+                    contratService.getContratsParVehicule(vehicule.getId());
+                for (com.group3.carrental.entity.Contrat contrat : tousLesContrats) {
+                    contratService.supprimerContrat(contrat.getId());
+                }
+                
+                // 2. Nettoyer les notes et relations
+                vehicule.getNotesRecues().clear();
+                vehicule.setAgent(null);
+                vehicule.setParkingPartenaire(null);
+                vehiculeRepository.save(vehicule);
+                
+                // 3. Supprimer le véhicule
+                vehiculeRepository.delete(vehicule);
+                vehiculeRepository.flush();
+                
+                System.out.println("Véhicule supprimé avec succès !");
+            } catch (Exception e) {
+                System.out.println("Erreur lors de la suppression : " + e.getMessage());
+                System.out.println("Détails: Le véhicule a peut-être des dépendances non gérées.");
+            }
         } else {
             System.out.println("Erreur: Véhicule a des contrats actifs ou futurs.");
         }
     }
 
     public void modifierVehicule(Agent agent) {
-        afficherLesVehiculesDeAgent(agent);
-        System.out.print("ID du vehicule à modifier: ");
-        int id = lireIntSafe();
-
-        Vehicule vehicule = vehiculeRepository.findById(id).orElse(null);
-        if (vehicule == null || vehicule.getAgent() == null || vehicule.getAgent().getId() != agent.getId()) {
-            System.out.println("Erreur: Véhicule introuvable ou ne vous appartient pas.");
+        List<Vehicule> vehicules = vehiculeRepository.findByAgent(agent);
+        if (vehicules.isEmpty()) {
+            System.out.println("Aucun véhicule à modifier.");
             return;
         }
+
+        afficherLesVehiculesDeAgent(agent);
+        System.out.print("Numéro du vehicule à modifier: ");
+        int numero = lireIntSafe();
+
+        if (numero < 1 || numero > vehicules.size()) {
+            System.out.println("Erreur: Numéro invalide.");
+            return;
+        }
+
+        Vehicule vehicule = vehicules.get(numero - 1);
 
         System.out.println("\n--- Modification du véhicule ---");
         TypeVehicule type = saisirTypeVehicule();

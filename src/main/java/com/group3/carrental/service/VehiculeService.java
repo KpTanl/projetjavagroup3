@@ -272,16 +272,23 @@ public class VehiculeService {
 
         LocalDate demain = LocalDate.now().plusDays(1);
         List<Vehicule> resultats = vehicules.stream()
-                .filter(v -> v.getVilleLocalisation().equalsIgnoreCase(villeSaisie))
-                .filter(v -> v.getDatesDisponibles().contains(demain))
-                .filter(v -> v.getMarque().equalsIgnoreCase(marqueSaisie))
+                .filter(v -> v.getVilleLocalisation() != null && v.getVilleLocalisation().equalsIgnoreCase(villeSaisie))
+                .filter(v -> {
+                    // Si la liste est vide, le véhicule est toujours disponible
+                    if (v.getDatesDisponibles() == null || v.getDatesDisponibles().isEmpty()) {
+                        return true;
+                    }
+                    // Sinon vérifier si demain est dans les dates disponibles
+                    return v.getDatesDisponibles().contains(demain);
+                })
+                .filter(v -> v.getMarque() != null && v.getMarque().equalsIgnoreCase(marqueSaisie))
+                .filter(v -> v.getCouleur() != null && v.getCouleur().equalsIgnoreCase(couleurSaisie))
                 .filter(v -> {
                     Double noteVehicule = v.calculerNoteMoyenne();
                     if (noteSaisie == 0.0)
                         return true;
                     return noteVehicule != null && noteVehicule >= noteSaisie;
                 })
-                .filter(v -> v.getCouleur().equalsIgnoreCase(couleurSaisie))
                 .collect(java.util.stream.Collectors.toList());
 
         System.out.println("\n--- RESULTATS CORRESPONDANTS ---");
