@@ -267,10 +267,13 @@ public class UtilisateurService {
     }
 
     public void louerVehicule(Utilisateur currentUser) {
-        if (!(currentUser instanceof Loueur loueurCourant)) {
-            System.out.println("Erreur: seul un loueur peut louer.");
+        // Autoriser un agent à louer comme un loueur
+        if (!(currentUser instanceof Loueur) && !(currentUser instanceof Agent)) {
+            System.out.println("Erreur: seul un loueur ou un agent peut louer.");
             return;
         }
+
+        Utilisateur locataire = currentUser;
 
         System.out.println("\n=== Location de Véhicule ===");
 
@@ -349,7 +352,7 @@ public class UtilisateurService {
             System.out.println("\n--- Détails du paiement ---");
             System.out.println("Prix assurance : " + prixAssurance + " euros");
             if (parkingSelectionne != null) {
-                System.out.println("Réduction parking (Loueur) : -" + prixParkingOuReduction + " euros");
+                System.out.println("Réduction parking : -" + prixParkingOuReduction + " euros");
             }
             System.out.println("PRIX TOTAL ESTIMÉ : " + prixTotal + " euros");
 
@@ -379,13 +382,30 @@ public class UtilisateurService {
             java.util.Date dateFinContrat = java.util.Date.from(
                     dateDebut.plusDays(nbJours).atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-            Agent agentVehicule = vehiculeSelectionne.getAgent();
+                Agent agentVehicule = vehiculeSelectionne.getAgent();
+
+            // Gestion du crédit du portefeuille (pour loueur ou agent)
+            double creditUtilise = 0;
+            if (locataire != null && locataire.getSoldePorteMonnaie() > 0) {
+                System.out.println("\n*** CRÉDIT DISPONIBLE ***");
+                System.out.println("Vous avez " + locataire.getSoldePorteMonnaie() + "€ de crédit.");
+                System.out.print("Voulez-vous utiliser votre crédit ? (O/N) : ");
+                String utiliserCredit = scanner.nextLine();
+                if (utiliserCredit.equalsIgnoreCase("O")) {
+                    creditUtilise = Math.min(prixTotal, locataire.getSoldePorteMonnaie());
+                    prixTotal -= creditUtilise;
+                    locataire.setSoldePorteMonnaie(locataire.getSoldePorteMonnaie() - creditUtilise);
+                    mettreAJour(locataire);
+                    System.out.println("Crédit utilisé : -" + creditUtilise + "€");
+                    System.out.println("Nouveau prix total : " + prixTotal + "€");
+                }
+            }
 
             contratService.creerContratPresigne(
                     dateDebutContrat,
                     dateFinContrat,
                     agentVehicule,
-                    loueurCourant,
+                    locataire,
                     vehiculeSelectionne,
                     prixTotal);
 
