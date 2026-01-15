@@ -372,7 +372,7 @@ public class UtilisateurService {
             double prixParkingOuReduction = (parkingSelectionne != null) ? parkingSelectionne.getReductionloueur() : 0;
             double prixTotal = prixAssurance - prixParkingOuReduction;
 
-            // AFFICHAGE DES PRIX
+            // affichage des differents prix 
             System.out.println("\n--- Détails du paiement ---");
             System.out.println("Prix assurance : " + prixAssurance + " euros");
             if (parkingSelectionne != null) {

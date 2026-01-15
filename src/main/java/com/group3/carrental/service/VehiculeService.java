@@ -59,7 +59,7 @@ public class VehiculeService {
             }
         }
 
-        // Ajouter la dernière plage
+
         int joursPlage = (int) java.time.temporal.ChronoUnit.DAYS.between(debutPlage, finPlage) + 1;
         totalJours += joursPlage;
         if (sb.length() > 0) {
@@ -254,14 +254,14 @@ public class VehiculeService {
                 .map(Vehicule::getMarque)
                 .distinct()
                 .collect(java.util.stream.Collectors.joining(" / "));
-        System.out.println("Quelle marque ? (Disponibles : " + marquesPossibles + ")");
+        System.out.println("Quelle marque voulez vous? (Disponibles : " + marquesPossibles + ")");
         String marqueSaisie = scanner.nextLine();
 
         String couleursPossibles = vehicules.stream()
                 .map(Vehicule::getCouleur)
                 .distinct()
                 .collect(java.util.stream.Collectors.joining(" / "));
-        System.out.println("Quelle couleur ? (Disponibles : " + couleursPossibles + ")");
+        System.out.println("Quelle couleur voulez vous ? (Disponibles : " + couleursPossibles + ")");
         String couleurSaisie = scanner.nextLine();
 
         System.out.println("Note minimale souhaitee (ex: 4.0 ou Entree pour 0.0 = pas de filtre) :");

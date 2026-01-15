@@ -144,7 +144,7 @@ public class AgentController {
                 break;
             case 0:
                 System.out.println("vous avez choisi de quitter!");
-                return null; // Signal déconnexion
+                return null; //déconnexion
             default:
                 System.out.println("Choix invalide !");
                 break;
@@ -192,9 +192,9 @@ public class AgentController {
         sc.nextLine();
 
         if (action == 1) {
-            // Mise à jour de l'objet et SAUVEGARDE en base de données
+            // Mise à jour de l'objet et save en base de données
             vSelectionne.setOptionRetour(Vehicule.OptionRetour.retour_parking);
-            vehiculeService.saveVehicule(vSelectionne); 
+            vehiculeService.saveVehicule(vSelectionne); //save
 
             // Souscription à l'option payante
             optionService.souscrireNouvelleOption(agentActuel, "Option Parking Partenaire", 15.0f);

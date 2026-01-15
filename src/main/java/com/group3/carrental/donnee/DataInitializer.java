@@ -75,7 +75,7 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         /**
-         * Ajoute 60 jours de disponibilité à un véhicule (à partir d'aujourd'hui)
+         * Ajoute disponibilité à un véhicule 
          */
         private void ajouterDisponibilite60Jours(Vehicule v) {
                 LocalDate today = LocalDate.now();
@@ -89,7 +89,7 @@ public class DataInitializer implements CommandLineRunner {
 
         @Override
         public void run(String... args) {
-                // 1. On initialise les parkings s'il n'y en a pas encore
+                // initialise les parkings 
                 if (parkingRepository.count() == 0) {
                         System.out.println("Initialisation des parkings...");
                         Parking parkingParis = new Parking("Parking_1_Paris", "Paris", "15 Rue de la Paix", "75002", 10,
@@ -102,7 +102,7 @@ public class DataInitializer implements CommandLineRunner {
                         parkingRepository.save(parkingToulouse);
                 }
 
-                // 2. On garde ta sécurité pour le reste des données
+                // Securite des données
                 if (vehiculeRepository.count() > 0 || utilisateurRepository.count() > 0) {
                         System.out.println("Autres données déjà présentes, suite de l'initialisation ignorée.");
                         return;
@@ -110,7 +110,7 @@ public class DataInitializer implements CommandLineRunner {
 
                 System.out.println("Initialisation des données de démonstration...");
 
-                // ========== Assurances ==========
+                // Assurances 
                 Assurance assuranceAZA = new Assurance(
                                 "Assurance AZA Complète",
                                 "Voiture:30.0,Moto:45.0,Camion:60.0,Voiture-Clio:28.0",
@@ -129,7 +129,7 @@ public class DataInitializer implements CommandLineRunner {
                                 80.0);
                 assuranceRepository.save(assurancePremium);
 
-                // ========== Utilisateurs (Loueurs) ==========
+                //  Utilisateurs (Loueurs) 
                 Loueur loueur1 = new Loueur(0, "Dupont", "Jean", "jean.dupont@email.com", "motdepasse123",
                                 new ArrayList<>(), new ArrayList<>(), 48.8584, 2.3488);
                 utilisateurRepository.save(loueur1);
@@ -148,7 +148,7 @@ public class DataInitializer implements CommandLineRunner {
                                 new ArrayList<>(), new ArrayList<>(), 48.4047, 2.7016);
                 utilisateurRepository.save(loueur4);
 
-                // ========== Utilisateurs (Agents Pro) ==========
+                // Utilisateurs (Agents Pro)
                 AgentPro agentPro1 = new AgentPro(0, "Société", "Admin", "admin@rentcar.com", "admin123",
                                 new ArrayList<>(), LocalDate.now(), 12345678901234L, "RentCar Pro", 48.8566, 2.3522);
                 utilisateurRepository.save(agentPro1);
@@ -177,7 +177,7 @@ public class DataInitializer implements CommandLineRunner {
                                 "CityRent Mobility", 43.2965, 5.3698);
                 utilisateurRepository.save(agentPro3);
 
-                // ========== Utilisateurs (Agents Particuliers) ==========
+                //  Utilisateurs (Agents Particuliers) 
                 AgentParticulier agentParticulier1 = new AgentParticulier(
                                 0,
                                 "Durand",
@@ -208,7 +208,7 @@ public class DataInitializer implements CommandLineRunner {
                                 LocalDate.now().minusMonths(1), 50.6292, 3.0573);
                 utilisateurRepository.save(agentParticulier3);
 
-                // ========== Véhicules (créés d'abord, notes ajoutées plus tard) ==========
+                // Véhicules  
                 Vehicule v1 = new Vehicule(
                                 Vehicule.TypeVehicule.Voiture,
                                 "Renault",
@@ -320,8 +320,7 @@ public class DataInitializer implements CommandLineRunner {
                 v8.setAgent(agentParticulier3);
                 vehiculeRepository.save(v8);
 
-                // ========== Contrats démo terminés (il faut créer le Contrat avant de créer
-                // NoteVehicule) ==========
+                // ========== Contrats pour démo terminés
                 Date deb1 = Date.from(Instant.now().minus(10, ChronoUnit.DAYS));
                 Date fin1 = Date.from(Instant.now().minus(6, ChronoUnit.DAYS));
 

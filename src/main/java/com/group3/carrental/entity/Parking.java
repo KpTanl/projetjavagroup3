@@ -43,7 +43,7 @@ public class Parking implements Services {
     }
 
     public String getLocalisationComplete() {
-        // Concaténation simple des champs existants
+        // Concaténation
         return this.rueP + ", " + this.CodePostalP + ", " + this.VilleP;
     }
 
@@ -76,7 +76,7 @@ public class Parking implements Services {
         }
     }
 
-    // Dans Parking.java
+
     public static List<String> getVillesDisponibles(List<Parking> tousLesParkings) {
         List<String> villes = new ArrayList<>();
         for (Parking p : tousLesParkings) {
@@ -88,7 +88,7 @@ public class Parking implements Services {
         return villes;
     }
 
-    // À ajouter dans Parking.java
+    
     public void afficherDetails() {
         System.out.println("\n-------------------------------------------");
         System.out.println("ADRESSE : " + getLocalisationComplete());
@@ -98,7 +98,6 @@ public class Parking implements Services {
         System.out.println("-------------------------------------------");
     }
 
-    // ==================== Services Interface ====================
     @Override
     public void souscrire() {
 

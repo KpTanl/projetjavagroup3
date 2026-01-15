@@ -12,8 +12,8 @@ import lombok.EqualsAndHashCode;
 @Table(name = "Entreprise")
 public class Entreprise extends Compte implements Services {
 
-    private String siret; // UML: siret, Code previously: Nsiret
-    private String nom; // UML: nom, Code previously: RaisonSoc
+    private String siret; 
+    private String nom;
 
     @Column(columnDefinition = "TEXT")
     private String catalogueTarifs;
@@ -26,30 +26,30 @@ public class Entreprise extends Compte implements Services {
     }
 
     public double definirTarif(String type, String modele, double prix) {
-        // TODO : Implémenter la logique de tarification
+
         return 0.0;
     }
 
     public void importerFichierTarifs() {
-        // TODO : Implémenter la logique d'importation de fichiers
+        
     }
 
     public void nettoyer(Vehicule v) {
-        // TODO: Implémenter le nettoyage
+        
     }
 
     @Override
     public void souscrire() {
-        // TODO Auto-generated method stub
+        
     }
 
     @Override
     public void resilier() {
-        // TODO Auto-generated method stub
+        
     }
 
     @Override
     public void renouveler() {
-        // TODO Auto-generated method stub
+        
     }
 }

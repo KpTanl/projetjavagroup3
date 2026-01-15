@@ -39,13 +39,13 @@ public class Loueur extends Utilisateur {
         List<Parking> resultats = new ArrayList<>();
 
         for (Parking p : catalogue) {
-            // Filtrage par ville (ignore la casse) et vérification de la capacité
+            // Filtrage par ville 
             if (p.getVilleP().equalsIgnoreCase(ville) && p.getVehiculesGares().size() < p.getNb_places_max()) {
                 resultats.add(p);
             }
         }
 
-        // Gestion de l'erreur si aucun parking n'est trouvé
+        //  si aucun parking n'est trouvé
         if (resultats.isEmpty()) {
             System.out.println("--- AUCUN RÉSULTAT ---");
             System.out.println("La ville '" + ville + "' n'est pas disponible ou est complète.");

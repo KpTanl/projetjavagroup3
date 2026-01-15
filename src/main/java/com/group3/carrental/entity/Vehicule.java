@@ -83,7 +83,7 @@ public class Vehicule {
         this.villeLocalisation = villeLocalisation;
     }
 
-    // agentProprietaire est un alias pour agent (compatibilité riad2)
+    
     public Agent getAgentProprietaire() {
         return this.agent;
     }
