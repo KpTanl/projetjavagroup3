@@ -3,8 +3,8 @@ package com.group3.carrental.service;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.group3.carrental.entity.Parking; 
-import com.group3.carrental.repository.ParkingRepository; 
+import com.group3.carrental.entity.Parking;
+import com.group3.carrental.repository.ParkingRepository;
 
 @Service
 public class ParkingService {
@@ -20,11 +20,11 @@ public class ParkingService {
     }
 
     public void save(Parking p) {
-    parkingRepository.save(p);
-}
+        parkingRepository.save(p);
+    }
 
-public List<Parking> getParkingsParVille(String VilleP) {
-    return parkingRepository.findByVilleP(VilleP); 
+    public List<Parking> getParkingsParVille(String VilleP) {
+        return parkingRepository.findByVilleP(VilleP);
 
-}
+    }
 }

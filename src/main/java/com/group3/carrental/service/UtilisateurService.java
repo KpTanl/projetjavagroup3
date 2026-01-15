@@ -179,7 +179,8 @@ public class UtilisateurService {
             }
             System.out.println("Disponibilité ajoutée du " + dateDebut + " au " + dateFin);
         } else {
-            // 默认60天可用
+            // Par défaut, le véhicule est disponible pendant 60 jours à partir de la date
+            // d'ajout
             LocalDate today = LocalDate.now();
             LocalDate sixtyDaysLater = today.plusDays(60);
             LocalDate current = today;
@@ -203,8 +204,8 @@ public class UtilisateurService {
         } else {
             for (int i = 0; i < vehicules.size(); i++) {
                 Vehicule v = vehicules.get(i);
-                System.out.println((i + 1) + ". " + v.getMarque() + " " + v.getModele() + 
-                                   " (" + v.getCouleur() + ") - État: " + v.getEtat());
+                System.out.println((i + 1) + ". " + v.getMarque() + " " + v.getModele() +
+                        " (" + v.getCouleur() + ") - État: " + v.getEtat());
             }
         }
     }
@@ -244,22 +245,22 @@ public class UtilisateurService {
             // Pas de contrats actifs - suppression possible
             try {
                 // 1. Supprimer TOUS les contrats associés (terminés inclus)
-                List<com.group3.carrental.entity.Contrat> tousLesContrats = 
-                    contratService.getContratsParVehicule(vehicule.getId());
+                List<com.group3.carrental.entity.Contrat> tousLesContrats = contratService
+                        .getContratsParVehicule(vehicule.getId());
                 for (com.group3.carrental.entity.Contrat contrat : tousLesContrats) {
                     contratService.supprimerContrat(contrat.getId());
                 }
-                
+
                 // 2. Nettoyer les notes et relations
                 vehicule.getNotesRecues().clear();
                 vehicule.setAgent(null);
                 vehicule.setParkingPartenaire(null);
                 vehiculeRepository.save(vehicule);
-                
+
                 // 3. Supprimer le véhicule
                 vehiculeRepository.delete(vehicule);
                 vehiculeRepository.flush();
-                
+
                 System.out.println("Véhicule supprimé avec succès !");
             } catch (Exception e) {
                 System.out.println("Erreur lors de la suppression : " + e.getMessage());
@@ -611,6 +612,44 @@ public class UtilisateurService {
         } catch (Exception e) {
             System.out.println("Format invalide.");
             return null;
+        }
+    }
+
+    /**
+     * Affiche la liste des agents et permet de consulter leurs véhicules.
+     * Méthode partagée entre VisitorController et AgentController.
+     */
+    public void consulterAgents() {
+        System.out.println("\n--- CONSULTATION DES AGENTS ---");
+        List<Utilisateur> agents = findAllAgents();
+
+        if (agents.isEmpty()) {
+            System.out.println("Désolé, aucun agent n'est inscrit pour le moment.");
+            return;
+        }
+
+        for (int i = 0; i < agents.size(); i++) {
+            Utilisateur a = agents.get(i);
+            System.out.println((i + 1) + ". " + a.getPrenom() + " " + a.getNom() + " (Email: " + a.getEmail() + ")");
+        }
+
+        System.out.print("\nEntrez le numéro de l'agent pour voir ses véhicules (ou 0 pour annuler) : ");
+        if (scanner.hasNextInt()) {
+            int choix = scanner.nextInt();
+            scanner.nextLine();
+
+            if (choix > 0 && choix <= agents.size()) {
+                Utilisateur agentChoisi = agents.get(choix - 1);
+
+                System.out.println("\n-----------------------------------------");
+                System.out.println("VÉHICULES PROPOSÉS PAR " + agentChoisi.getPrenom().toUpperCase());
+                System.out.println("-----------------------------------------");
+                afficherLesVehiculesDeAgent(agentChoisi);
+                System.out.println("-----------------------------------------");
+            }
+        } else {
+            scanner.next();
+            System.out.println("Saisie invalide.");
         }
     }
 }

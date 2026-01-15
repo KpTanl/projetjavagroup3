@@ -1,6 +1,5 @@
 package com.group3.carrental.controller;
 
-import java.util.List;
 import java.util.Scanner;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,7 +120,7 @@ public class VisitorController {
                 vehiculeService.filtrerVehicules();
                 break;
             case 5:
-                actionConsulterAgents();
+                utilisateurService.consulterAgents();
                 break;
             case 0:
                 System.out.println("vos avez choisi de quitter!");
@@ -131,39 +130,5 @@ public class VisitorController {
                 break;
         }
         return new VisitorResult(null, false);
-    }
-
-    private void actionConsulterAgents() {
-        System.out.println("\n--- CONSULTATION DES AGENTS ---");
-        List<Utilisateur> agents = utilisateurService.findAllAgents();
-
-        if (agents.isEmpty()) {
-            System.out.println("Désolé, aucun agent n'est inscrit pour le moment.");
-            return;
-        }
-
-        for (int i = 0; i < agents.size(); i++) {
-            Utilisateur a = agents.get(i);
-            System.out.println((i + 1) + ". " + a.getPrenom() + " " + a.getNom() + " (Email: " + a.getEmail() + ")");
-        }
-
-        System.out.print("\nEntrez le numéro de l'agent pour voir ses véhicules (ou 0 pour annuler) : ");
-        if (sc.hasNextInt()) {
-            int choix = sc.nextInt();
-            sc.nextLine();
-
-            if (choix > 0 && choix <= agents.size()) {
-                Utilisateur agentChoisi = agents.get(choix - 1);
-
-                System.out.println("\n-----------------------------------------");
-                System.out.println("VÉHICULES PROPOSÉS PAR " + agentChoisi.getPrenom().toUpperCase());
-                System.out.println("-----------------------------------------");
-                utilisateurService.afficherLesVehiculesDeAgent(agentChoisi);
-                System.out.println("-----------------------------------------");
-            }
-        } else {
-            sc.next();
-            System.out.println("Saisie invalide.");
-        }
     }
 }
