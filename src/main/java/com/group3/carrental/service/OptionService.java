@@ -63,4 +63,31 @@ public class OptionService {
         }
         return activerOption(agent, type, prixMensuel);
     }
+
+    /**
+     * Souscrire à une nouvelle option payante.
+     */
+    public void souscrireNouvelleOption(Agent agent, String type, float prix) {
+        OptionPayanteAgent nouvelleOption = new OptionPayanteAgent(type, prix, agent);
+        nouvelleOption.souscrire();
+        optionRepository.save(nouvelleOption);
+    }
+
+    /**
+     * Annuler une option par son ID.
+     */
+    public void annulerOption(Long optionId) {
+        OptionPayanteAgent opt = optionRepository.findById(optionId).orElse(null);
+        if (opt != null) {
+            opt.resilier();
+            optionRepository.save(opt);
+        }
+    }
+
+    /**
+     * Récupérer les options par Agent 
+     */
+    public List<OptionPayanteAgent> getOptionsByAgent(Agent agent) {
+        return optionRepository.findByAgentId(agent.getId());
+    }
 }

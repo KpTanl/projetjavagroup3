@@ -13,6 +13,7 @@ import com.group3.carrental.entity.Agent;
 import com.group3.carrental.entity.Contrat;
 import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Vehicule;
+import com.group3.carrental.entity.OptionPayanteAgent;
 import com.group3.carrental.service.ContratService;
 import com.group3.carrental.service.UtilisateurService;
 import com.group3.carrental.service.VehiculeService;
@@ -68,6 +69,7 @@ public class AgentController {
         System.out.println("12. Droit de réponse (discussion sur notes)");
         System.out.println("13. Mes contrats terminés");
         System.out.println("14. Mes contrats et PDF");
+        System.out.println("15. Gestion des options");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -102,8 +104,7 @@ public class AgentController {
             case 10:
                 boolean optionManuelle = optionService.hasActiveOption(
                         agent.getId(),
-                        OptionService.OPT_SIGNATURE_MANUELLE
-                );
+                        OptionService.OPT_SIGNATURE_MANUELLE);
                 if (!optionManuelle) {
                     System.out.println("Option non active : les contrats sont acceptés automatiquement à la création.");
                     break;
@@ -121,6 +122,9 @@ public class AgentController {
                 break;
             case 14:
                 afficherMesContrats(currentUser);
+                break;
+            case 15:
+                gererMesOptions(agent);
                 break;
             case 0:
                 System.out.println("vous avez choisi de quitter!");
@@ -313,6 +317,7 @@ public class AgentController {
             }
         }
     }
+
     private void menuOptionSignatureManuelle(Agent agent) {
         final float PRIX_MENSUEL = 9.99f; // mets le prix demandé dans l'énoncé si vous en avez un
 
@@ -336,5 +341,110 @@ public class AgentController {
         } catch (Exception e) {
             System.out.println("Erreur: " + e.getMessage());
         }
+    }
+
+    /**
+     * Gérer les options de l'agent.
+     */
+    private void gererMesOptions(Agent agent) {
+        while (true) {
+            System.out.println("\n--- GESTION DES OPTIONS ---");
+            System.out.println("1. Voir mes options actives");
+            System.out.println("2. Souscrire à une nouvelle option");
+            System.out.println("3. Résilier une option");
+            System.out.println("4. Retour");
+            System.out.print("Votre choix : ");
+
+            int choix = sc.nextInt();
+            sc.nextLine();
+
+            switch (choix) {
+                case 1:
+                    afficherOptionsAgent(agent);
+                    break;
+                case 2:
+                    souscrireOption(agent);
+                    break;
+                case 3:
+                    resilierOption(agent);
+                    break;
+                case 4:
+                    return;
+                default:
+                    System.out.println("Choix invalide !");
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Afficher les options souscrites par l'agent.
+     */
+    private void afficherOptionsAgent(Agent agent) {
+        List<OptionPayanteAgent> options = optionService.getOptionsByAgent(agent);
+        if (options.isEmpty()) {
+            System.out.println("\nVous n'avez aucune option souscrite.");
+        } else {
+            System.out.println("\n--- VOS ABONNEMENTS ---");
+            for (OptionPayanteAgent opt : options) {
+                String statut = opt.isEstActive() ? "[ACTIVE]" : "[RESILIEE]";
+                System.out.println(
+                        "- ID: " + opt.getId() + " | " + opt.getType() + " | " + opt.getPrixMensuel() + "€ " + statut);
+            }
+        }
+    }
+
+    /**
+     * Souscrire à une nouvelle option payante.
+     */
+    private void souscrireOption(Agent agent) {
+        System.out.println("\n--- SOUSCRIRE À UNE OPTION ---");
+        System.out.println("Options disponibles :");
+        System.out.println("1. Mise en avant premium (50€/mois)");
+        System.out.println("2. Assurance étendue (30€/mois)");
+        System.out.println("3. Support prioritaire (20€/mois)");
+        System.out.print("Votre choix : ");
+
+        int choixOption = sc.nextInt();
+        sc.nextLine();
+
+        String type;
+        float prix;
+
+        switch (choixOption) {
+            case 1:
+                type = "Mise en avant premium";
+                prix = 50.0f;
+                break;
+            case 2:
+                type = "Assurance étendue";
+                prix = 30.0f;
+                break;
+            case 3:
+                type = "Support prioritaire";
+                prix = 20.0f;
+                break;
+            default:
+                System.out.println("Choix invalide !");
+                return;
+        }
+
+        optionService.souscrireNouvelleOption(agent, type, prix);
+        System.out.println("\n✓ Option '" + type + "' souscrite avec succès pour " + prix + "€/mois.");
+    }
+
+    /**
+     * Annuler une option payante existante.
+     */
+    private void resilierOption(Agent agent) {
+        afficherOptionsAgent(agent);
+        System.out.println("\n--- RÉSILIER UNE OPTION ---");
+        System.out.print("Entrez l'ID de l'option à résilier : ");
+
+        Long optionId = sc.nextLong();
+        sc.nextLine();
+
+        optionService.annulerOption(optionId);
+        System.out.println("\n✓ Option résiliée (si elle existait).");
     }
 }
