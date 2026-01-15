@@ -112,21 +112,21 @@ public class DataInitializer implements CommandLineRunner {
 
                 // Assurances 
                 Assurance assuranceAZA = new Assurance(
-                                "Assurance AZA Complète",
-                                "Voiture:30.0,Moto:45.0,Camion:60.0,Voiture-Clio:28.0",
-                                30.0);
+                                "Assurance AZA Basique",
+                                "Voiture:8.0,Moto:10.0,Camion:15.0,Voiture-Clio:7.0",
+                                8.0);
                 assuranceRepository.save(assuranceAZA);
 
                 Assurance assuranceConfort = new Assurance(
                                 "Assurance Confort",
-                                "Voiture:50.0,Moto:65.0,Camion:85.0",
-                                50.0);
+                                "Voiture:12.0,Moto:15.0,Camion:20.0",
+                                12.0);
                 assuranceRepository.save(assuranceConfort);
 
                 Assurance assurancePremium = new Assurance(
                                 "Assurance Premium",
-                                "Voiture:80.0,Moto:100.0,Camion:120.0",
-                                80.0);
+                                "Voiture:18.0,Moto:22.0,Camion:28.0",
+                                18.0);
                 assuranceRepository.save(assurancePremium);
 
                 //  Utilisateurs (Loueurs) 
@@ -221,6 +221,7 @@ public class DataInitializer implements CommandLineRunner {
                                 48.8583, 2.2945);
                 ajouterDisponibilite60Jours(v1);
                 v1.setAgent(agentPro1); // Assigné à agentPro1
+                v1.setPrixJournalier(35.0); // 35€/jour
                 vehiculeRepository.save(v1);
 
                 Vehicule v2 = new Vehicule(
@@ -235,6 +236,7 @@ public class DataInitializer implements CommandLineRunner {
                                 48.8397, 2.2399);
                 ajouterDisponibilite60Jours(v2);
                 v2.setAgent(agentPro2); // Assigné à agentPro2
+                v2.setPrixJournalier(45.0); // 45€/jour (Moto)
                 vehiculeRepository.save(v2);
 
                 Vehicule v3 = new Vehicule(
@@ -249,6 +251,7 @@ public class DataInitializer implements CommandLineRunner {
                                 48.9361, 2.3574);
                 ajouterDisponibilite60Jours(v3);
                 v3.setAgent(agentPro3); // Assigné à agentPro3
+                v3.setPrixJournalier(40.0); // 40€/jour
                 vehiculeRepository.save(v3);
 
                 Vehicule v4 = new Vehicule(
@@ -263,6 +266,7 @@ public class DataInitializer implements CommandLineRunner {
                                 48.8048, 2.1203);
                 ajouterDisponibilite60Jours(v4);
                 v4.setAgent(agentParticulier1); // Assigné à agentParticulier1
+                v4.setPrixJournalier(80.0); // 80€/jour (Camion)
                 vehiculeRepository.save(v4);
 
                 Vehicule v5 = new Vehicule(
@@ -276,6 +280,7 @@ public class DataInitializer implements CommandLineRunner {
                                 "Bordeaux",
                                 48.8674, 2.7836);
                 ajouterDisponibilite60Jours(v5);
+                v5.setPrixJournalier(50.0); // 50€/jour (Moto)
                 vehiculeRepository.save(v5);
 
                 Vehicule v6 = new Vehicule(
@@ -290,6 +295,7 @@ public class DataInitializer implements CommandLineRunner {
                                 45.7640, 4.8357);
                 ajouterDisponibilite60Jours(v6);
                 v6.setAgent(agentParticulier1);
+                v6.setPrixJournalier(30.0); // 30€/jour
                 vehiculeRepository.save(v6);
 
                 Vehicule v7 = new Vehicule(
@@ -304,6 +310,7 @@ public class DataInitializer implements CommandLineRunner {
                                 48.4047, 2.7016);
                 ajouterDisponibilite60Jours(v7);
                 v7.setAgent(agentParticulier2);
+                v7.setPrixJournalier(75.0); // 75€/jour (Camion)
                 vehiculeRepository.save(v7);
 
                 Vehicule v8 = new Vehicule(
@@ -318,6 +325,7 @@ public class DataInitializer implements CommandLineRunner {
                                 47.9029, 1.9092);
                 ajouterDisponibilite60Jours(v8);
                 v8.setAgent(agentParticulier3);
+                v8.setPrixJournalier(55.0); // 55€/jour (BMW)
                 vehiculeRepository.save(v8);
 
                 // ========== Contrats pour démo terminés
