@@ -65,10 +65,8 @@ public class Vehicule {
     private Agent agent;
     private int kilometrage;
 
-    // Date de suppression programmée (null = pas de suppression prévue)
     private LocalDate dateSuppressionPrevue;
 
-    // 原kepeng构造函数（8参数）
     public Vehicule(TypeVehicule type, String marque, String modele, String couleur, EtatVehicule etat,
             String rueLocalisation, String cPostalLocalisation, String villeLocalisation, double latitudeVehicule,
             double longitudeVehicule) {

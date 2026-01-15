@@ -93,7 +93,7 @@ public class Parking implements Services {
         System.out.println("\n-------------------------------------------");
         System.out.println("ADRESSE : " + getLocalisationComplete());
         System.out.println("CONTRAINTES : " + (contraintes != null ? contraintes : "Aucune"));
-        System.out.println("ℹINFOS : Parking partenaire Vienci - Durée longue autorisée");
+        System.out.println("INFOS : Parking partenaire Vienci - Durée longue autorisée");
         System.out.println("RÉDUCTION : -" + reductionloueur + "€ sur votre location");
         System.out.println("-------------------------------------------");
     }

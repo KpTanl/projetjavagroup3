@@ -79,6 +79,7 @@ public class AgentController {
         System.out.println("14. Mes contrats et PDF");
         System.out.println("15. Gestion des options");
         System.out.println("16. Commander un entretien ponctuel");
+        System.out.println("17. Louer un véhicule");
         System.out.println("0. Quitter");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -137,6 +138,9 @@ public class AgentController {
                 break;
             case 16:
                 commanderEntretienPonctuel(agent);
+                break;
+            case 17:
+                utilisateurService.louerVehicule(agent);
                 break;
             case 0:
                 System.out.println("vous avez choisi de quitter!");
