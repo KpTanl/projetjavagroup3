@@ -1893,6 +1893,7 @@ public static void main(String[] args) {
 
 #### ⚡ Récapitulatif DI
 
+
 | Concept | Explication |
 |---------|-------------|
 | **DI** | Spring crée et fournit les objets automatiquement |
