@@ -76,7 +76,6 @@ public class DataInitializer implements CommandLineRunner {
         utilisateurRepository.save(loueur1);
         utilisateurRepository.save(loueur2);
 
-
         // ========== Agents ==========
         AgentPro agentPro1 = new AgentPro(0, "Société", "Admin", "admin@rentcar.com", "admin123", new ArrayList<>(), LocalDate.now(), 12345678901234L, "RentCar Pro", 48.8566, 2.3522);
         AgentParticulier agentPart1 = new AgentParticulier(0, "Durand", "Paul", "paul.durand@email.com", "paulpass", new ArrayList<>(), LocalDate.now().minusDays(3), 48.8600, 2.3500);
