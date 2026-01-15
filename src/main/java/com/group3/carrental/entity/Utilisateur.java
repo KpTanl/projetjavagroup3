@@ -22,6 +22,15 @@ public abstract class Utilisateur extends Compte {
     protected double latitudeHabitation;
     protected double longitudeHabitation;
 
+    // Parrainage (Referral System)
+    @ManyToOne
+    @JoinColumn(name = "parrain_id")
+    protected Utilisateur parrain;
+
+    protected double soldePorteMonnaie = 0.0;
+
+    protected boolean bonusParrainageRecu = false;
+
     public enum Role {
         Loueur,
         Agent
@@ -44,10 +53,6 @@ public abstract class Utilisateur extends Compte {
         this.longitudeHabitation = longitudeHabitation;
     }
 
-    public void seConnecter() {
-
-    }
-
     public void modifierProfil(String nom, String prenom, String email, String motDePasse) {
         if (nom != null && !nom.isEmpty()) {
             this.nom = nom;
@@ -61,10 +66,6 @@ public abstract class Utilisateur extends Compte {
         if (motDePasse != null && !motDePasse.isEmpty()) {
             this.motDePasse = motDePasse;
         }
-    }
-
-    public void signerContrat() {
-
     }
 
 }

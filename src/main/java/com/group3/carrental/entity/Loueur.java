@@ -28,7 +28,6 @@ public class Loueur extends Utilisateur implements Commun {
         this.notesRecues = notesRecues;
     }
 
-    // 构造函数（不带坐标 - kepeng版本兼容DataInitializer）
     public Loueur(int id, String nom, String prenom, String email, String motDePasse,
             List<Contrat> historiqueLocations, List<NoteLoueur> notesRecues) {
         super(id, nom, prenom, email, motDePasse, Role.Loueur);
@@ -43,13 +42,13 @@ public class Loueur extends Utilisateur implements Commun {
     }
 
     @Override
-    public Vehicule FiltreVehicule() {
+    public Vehicule filtreVehicule() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public void ConsulterProfilsAgents() {
+    public void consulterProfilsAgents() {
         // TODO Auto-generated method stub
     }
 

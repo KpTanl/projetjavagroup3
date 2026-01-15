@@ -26,7 +26,7 @@ public class Contrat {
     @ManyToOne
     private Agent agent;
     @ManyToOne
-    private Loueur loueur;
+    private Utilisateur loueur;
     @ManyToOne
     private Vehicule vehicule;
     private double prixTotal;
@@ -43,7 +43,7 @@ public class Contrat {
         Rendu
     }
 
-    public Contrat(Date dateDeb, Date dateFin, Agent agent, Loueur loueur, Vehicule vehicule, double prixTotal) {
+    public Contrat(Date dateDeb, Date dateFin, Agent agent, Utilisateur loueur, Vehicule vehicule, double prixTotal) {
         this.dateDeb = dateDeb;
         this.dateFin = dateFin;
         this.agent = agent;
@@ -152,9 +152,6 @@ public class Contrat {
         }
 
         return nomFichier;
-    }
-
-    public class StatutContrat {
     }
 
     public boolean estTermine() {

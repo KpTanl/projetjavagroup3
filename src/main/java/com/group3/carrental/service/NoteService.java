@@ -102,8 +102,8 @@ public class NoteService {
                 responsabilite,
                 commentaire,
                 c.getLoueur(),
-                agent,      
-                c        
+                agent,
+                c
         );
 
         return noteLoueurRepository.save(nl);

@@ -59,10 +59,11 @@ public class VehiculeService {
     }
 
     public void afficherVehiculesDisponibles() {
-        List<Vehicule> disponibles = vehiculeRepository.findByEtat(Vehicule.EtatVehicule.Non_loué);
-
-        disponibles = disponibles.stream()
-                .filter(v -> !v.getDatesDisponibles().isEmpty())
+        // Liste vide = disponible à tout moment
+        // Exclure les véhicules avec suppression programmée
+        List<Vehicule> disponibles = vehiculeRepository.findByEtat(Vehicule.EtatVehicule.Non_loué)
+                .stream()
+                .filter(v -> v.getDateSuppressionPrevue() == null)
                 .toList();
 
         System.out.println("\n--- Véhicules disponibles (non loués) ---");
@@ -84,7 +85,12 @@ public class VehiculeService {
                 } else {
                     System.out.println("Agent: Non assigné");
                 }
-                System.out.println("Dates disponibles: " + v.getDatesDisponibles());
+                // Afficher les dates ou "Toujours disponible"
+                if (v.getDatesDisponibles().isEmpty()) {
+                    System.out.println("Disponibilité: Toujours disponible");
+                } else {
+                    System.out.println("Dates disponibles: " + v.getDatesDisponibles());
+                }
                 System.out.println("------------------------------------");
             }
         }
@@ -148,6 +154,11 @@ public class VehiculeService {
                 case "2":
                     etat = EtatVehicule.Non_loué;
                     break;
+                case "3": 
+                etat = EtatVehicule.Indisponible;
+                System.out.println("Le véhicule est marqué comme : indisponible à la location");
+                break;
+            
                 default:
                     System.out.println("Type invalide. Veuillez choisir un type valide.");
                     break;

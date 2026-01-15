@@ -34,7 +34,7 @@ public class NoteLoueur extends Note {
             int noteEngagement,
             int noteResponsabilite,
             String commentaire,
-            Loueur loueur,
+            Utilisateur loueur,
             Agent auteur,
             Contrat contrat
     ) {
@@ -42,7 +42,7 @@ public class NoteLoueur extends Note {
         this.noteTraitementVehicule = noteTraitementVehicule;
         this.noteEngagement = noteEngagement;
         this.noteResponsabilite = noteResponsabilite;
-        this.loueur = loueur;
+        this.loueur = (Loueur) loueur;
         this.auteur = auteur;
         this.contrat = contrat;
         this.noteGlobale = calculerNoteGlobale();

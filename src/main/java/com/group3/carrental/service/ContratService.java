@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.group3.carrental.entity.Agent;
 import com.group3.carrental.entity.Contrat;
-import com.group3.carrental.entity.Loueur;
+import com.group3.carrental.entity.Utilisateur;
 import com.group3.carrental.entity.Vehicule;
 import com.group3.carrental.repository.ContratRepository;
 
@@ -21,7 +21,7 @@ public class ContratService {
         this.contratRepository = contratRepository;
     }
 
-    public Contrat creerContrat(Date dateDeb, Date dateFin, Agent agent, Loueur loueur, Vehicule vehicule,
+    public Contrat creerContrat(Date dateDeb, Date dateFin, Agent agent, Utilisateur loueur, Vehicule vehicule,
             double prixTotal) {
         Contrat contrat = new Contrat(dateDeb, dateFin, agent, loueur, vehicule, prixTotal);
         contrat.setStatut(Contrat.Statut.Presigne);
@@ -29,7 +29,7 @@ public class ContratService {
     }
 
     public Contrat creerContratPresigne(Date dateDeb, Date dateFin,
-            Agent agent, Loueur loueur,
+            Agent agent, Utilisateur loueur,
             Vehicule vehicule, double prixTotal) {
         Contrat contrat = new Contrat(dateDeb, dateFin, agent, loueur, vehicule, prixTotal);
         contrat.setStatut(Contrat.Statut.Presigne);

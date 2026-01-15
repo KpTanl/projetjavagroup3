@@ -80,7 +80,7 @@ public class LoueurController {
                 vehiculeService.filtrerVehicules();
                 break;
             case 3:
-                louerVehicule(currentUser);
+                utilisateurController.louerVehicule(currentUser);
                 break;
             case 4:
                 afficherAssurances();
@@ -159,14 +159,29 @@ public class LoueurController {
                     + vehiculeSelectionne.getModele() + " (ID: " + vehiculeId + ")");
 
             List<LocalDate> datesDisponibles = vehiculeSelectionne.getDatesDisponibles();
-            System.out.println("\nDates disponibles pour ce véhicule:");
-            if (datesDisponibles.isEmpty()) {
-                System.out.println("Aucune date disponible pour ce véhicule.");
-                return;
-            }
 
+            // Si liste vide = toujours disponible, sinon vérifier les dates
             LocalDate dateDebut = null;
-            if (datesDisponibles.size() > 1) {
+            if (datesDisponibles.isEmpty()) {
+                // Véhicule toujours disponible - demander la date souhaitée
+                System.out.println("\nCe véhicule est toujours disponible.");
+                System.out.print("Saisissez la date de début de location (format: AAAA-MM-JJ) : ");
+                String dateInput = sc.nextLine();
+                try {
+                    dateDebut = LocalDate.parse(dateInput);
+                    if (dateDebut.isBefore(LocalDate.now())) {
+                        System.out.println("La date ne peut pas être dans le passé.");
+                        return;
+                    }
+                } catch (Exception e) {
+                    System.out.println("Format de date invalide. Utilisez AAAA-MM-JJ (ex: 2026-01-15)");
+                    return;
+                }
+            } else if (datesDisponibles.size() == 1) {
+                dateDebut = datesDisponibles.get(0);
+                System.out.println("\nDate de début imposée: " + dateDebut);
+            } else {
+                System.out.println("\nDates disponibles pour ce véhicule:");
                 System.out.println("Nombre de dates disponibles: " + datesDisponibles.size());
                 System.out.println("Première date disponible: " + datesDisponibles.get(0));
                 System.out.println("Dernière date disponible: " + datesDisponibles.get(datesDisponibles.size() - 1));
@@ -183,9 +198,6 @@ public class LoueurController {
                     System.out.println("Format de date invalide. Utilisez AAAA-MM-JJ (ex: 2026-01-15)");
                     return;
                 }
-            } else {
-                dateDebut = datesDisponibles.get(0);
-                System.out.println("Date de début: " + dateDebut);
             }
 
             System.out.print("Nombre de jours de location : ");
@@ -239,7 +251,7 @@ public class LoueurController {
             }
             System.out.println("PRIX TOTAL ESTIMÉ : " + prixTotal + " euros");
 
-            //RECAPITULATIF
+            // RECAPITULATIF
             System.out.println("\n=== Récapitulatif de Location ===");
             System.out.println("Véhicule: ID " + vehiculeId);
             System.out.println("Date de début: " + dateDebut);
@@ -269,6 +281,23 @@ public class LoueurController {
                     Loueur loueurCourant = null;
                     if (currentUser instanceof Loueur) {
                         loueurCourant = (Loueur) currentUser;
+                    }
+
+                    // Utilisation du crédit de parrainage
+                    double creditUtilise = 0;
+                    if (loueurCourant != null && loueurCourant.getSoldePorteMonnaie() > 0) {
+                        System.out.println("\n*** CRÉDIT DISPONIBLE ***");
+                        System.out.println("Vous avez " + loueurCourant.getSoldePorteMonnaie() + "€ de crédit.");
+                        System.out.print("Voulez-vous utiliser votre crédit ? (O/N) : ");
+                        String utiliserCredit = sc.nextLine();
+                        if (utiliserCredit.equalsIgnoreCase("O")) {
+                            creditUtilise = Math.min(prixTotal, loueurCourant.getSoldePorteMonnaie());
+                            prixTotal -= creditUtilise;
+                            loueurCourant.setSoldePorteMonnaie(loueurCourant.getSoldePorteMonnaie() - creditUtilise);
+                            utilisateurService.mettreAJour(loueurCourant);
+                            System.out.println("Crédit utilisé : -" + creditUtilise + "€");
+                            System.out.println("Nouveau prix total : " + prixTotal + "€");
+                        }
                     }
 
                     contratService.creerContratPresigne(dateDebutContrat, dateFinContrat, agentVehicule, loueurCourant,
@@ -375,6 +404,23 @@ public class LoueurController {
 
         // Marquer le contrat comme rendu
         contratService.rendreVehicule(contrat.getId(), cheminPhoto);
+
+        // Parrainage: Récompenser le parrain si c'est la première location terminée
+        Utilisateur loueur = contrat.getLoueur();
+        if (loueur instanceof Loueur) {
+            Loueur loueurCast = (Loueur) loueur;
+            if (loueurCast.getParrain() != null && !loueurCast.isBonusParrainageRecu()) {
+                Utilisateur parrain = loueurCast.getParrain();
+                double bonus = 50.0;
+                parrain.setSoldePorteMonnaie(parrain.getSoldePorteMonnaie() + bonus);
+                loueurCast.setBonusParrainageRecu(true);
+                utilisateurService.mettreAJour(parrain);
+                utilisateurService.mettreAJour(loueurCast);
+                System.out.println("\n*** PARRAINAGE ***");
+                System.out.println("Félicitations ! Votre parrain " + parrain.getPrenom() + " " + parrain.getNom()
+                        + " a reçu " + bonus + "€ de crédit !");
+            }
+        }
 
         System.out.println("\n========================================");
         System.out.println("  VEHICULE RENDU AVEC SUCCES !");

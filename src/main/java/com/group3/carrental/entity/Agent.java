@@ -2,6 +2,7 @@ package com.group3.carrental.entity;
 
 import java.time.LocalDate;
 import com.group3.carrental.entity.Vehicule.OptionRetour;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import jakarta.persistence.*;
@@ -11,11 +12,15 @@ import lombok.Data;
 @DiscriminatorValue("Agent")
 public abstract class Agent extends Utilisateur implements Commun {
 
+    // Options payantes souscrites par l'agent
+    @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<OptionPayanteAgent> optionsSouscrites = new ArrayList<>();
+
     // EAGER: charger immediatement pour eviter LazyInitializationException
     @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<NoteAgent> notesRecues;
 
-    @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Vehicule> vehiculesEnLocation;
 
     @Column(name = "date_recu_facture")
@@ -118,21 +123,31 @@ public abstract class Agent extends Utilisateur implements Commun {
     }
 
     @Override
-    public Vehicule FiltreVehicule() {
+    public Vehicule filtreVehicule() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public void ConsulterProfilsAgents() {
+    public void consulterProfilsAgents() {
         // TODO Auto-generated method stub
     }
 
     public List<Vehicule> getVehiculesEnLocation() {
+        if (this.vehiculesEnLocation == null) {
+            this.vehiculesEnLocation = new ArrayList<>();
+        }
         return vehiculesEnLocation;
     }
 
     public void setVehiculesEnLocation(List<Vehicule> vehiculesEnLocation) {
         this.vehiculesEnLocation = vehiculesEnLocation;
+    }
+
+    public List<OptionPayanteAgent> getOptionsSouscrites() {
+        if (this.optionsSouscrites == null) {
+            this.optionsSouscrites = new ArrayList<>();
+        }
+        return optionsSouscrites;
     }
 }

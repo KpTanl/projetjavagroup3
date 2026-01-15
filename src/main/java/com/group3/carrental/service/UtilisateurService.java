@@ -47,7 +47,13 @@ public class UtilisateurService {
     }
 
     public Optional<Utilisateur> login(String email, String motDePasse) {
-        return utilisateurRepository.findByEmailAndMotDePasse(email, motDePasse);
+        Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findByEmail(email);
+        
+        if (utilisateurOpt.isPresent() && utilisateurOpt.get().seConnecter(motDePasse)) {
+            return utilisateurOpt;
+        }
+        
+        return Optional.empty();
     }
 
     public Utilisateur register(Utilisateur utilisateur) {
@@ -56,6 +62,10 @@ public class UtilisateurService {
 
     public Utilisateur mettreAJour(Utilisateur utilisateur) {
         return utilisateurRepository.save(utilisateur);
+    }
+
+    public Utilisateur findByEmail(String email) {
+        return utilisateurRepository.findByEmail(email).orElse(null);
     }
 
     public void ajouterVehicule(Utilisateur currentUser) {
@@ -118,7 +128,54 @@ public class UtilisateurService {
         double longitude = Double.parseDouble(scanner.nextLine());
         Vehicule vehicule = new Vehicule(type, inputMarque, inputModele,
                 inputCouleur, etat, rue, codePostal, ville, latitude, longitude);
-        vehicule.ajouterDisponibilite(LocalDate.now().plusDays(1));
+
+        // Demander les dates de disponibilité (optionnel - vide = toujours disponible)
+        System.out.println("\n--- Dates de disponibilité ---");
+        System.out.println("(Laissez vide pour 'toujours disponible')");
+        System.out.print("Date de début disponible (YYYY-MM-DD) : ");
+        String dateDebutStr = scanner.nextLine().trim();
+
+        if (!dateDebutStr.isEmpty()) {
+            LocalDate dateDebut = null;
+            LocalDate dateFin = null;
+
+            // Valider date de début
+            while (dateDebut == null) {
+                try {
+                    dateDebut = LocalDate.parse(dateDebutStr);
+                } catch (Exception e) {
+                    System.out.println("Format invalide. Utilisez le format YYYY-MM-DD (ex: 2026-01-20)");
+                    System.out.print("Date de début disponible (YYYY-MM-DD) : ");
+                    dateDebutStr = scanner.nextLine().trim();
+                }
+            }
+
+            // Valider date de fin
+            while (dateFin == null || dateFin.isBefore(dateDebut)) {
+                System.out.print("Date de fin disponible (YYYY-MM-DD) : ");
+                String dateFinStr = scanner.nextLine().trim();
+                try {
+                    dateFin = LocalDate.parse(dateFinStr);
+                    if (dateFin.isBefore(dateDebut)) {
+                        System.out.println("Erreur: La date de fin doit être après ou égale à " + dateDebut);
+                        dateFin = null;
+                    }
+                } catch (Exception e) {
+                    System.out.println("Format invalide. Utilisez le format YYYY-MM-DD (ex: 2026-01-25)");
+                }
+            }
+
+            // Ajouter toutes les dates de la plage
+            LocalDate current = dateDebut;
+            while (!current.isAfter(dateFin)) {
+                vehicule.ajouterDisponibilite(current);
+                current = current.plusDays(1);
+            }
+            System.out.println("Disponibilité ajoutée du " + dateDebut + " au " + dateFin);
+        } else {
+            System.out.println("Le véhicule sera toujours disponible.");
+        }
+
         vehicule.setAgent(agent);
         vehiculeRepository.save(vehicule);
         System.out.println("Vehicule ajoute reussi !!");
@@ -147,9 +204,28 @@ public class UtilisateurService {
             return;
         }
 
-        vehiculeRepository.delete(vehicule);
-        System.out.println("Véhicule supprimé !");
+        // Vérifier s'il y a des contrats actifs ou futurs
+        List<com.group3.carrental.entity.Contrat> contrats = contratService.getContratsParVehicule(vehicule.getId());
+        LocalDate aujourdhui = LocalDate.now();
+
+        // Filtrer les contrats en cours ou futurs
+        List<com.group3.carrental.entity.Contrat> contratsActifsOuFuturs = contrats.stream()
+                .filter(c -> {
+                    LocalDate dateFin = c.getDateFin().toInstant()
+                            .atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+                    return !dateFin.isBefore(aujourdhui);
+                })
+                .toList();
+
+        if (contratsActifsOuFuturs.isEmpty()) {
+            // Pas de contrats actifs - suppression immédiate
+            vehiculeRepository.delete(vehicule);
+            System.out.println("Véhicule supprimé !");
+        } else {
+            System.out.println("Erreur: Véhicule a des contrats actifs ou futurs.");
+        }   
     }
+
 
     public void modifierVehicule(Agent agent) {
         afficherLesVehiculesDeAgent(agent);
