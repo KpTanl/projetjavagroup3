@@ -126,8 +126,14 @@ public class UtilisateurService {
         double latitude = Double.parseDouble(scanner.nextLine());
         System.out.println("Longitude: ");
         double longitude = Double.parseDouble(scanner.nextLine());
+
+        // Demander le prix journalier du véhicule
+        System.out.println("Prix journalier (€/jour): ");
+        double prixJournalier = Double.parseDouble(scanner.nextLine());
+
         Vehicule vehicule = new Vehicule(type, inputMarque, inputModele,
                 inputCouleur, etat, rue, codePostal, ville, latitude, longitude);
+        vehicule.setPrixJournalier(prixJournalier);
 
         // Demander les dates de disponibilité (optionnel - vide = toujours disponible)
         System.out.println("\n--- Dates de disponibilité ---");
@@ -370,19 +376,33 @@ public class UtilisateurService {
             }
 
             double prixParkingOuReduction = (parkingSelectionne != null) ? parkingSelectionne.getReductionloueur() : 0;
-            double prixTotal = prixAssurance - prixParkingOuReduction;
+
+            // Calcul du prix du véhicule (prix journalier défini par l'agent)
+            double prixVehicule = vehiculeSelectionne.getPrixJournalier() * nbJours;
+
+            // Calcul des frais de plateforme (10% + 2€ par jour)
+            double fraisPlateforme = (prixVehicule * 0.10) + (2.0 * nbJours);
+
+            // Prix total = prix véhicule + frais plateforme + assurance - réduction parking
+            double prixTotal = prixVehicule + fraisPlateforme + prixAssurance - prixParkingOuReduction;
 
             // AFFICHAGE DES PRIX
             System.out.println("\n--- Détails du paiement ---");
+            System.out.println("Prix véhicule : " + prixVehicule + " euros (" + vehiculeSelectionne.getPrixJournalier()
+                    + "€/jour x " + nbJours + " jours)");
+            System.out.println(
+                    "Frais de plateforme : " + String.format("%.2f", fraisPlateforme) + " euros (10% + 2€/jour)");
             System.out.println("Prix assurance : " + prixAssurance + " euros");
             if (parkingSelectionne != null) {
                 System.out.println("Réduction parking : -" + prixParkingOuReduction + " euros");
             }
-            System.out.println("PRIX TOTAL ESTIMÉ : " + prixTotal + " euros");
+            System.out.println("PRIX TOTAL ESTIMÉ : " + String.format("%.2f", prixTotal) + " euros");
 
             // RÉCAPITULATIF
             System.out.println("\n=== Récapitulatif de Location ===");
-            System.out.println("Véhicule: ID " + vehiculeId);
+            System.out.println("Véhicule: ID " + vehiculeId + " - " + vehiculeSelectionne.getMarque() + " "
+                    + vehiculeSelectionne.getModele());
+            System.out.println("Prix journalier: " + vehiculeSelectionne.getPrixJournalier() + "€/jour");
             System.out.println("Date de début: " + dateDebut);
             System.out.println("Durée: " + nbJours + " jours");
             System.out.println("Assurance: " + assuranceChoisie.getNom());
@@ -391,7 +411,7 @@ public class UtilisateurService {
                 System.out.println("Lieu de dépôt : " + parkingSelectionne.getNomP() + " ("
                         + parkingSelectionne.getVilleP() + ")");
             }
-            System.out.println("Prix total estimé: " + prixTotal + "€");
+            System.out.println("Prix total estimé: " + String.format("%.2f", prixTotal) + "€");
 
             System.out.print("\nConfirmer la location ? (O/N) : ");
             String confirmation = scanner.nextLine();

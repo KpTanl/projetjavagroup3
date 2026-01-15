@@ -94,6 +94,7 @@ public class VehiculeService {
                 System.out.println("Vehicule: " + v.getMarque() + " " + v.getModele());
                 System.out.println("Lieu: " + v.getLocalisationComplete());
                 System.out.println("Etat: " + v.getEtat());
+                System.out.println("Prix journalier: " + v.getPrixJournalier() + "€/jour");
                 Double note = v.calculerNoteMoyenne();
                 System.out.println("Note moyenne: " + (note != null ? note + "/5" : "Aucune note"));
                 if (v.getAgent() != null) {
@@ -128,6 +129,7 @@ public class VehiculeService {
                 System.out.println("Vehicule: " + v.getMarque() + " " + v.getModele());
                 System.out.println("Lieu: " + v.getLocalisationComplete());
                 System.out.println("Etat: " + v.getEtat());
+                System.out.println("Prix journalier: " + v.getPrixJournalier() + "€/jour");
                 Double noteDisp = v.calculerNoteMoyenne();
                 System.out.println("Note moyenne: " + (noteDisp != null ? noteDisp + "/5" : "Aucune note"));
                 if (v.getAgent() != null) {
