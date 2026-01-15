@@ -22,7 +22,7 @@ public class NoteAgent extends Note {
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "loueur_id", nullable = false)
-    private Loueur auteur;
+    private Utilisateur auteur;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "contrat_id", nullable = false)
@@ -34,7 +34,7 @@ public class NoteAgent extends Note {
             int noteReactivite,
             String commentaire,
             Agent agent,
-            Loueur auteur,
+            Utilisateur auteur,
             Contrat contrat
     ) {
         super(commentaire);
