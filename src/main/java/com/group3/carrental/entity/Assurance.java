@@ -89,9 +89,7 @@ public class Assurance {
             if (parts.length == 2) {
                 try {
                     grille.put(parts[0].trim(), Double.parseDouble(parts[1].trim()));
-                } catch (NumberFormatException e) {
-                    // Ignorer les entrées mal formatées
-                }
+                } catch (NumberFormatException e) {}
             }
         }
         

@@ -5,13 +5,12 @@ import java.util.List;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @Entity
 @Table(name = "parking")
-public class Parking implements Services {
+public class Parking {
     // propriétés
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -96,22 +95,6 @@ public class Parking implements Services {
         System.out.println("INFOS : Parking partenaire Vienci - Durée longue autorisée");
         System.out.println("RÉDUCTION : -" + reductionloueur + "euros sur votre location");
         System.out.println("-------------------------------------------");
-    }
-
-    // ==================== Services Interface ====================
-    @Override
-    public void souscrire() {
-
-    }
-
-    @Override
-    public void resilier() {
-
-    }
-
-    @Override
-    public void renouveler() {
-
     }
 
 }

@@ -23,13 +23,5 @@ public abstract class Compte {
         this.motDePasse = motDePasse;
     }
 
-    /**
-     * Vérifie si le mot de passe fourni correspond au mot de passe du compte
-     * 
-     * @param motDePasseSaisi Le mot de passe à vérifier
-     * @return true si le mot de passe est correct, false sinon
-     */
-    public boolean seConnecter(String motDePasseSaisi) {
-        return this.motDePasse != null && this.motDePasse.equals(motDePasseSaisi);
-    }
+    public abstract boolean seConnecter(String motDePasseSaisi);
 }
