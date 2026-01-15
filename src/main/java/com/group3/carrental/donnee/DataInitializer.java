@@ -74,6 +74,19 @@ public class DataInitializer implements CommandLineRunner {
                 this.prestataireRepository = prestataireRepository;
         }
 
+        /**
+         * Ajoute 60 jours de disponibilité à un véhicule (à partir d'aujourd'hui)
+         */
+        private void ajouterDisponibilite60Jours(Vehicule v) {
+                LocalDate today = LocalDate.now();
+                LocalDate endDate = today.plusDays(60);
+                LocalDate current = today;
+                while (!current.isAfter(endDate)) {
+                        v.ajouterDisponibilite(current);
+                        current = current.plusDays(1);
+                }
+        }
+
         @Override
         public void run(String... args) {
                 // 1. On initialise les parkings s'il n'y en a pas encore
@@ -206,7 +219,7 @@ public class DataInitializer implements CommandLineRunner {
                                 "75000",
                                 "Paris",
                                 48.8583, 2.2945);
-                v1.ajouterDisponibilite(LocalDate.now().plusDays(1));
+                ajouterDisponibilite60Jours(v1);
                 v1.setAgent(agentPro1); // Assigné à agentPro1
                 vehiculeRepository.save(v1);
 
@@ -220,7 +233,7 @@ public class DataInitializer implements CommandLineRunner {
                                 "31000",
                                 "Toulouse",
                                 48.8397, 2.2399);
-                v2.ajouterDisponibilite(LocalDate.now().plusDays(2));
+                ajouterDisponibilite60Jours(v2);
                 v2.setAgent(agentPro2); // Assigné à agentPro2
                 vehiculeRepository.save(v2);
 
@@ -234,7 +247,7 @@ public class DataInitializer implements CommandLineRunner {
                                 "59000",
                                 "Lille",
                                 48.9361, 2.3574);
-                v3.ajouterDisponibilite(LocalDate.now().plusDays(3));
+                ajouterDisponibilite60Jours(v3);
                 v3.setAgent(agentPro3); // Assigné à agentPro3
                 vehiculeRepository.save(v3);
 
@@ -248,7 +261,7 @@ public class DataInitializer implements CommandLineRunner {
                                 "59800",
                                 "Lille",
                                 48.8048, 2.1203);
-                v4.ajouterDisponibilite(LocalDate.now().plusDays(5));
+                ajouterDisponibilite60Jours(v4);
                 v4.setAgent(agentParticulier1); // Assigné à agentParticulier1
                 vehiculeRepository.save(v4);
 
@@ -262,7 +275,7 @@ public class DataInitializer implements CommandLineRunner {
                                 "33000",
                                 "Bordeaux",
                                 48.8674, 2.7836);
-                v5.ajouterDisponibilite(LocalDate.now().plusDays(1));
+                ajouterDisponibilite60Jours(v5);
                 vehiculeRepository.save(v5);
 
                 Vehicule v6 = new Vehicule(
@@ -275,7 +288,7 @@ public class DataInitializer implements CommandLineRunner {
                                 "69000",
                                 "Lyon",
                                 45.7640, 4.8357);
-                v6.ajouterDisponibilite(LocalDate.now().plusDays(2));
+                ajouterDisponibilite60Jours(v6);
                 v6.setAgent(agentParticulier1);
                 vehiculeRepository.save(v6);
 
@@ -289,7 +302,7 @@ public class DataInitializer implements CommandLineRunner {
                                 "13000",
                                 "Marseille",
                                 48.4047, 2.7016);
-                v7.ajouterDisponibilite(LocalDate.now().plusDays(4));
+                ajouterDisponibilite60Jours(v7);
                 v7.setAgent(agentParticulier2);
                 vehiculeRepository.save(v7);
 
@@ -303,7 +316,7 @@ public class DataInitializer implements CommandLineRunner {
                                 "69002",
                                 "Lyon",
                                 47.9029, 1.9092);
-                v8.ajouterDisponibilite(LocalDate.now().plusDays(3));
+                ajouterDisponibilite60Jours(v8);
                 v8.setAgent(agentParticulier3);
                 vehiculeRepository.save(v8);
 

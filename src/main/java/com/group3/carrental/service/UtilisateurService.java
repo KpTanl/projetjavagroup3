@@ -48,11 +48,11 @@ public class UtilisateurService {
 
     public Optional<Utilisateur> login(String email, String motDePasse) {
         Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findByEmail(email);
-        
+
         if (utilisateurOpt.isPresent() && utilisateurOpt.get().seConnecter(motDePasse)) {
             return utilisateurOpt;
         }
-        
+
         return Optional.empty();
     }
 
@@ -173,7 +173,15 @@ public class UtilisateurService {
             }
             System.out.println("Disponibilité ajoutée du " + dateDebut + " au " + dateFin);
         } else {
-            System.out.println("Le véhicule sera toujours disponible.");
+            // 默认60天可用
+            LocalDate today = LocalDate.now();
+            LocalDate sixtyDaysLater = today.plusDays(60);
+            LocalDate current = today;
+            while (!current.isAfter(sixtyDaysLater)) {
+                vehicule.ajouterDisponibilite(current);
+                current = current.plusDays(1);
+            }
+            System.out.println("Le véhicule sera disponible du " + today + " au " + sixtyDaysLater + " (60 jours).");
         }
 
         vehicule.setAgent(agent);
@@ -223,9 +231,8 @@ public class UtilisateurService {
             System.out.println("Véhicule supprimé !");
         } else {
             System.out.println("Erreur: Véhicule a des contrats actifs ou futurs.");
-        }   
+        }
     }
-
 
     public void modifierVehicule(Agent agent) {
         afficherLesVehiculesDeAgent(agent);
@@ -313,6 +320,23 @@ public class UtilisateurService {
                 return;
             }
 
+            // Vérifier que TOUTES les dates de la période de location sont disponibles
+            LocalDate dateFin = dateDebut.plusDays(nbJours - 1);
+            List<LocalDate> datesManquantes = new java.util.ArrayList<>();
+            LocalDate dateCheck = dateDebut;
+            while (!dateCheck.isAfter(dateFin)) {
+                if (!datesDisponibles.contains(dateCheck)) {
+                    datesManquantes.add(dateCheck);
+                }
+                dateCheck = dateCheck.plusDays(1);
+            }
+
+            if (!datesManquantes.isEmpty()) {
+                System.out.println("Erreur : Le véhicule n'est pas disponible pour toute la période demandée.");
+                System.out.println("Dates non disponibles : " + datesManquantes);
+                return;
+            }
+
             List<Assurance> assurances = assuranceService.getAllAssurances();
             if (assurances.isEmpty()) {
                 System.out.println("Aucune assurance disponible.");
@@ -382,7 +406,7 @@ public class UtilisateurService {
             java.util.Date dateFinContrat = java.util.Date.from(
                     dateDebut.plusDays(nbJours).atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-                Agent agentVehicule = vehiculeSelectionne.getAgent();
+            Agent agentVehicule = vehiculeSelectionne.getAgent();
 
             // Gestion du crédit du portefeuille (pour loueur ou agent)
             double creditUtilise = 0;
