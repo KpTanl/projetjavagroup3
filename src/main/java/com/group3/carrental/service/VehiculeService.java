@@ -154,6 +154,11 @@ public class VehiculeService {
                 case "2":
                     etat = EtatVehicule.Non_loué;
                     break;
+                case "3": 
+                etat = EtatVehicule.Indisponible;
+                System.out.println("Le véhicule est marqué comme : indisponible à la location");
+                break;
+            
                 default:
                     System.out.println("Type invalide. Veuillez choisir un type valide.");
                     break;
@@ -283,4 +288,8 @@ public class VehiculeService {
             });
         }
     }
+    public void saveVehicule(Vehicule v) {
+    // vehiculeRepository est normalement déjà injecté dans ton service
+    vehiculeRepository.save(v);
+}
 }

@@ -155,51 +155,60 @@ public class AgentController {
     /**
      * Gérer les options de parking pour les véhicules de l'agent.
      */
-    public void gererOptionsParkingAgent(Utilisateur currentUser) {
-        if (!(currentUser instanceof Agent)) {
-            System.out.println("Erreur : Vous devez être un Agent pour accéder à cette option.");
-            return;
-        }
+  public void gererOptionsParkingAgent(Utilisateur currentUser) {
+    if (!(currentUser instanceof Agent)) {
+        System.out.println("Erreur : Vous devez être un Agent.");
+        return;
+    }
 
-        Agent agentActuel = (Agent) currentUser;
-        List<Vehicule> mesVehicules = vehiculeService.getVehiculesByAgentId(agentActuel.getId());
+    // On déclare les variables manquantes
+    Agent agentActuel = (Agent) currentUser; 
+    List<Vehicule> mesVehicules = vehiculeService.getVehiculesByAgentId(agentActuel.getId());
 
-        if (mesVehicules == null || mesVehicules.isEmpty()) {
-            System.out.println("Vous n'avez aucun véhicule enregistré.");
-            return;
-        }
+    if (mesVehicules == null || mesVehicules.isEmpty()) {
+        System.out.println("Vous n'avez aucun véhicule enregistré.");
+        return;
+    }
 
-        System.out.println("\n--- GESTION DES OPTIONS PARKING ---");
-        for (int i = 0; i < mesVehicules.size(); i++) {
-            Vehicule v = mesVehicules.get(i);
-            System.out.println((i + 1) + ". " + v.getMarque() + " " + v.getModele()
-                    + " | Option actuelle : " + v.getOptionRetour());
-        }
+    // Affichage de la liste pour que l'utilisateur puisse choisir
+    System.out.println("\n--- GESTION DES OPTIONS PARKING ---");
+    for (int i = 0; i < mesVehicules.size(); i++) {
+        Vehicule v = mesVehicules.get(i);
+        System.out.println((i + 1) + ". " + v.getMarque() + " " + v.getModele()
+                + " | Statut actuel : " + (v.getOptionRetour() != null ? v.getOptionRetour() : "Classique"));
+    }
 
-        System.out.print("\nSélectionnez le numéro du véhicule à modifier (0 pour annuler) : ");
-        int choix = sc.nextInt();
+    System.out.print("\nSélectionnez le numéro du véhicule à modifier (0 pour annuler) : ");
+    int choix = sc.nextInt();
+    sc.nextLine();
+
+    if (choix > 0 && choix <= mesVehicules.size()) {
+        Vehicule vSelectionne = mesVehicules.get(choix - 1);
+
+        System.out.println("Voulez-vous activer ou désactiver l'option ?");
+        System.out.println("1. Activer (retour_parking) - 15€/mois");
+        System.out.println("2. Désactiver (retour_classique)");
+        int action = sc.nextInt();
         sc.nextLine();
 
-        if (choix > 0 && choix <= mesVehicules.size()) {
-            Vehicule vSelectionne = mesVehicules.get(choix - 1);
+        if (action == 1) {
+            // Mise à jour de l'objet et SAUVEGARDE en base de données
+            vSelectionne.setOptionRetour(Vehicule.OptionRetour.retour_parking);
+            vehiculeService.saveVehicule(vSelectionne); 
 
-            System.out.println("Voulez-vous activer ou désactiver l'option ?");
-            System.out.println("1. Activer (retour_parking)");
-            System.out.println("2. Désactiver (retour_classique)");
-            int action = sc.nextInt();
-            sc.nextLine();
-
-            if (action == 1) {
-                agentActuel.configurerOptionParking(vSelectionne, true);
-                System.out.println("Mise à jour réussie : Option activée.");
-            } else if (action == 2) {
-                agentActuel.configurerOptionParking(vSelectionne, false);
-                System.out.println("Mise à jour réussie : Option désactivée.");
-            } else {
-                System.out.println("Action annulée : choix invalide.");
-            }
+            // Souscription à l'option payante
+            optionService.souscrireNouvelleOption(agentActuel, "Option Parking Partenaire", 15.0f);
+            
+            System.out.println("Mise à jour réussie : Option activée et enregistrée.");
+        } else if (action == 2) {
+            vSelectionne.setOptionRetour(null); 
+            vehiculeService.saveVehicule(vSelectionne);
+            System.out.println("Mise à jour réussie : Option désactivée.");
         }
+    } else if (choix != 0) {
+        System.out.println("Action annulée : choix invalide.");
     }
+}
 
     /**
      * Consulter l'historique des locations pour les véhicules de l'agent.
