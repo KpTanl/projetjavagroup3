@@ -10,7 +10,7 @@ import lombok.Data;
 
 @Entity
 @DiscriminatorValue("Agent")
-public abstract class Agent extends Utilisateur implements Commun {
+public abstract class Agent extends Utilisateur {
 
     // Options payantes souscrites par l'agent
     @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -114,23 +114,6 @@ public abstract class Agent extends Utilisateur implements Commun {
                 .average()
                 .orElse(0.0);
         return Math.round(moyenne * 100.0) / 100.0;
-    }
-
-    @Override
-    public Vehicule rechercherVehicule() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Vehicule FiltreVehicule() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void consulterProfilsAgents() {
-        // TODO Auto-generated method stub
     }
 
     public List<Vehicule> getVehiculesEnLocation() {

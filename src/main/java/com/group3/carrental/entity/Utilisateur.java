@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 @Table(name = "utilisateurs")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type")
-public abstract class Utilisateur extends Compte {
+public class Utilisateur extends Compte {
 
     private String nom;
     private String prenom;

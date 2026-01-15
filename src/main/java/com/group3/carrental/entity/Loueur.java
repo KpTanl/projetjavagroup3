@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @NoArgsConstructor
-public class Loueur extends Utilisateur implements Commun {
+public class Loueur extends Utilisateur {
 
     @Transient
     private List<Contrat> historiqueLocations;
@@ -33,35 +33,6 @@ public class Loueur extends Utilisateur implements Commun {
         super(id, nom, prenom, email, motDePasse, Role.Loueur);
         this.historiqueLocations = historiqueLocations;
         this.notesRecues = notesRecues;
-    }
-
-    @Override
-    public Vehicule rechercherVehicule() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Vehicule FiltreVehicule() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void consulterProfilsAgents() {
-        // TODO Auto-generated method stub
-    }
-
-    public NoteVehicule noterVehicule() {
-        return null;
-    }
-
-    public void choisirDate(List<Date> d) {
-
-    }
-
-    public void choisirAssurance(List<Assurance> a) {
-
     }
 
     public List<Parking> consulterParkingsParVille(String ville, List<Parking> catalogue) {
