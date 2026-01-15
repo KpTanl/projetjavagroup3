@@ -31,7 +31,7 @@ public class PrestataireEntretien implements Services {
         this.cataloguePrixE = new HashMap<>();
     }
 
-    // --- MÉTHODES DU DIAGRAMME ---
+  
 
     public void definirTarif(String modele, float prix) {
         this.cataloguePrixE.put(modele, prix);
@@ -41,7 +41,7 @@ public class PrestataireEntretien implements Services {
         System.out.println("Nettoyage du véhicule " + v.getModele() + " par " + this.nomSociete);
     }
 
-    // --- MÉTHODES DE L'INTERFACE SERVICES ---
+    
 
     @Override
     public void souscrire() {

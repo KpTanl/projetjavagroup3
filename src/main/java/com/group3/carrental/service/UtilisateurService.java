@@ -462,9 +462,8 @@ public class UtilisateurService {
         }
     }
 
-    /**
-     * Permet au loueur de sélectionner un parking partenaire pour le dépôt.
-     */
+    /*Permet au loueur de sélectionner un parking partenaire pour le dépôt. */
+    
     public Parking gererSelectionParkingPourLoueur() {
         List<Parking> tousLesParkings = parkingService.getAllParkings();
         List<String> villesDispo = Parking.getVillesDisponibles(tousLesParkings);

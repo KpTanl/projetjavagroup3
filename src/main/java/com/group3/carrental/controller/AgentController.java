@@ -50,10 +50,9 @@ public class AgentController {
     }
 
     /**
-     * Affiche le menu Agent et gère les choix.
-     * 
+     * Affiche le menu agent et gère les choix.
      * @param currentUser l'utilisateur courant
-     * @return le nouveau rôle après l'action (null si déconnexion)
+     * @return null si déconnexion, sinon 
      */
     public Utilisateur displayMenuAgent(Utilisateur currentUser) {
         if (!(currentUser instanceof Agent)) {
@@ -152,16 +151,14 @@ public class AgentController {
         return currentUser;
     }
 
-    /**
-     * Gérer les options de parking pour les véhicules de l'agent.
-     */
+    /*Gestion de l'option parking pour les véhicules de l'agent.*/
   public void gererOptionsParkingAgent(Utilisateur currentUser) {
     if (!(currentUser instanceof Agent)) {
         System.out.println("Erreur : Vous devez être un Agent.");
         return;
     }
 
-    // On déclare les variables manquantes
+    
     Agent agentActuel = (Agent) currentUser; 
     List<Vehicule> mesVehicules = vehiculeService.getVehiculesByAgentId(agentActuel.getId());
 
@@ -210,10 +207,7 @@ public class AgentController {
     }
 }
 
-    /**
-     * Consulter l'historique des locations pour les véhicules de l'agent.
-     * L'agent ne peut consulter que ses propres véhicules.
-     */
+    /*consulter l'historique des locations */
     public void consulterHistoriqueVehicules(Utilisateur currentUser) {
         if (!(currentUser instanceof Agent)) {
             System.out.println("Accès refusé : vous devez être un Agent.");
@@ -237,7 +231,7 @@ public class AgentController {
         int vehiculeId = sc.nextInt();
         sc.nextLine();
 
-        // Vérifier que le véhicule appartient à l'agent
+        // Vérifier que le véhicule appartient bien à l'agent
         Vehicule vehiculeChoisi = mesVehicules.stream()
                 .filter(v -> v.getId() == vehiculeId)
                 .findFirst()
@@ -272,9 +266,8 @@ public class AgentController {
         }
     }
 
-    /**
-     * Afficher les contrats de l'agent.
-     */
+    /*Afficher les contrats de l'agent*/
+
     private void afficherMesContrats(Utilisateur currentUser) {
         if (!(currentUser instanceof Agent agent)) {
             return;
@@ -344,7 +337,7 @@ public class AgentController {
     }
 
     private void menuOptionSignatureManuelle(Agent agent) {
-        final float PRIX_MENSUEL = 9.99f; // mets le prix demandé dans l'énoncé si vous en avez un
+        final float PRIX_MENSUEL = 9.99f; //prix
 
         boolean active = optionService.hasActiveOption(agent.getId(), OptionService.OPT_SIGNATURE_MANUELLE);
 
@@ -368,9 +361,7 @@ public class AgentController {
         }
     }
 
-    /**
-     * Gérer les options de l'agent.
-     */
+    /*Gérer les options de l'agent */
     private void gererMesOptions(Agent agent) {
         while (true) {
             System.out.println("\n--- GESTION DES OPTIONS ---");
@@ -402,9 +393,7 @@ public class AgentController {
         }
     }
 
-    /**
-     * Afficher les options souscrites par l'agent.
-     */
+    /* Afficher les options souscrites  */
     private void afficherOptionsAgent(Agent agent) {
         List<OptionPayanteAgent> options = optionService.getOptionsByAgent(agent);
         if (options.isEmpty()) {
@@ -419,9 +408,8 @@ public class AgentController {
         }
     }
 
-    /**
-     * Souscrire à une nouvelle option payante.
-     */
+    //nouvelle option payante.
+     
     private void souscrireOption(Agent agent) {
         System.out.println("\n--- SOUSCRIRE À UNE OPTION ---");
         System.out.println("Options disponibles :");
@@ -458,9 +446,7 @@ public class AgentController {
         System.out.println("\n✓ Option '" + type + "' souscrite avec succès pour " + prix + "€/mois.");
     }
 
-    /**
-     * Annuler une option payante existante.
-     */
+    /*resilier une option  */
     private void resilierOption(Agent agent) {
         afficherOptionsAgent(agent);
         System.out.println("\n--- RÉSILIER UNE OPTION ---");
@@ -473,11 +459,9 @@ public class AgentController {
         System.out.println("\n✓ Option résiliée (si elle existait).");
     }
 
-    /**
-     * Commander un entretien ponctuel pour un véhicule.
-     */
+    /*Commander un entretien ponctuel pour un véhicule.   */
     private void commanderEntretienPonctuel(Agent agent) {
-        // Recharge l'agent depuis la base pour ouvrir une session propre
+        
         Agent agentComplet = (Agent) utilisateurRepository.findById(agent.getId()).orElse(null);
 
         if (agentComplet == null) {
@@ -485,7 +469,7 @@ public class AgentController {
             return;
         }
 
-        // 1. Sélection du véhicule de l'agent
+        // Sélection du véhicule de l'agent
         List<Vehicule> sesVehicules = agentComplet.getVehiculesEnLocation();
         if (sesVehicules.isEmpty()) {
             System.out.println("Vous n'avez pas de véhicules enregistrés.");
@@ -505,7 +489,7 @@ public class AgentController {
             return;
         }
 
-        // 2. Sélection de l'entreprise (Prestataire)
+        //Sélection de l'entreprise (Prestataire)
         List<PrestataireEntretien> prestataires = prestataireRepository.findAll();
         if (prestataires.isEmpty()) {
             System.out.println("Aucun prestataire d'entretien disponible.");
@@ -525,7 +509,7 @@ public class AgentController {
             return;
         }
 
-        // 3. Appel au service
+        // service
         optionService.commanderEntretien(agentComplet, sesVehicules.get(vIdx - 1), prestataires.get(eIdx - 1));
     }
 }

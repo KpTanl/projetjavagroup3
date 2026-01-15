@@ -19,11 +19,7 @@ public class VehiculeService {
     Scanner scanner = new Scanner(System.in);
     private final VehiculeRepository vehiculeRepository;
 
-    /**
-     * Formate les dates disponibles en affichant les plages continues.
-     * Si les dates ne sont pas continues, affiche plusieurs plages.
-     * Exemple: "2026-01-01 à 2026-01-15, 2026-02-01 à 2026-02-15"
-     */
+    //pour les dates (leur format)
     public static String formaterDisponibilites(List<LocalDate> dates) {
         if (dates == null || dates.isEmpty()) {
             return "Aucune";
@@ -43,7 +39,7 @@ public class VehiculeService {
             if (current.equals(finPlage.plusDays(1))) {
                 finPlage = current;
             } else {
-                // Sinon, terminer la plage précédente et en commencer une nouvelle
+                // else, terminer la plage précédente et en commencer une nouvelle
                 int joursPlage = (int) java.time.temporal.ChronoUnit.DAYS.between(debutPlage, finPlage) + 1;
                 totalJours += joursPlage;
                 if (sb.length() > 0) {
@@ -111,8 +107,7 @@ public class VehiculeService {
     }
 
     public void afficherVehiculesDisponibles() {
-        // Liste vide = disponible à tout moment
-        // Exclure les véhicules avec suppression programmée
+        // Exclure les véhicules avec suppression prevu 
         List<Vehicule> disponibles = vehiculeRepository.findByEtat(Vehicule.EtatVehicule.Non_loué)
                 .stream()
                 .filter(v -> v.getDateSuppressionPrevue() == null)
@@ -138,7 +133,7 @@ public class VehiculeService {
                 } else {
                     System.out.println("Agent: Non assigné");
                 }
-                // Afficher les dates ou "Toujours disponible"
+                // Afficher les dates sinon "Toujours disponible"
                 if (v.getDatesDisponibles().isEmpty()) {
                     System.out.println("Disponibilité: Toujours disponible");
                 } else {
@@ -299,9 +294,6 @@ public class VehiculeService {
         }
     }
 
-    /**
-     * Sauvegarde les modifications d'un véhicule (utile pour l'option parking).
-     */
     public void save(Vehicule vehicule) {
         vehiculeRepository.save(vehicule);
     }
@@ -343,7 +335,6 @@ public class VehiculeService {
     }
 
     public void saveVehicule(Vehicule v) {
-        // vehiculeRepository est normalement déjà injecté dans ton service
         vehiculeRepository.save(v);
     }
 }

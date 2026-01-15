@@ -42,12 +42,10 @@ public class LoueurController {
         this.utilisateurService = utilisateurService;
     }
 
-    /**
-     * Affiche le menu Loueur et gère les choix.
-     * 
+    /** Affiche le menu Loueur et gère les choix.
      * @param currentUser l'utilisateur courant
-     * @return null si déconnexion, sinon currentUser
-     */
+     * @return null si déconnexion, sinon currentUser */
+
     public Utilisateur displayMenuLoueur(Utilisateur currentUser) {
         // Vérifier s'il y a des véhicules à rendre
         if (currentUser instanceof Loueur loueur) {
@@ -167,7 +165,7 @@ public class LoueurController {
             // Si liste vide = toujours disponible, sinon vérifier les dates
             LocalDate dateDebut = null;
             if (datesDisponibles.isEmpty()) {
-                // Véhicule toujours disponible - demander la date souhaitée
+                // Véhicule toujours disponible il faut demander la date souhaitée
                 System.out.println("\nCe véhicule est toujours disponible.");
                 System.out.print("Saisissez la date de début de location (format: AAAA-MM-JJ) : ");
                 String dateInput = sc.nextLine();
@@ -206,7 +204,7 @@ public class LoueurController {
             int nbJours = sc.nextInt();
             sc.nextLine();
 
-            // Vérifier que TOUTES les dates de la période de location sont disponibles
+            // Vérifie que toutes les dates de la période de location sont disponibles
             if (!datesDisponibles.isEmpty()) {
                 LocalDate dateFinLocation = dateDebut.plusDays(nbJours - 1);
                 List<LocalDate> datesManquantes = new java.util.ArrayList<>();
@@ -253,7 +251,7 @@ public class LoueurController {
             Assurance assuranceChoisie = assurances.get(choixAssurance - 1);
             double prixAssurance = assuranceService.calculerPrix(assuranceChoisie, nbJours);
 
-            // OPTION PARKING
+            // option parking
             Parking parkingSelectionne = null;
             System.out.print("\nVoulez-vous choisir un parking pour le dépôt ? (O/N) : ");
             String choixParking = sc.nextLine();

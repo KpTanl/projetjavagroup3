@@ -59,13 +59,13 @@ public class Parking implements Services {
     }
 
     public boolean ajouterVehicule(Vehicule v) {
-        // 1. On vérifie d'abord si l'option est bien activée sur le véhicule
+        //On vérifie d'abord si l'option est bien activée sur le véhicule
         if (v.getOptionRetour() != Vehicule.OptionRetour.retour_parking) {
             System.out.println("Erreur : Impossible d'associer ce véhicule. L'option parking n'est pas activée !");
             return false;
         }
 
-        // 2. On vérifie la capacité du parking
+        // On vérifie la capacité du parking
         if (vehiculesGares.size() < nb_places_max) {
             vehiculesGares.add(v);
             v.setParkingPartenaire(this);

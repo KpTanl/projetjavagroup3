@@ -22,7 +22,7 @@ public class Utilisateur extends Compte {
     protected double latitudeHabitation;
     protected double longitudeHabitation;
 
-    // Parrainage (Referral System)
+    // Parrainage 
     @ManyToOne
     @JoinColumn(name = "parrain_id")
     protected Utilisateur parrain;

@@ -6,15 +6,7 @@ import lombok.NoArgsConstructor;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Entité Assurance
- * 
- * Grille tarifaire stockée sous format: "TYPE_VEHICULE:PRIX" ou "TYPE_VEHICULE-MODELE:PRIX"
- * Exemple de nomenclature:
- * - "Voiture:30.0" = 30€/jour pour toutes les voitures
- * - "Voiture-Clio:28.0" = 28€/jour spécifique pour Renault Clio
- * - "Moto:45.0" = 45€/jour pour toutes les motos
- */
+
 @Data
 @NoArgsConstructor
 @Entity
@@ -27,7 +19,7 @@ public class Assurance {
     private String nom;
     
     @Column(length = 1000)
-    private String grilleTarifaire; // Format: "TYPE:PRIX,TYPE-MODELE:PRIX"
+    private String grilleTarifaire; 
     
     private double prixParJour;
 
@@ -37,18 +29,13 @@ public class Assurance {
         this.prixParJour = prixParJour;
     }
 
-    /**
-     * Importer la grille tarifaire depuis un fichier/API
-     * Format attendu: "Voiture:30.0,Moto:45.0,Voiture-Clio:28.0"
-     */
+    
     public void importerGrille(String grilleFormatee) {
         this.grilleTarifaire = grilleFormatee;
     }
 
-    /**
-     * Calculer le prix pour un véhicule selon son type et modèle
-     * Cherche d'abord TYPE-MODELE, sinon TYPE, sinon prix par défaut
-     */
+    /*Calculer le prix pour un véhicule selon son type et modèle*/
+    
     public double calculerPrixTotal(Vehicule vehicule, int nbJours) {
         double prixJournalier = getPrixPourVehicule(vehicule);
         return prixJournalier * nbJours;

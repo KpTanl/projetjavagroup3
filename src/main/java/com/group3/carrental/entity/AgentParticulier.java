@@ -15,7 +15,7 @@ public class AgentParticulier extends Agent {
             List<NoteAgent> notesRecues, LocalDate dateRecuFacture,
             double latitudeHabitation, double longitudeHabitation) { // 1. Ajout ici
 
-        // 2. Transmission au constructeur de la classe Agent
+       
         super(id, nom, prenom, email, motDePasse, notesRecues, dateRecuFacture,
                 latitudeHabitation, longitudeHabitation);
     }

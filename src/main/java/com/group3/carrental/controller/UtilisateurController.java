@@ -532,7 +532,7 @@ public class UtilisateurController {
         sc.nextLine();
 
         try {
-            menuDiscussion(currentUser, contratId); // <-- réutilise ton menu privé existant
+            menuDiscussion(currentUser, contratId);
         } catch (Exception e) {
             System.out.println("Erreur: " + e.getMessage());
         }

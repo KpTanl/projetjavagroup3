@@ -16,7 +16,7 @@ public class Loueur extends Utilisateur {
     @Transient
     private List<Contrat> historiqueLocations;
 
-    // EAGER: charger immediatement pour eviter LazyInitializationException
+    
     @OneToMany(mappedBy = "loueur", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<NoteLoueur> notesRecues;
 
@@ -59,7 +59,6 @@ public class Loueur extends Utilisateur {
     }
 
     public void choisirEtDeposer(Vehicule v, Parking p) {
-        // L'assignation se fait via la méthode de l'objet Parking
         boolean succes = p.ajouterVehicule(v);
 
         if (succes) {

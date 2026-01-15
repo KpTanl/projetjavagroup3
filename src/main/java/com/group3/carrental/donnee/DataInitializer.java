@@ -74,9 +74,9 @@ public class DataInitializer implements CommandLineRunner {
                 this.prestataireRepository = prestataireRepository;
         }
 
-        /**
-         * Ajoute disponibilité à un véhicule 
-         */
+        
+         //Ajoute disponibilité à un véhicule 
+         
         private void ajouterDisponibilite60Jours(Vehicule v) {
                 LocalDate today = LocalDate.now();
                 LocalDate endDate = today.plusDays(60);
@@ -370,9 +370,7 @@ public class DataInitializer implements CommandLineRunner {
 
                 System.out.println("5 Contrats démo terminés créés.");
 
-                // ========== NoteVehicule (7 paramètres requis : proprete, usure, confort,
-                // commentaire,
-                // vehicule, loueur, contrat) ==========
+                // NoteVehicule 
                 NoteVehicule noteV1 = new NoteVehicule(4, 5, 4, "Très bon véhicule", v1, loueur1, contrat1);
                 noteVehiculeRepository.save(noteV1);
 
@@ -387,7 +385,7 @@ public class DataInitializer implements CommandLineRunner {
 
                 System.out.println("4 Notes véhicule démo créées.");
 
-                // ========== Entreprises ==========
+                // Entreprises
                 Entreprise e1 = new Entreprise(0, "cleanauto@example.com", "pass123", "CleanAuto", "12345678900011",
                                 "Nettoyage intérieur/extérieur");
                 Entreprise e2 = new Entreprise(0, "fastrepair@example.com", "pass123", "FastRepair", "98765432100022",
@@ -410,7 +408,7 @@ public class DataInitializer implements CommandLineRunner {
                 System.out.println("   - 5 contrats démo terminés");
                 System.out.println("   - 4 notes véhicule + 2 notes agent");
 
-                // ========== Options Payantes Agent (Démo) ==========
+                // Options Payantes Agent 
                 OptionPayanteAgent opt1 = new OptionPayanteAgent("Mise en avant premium", 50.0f, agentPro1);
                 opt1.souscrire(); // Active l'option
                 optionPayanteAgentRepository.save(opt1);
@@ -421,7 +419,7 @@ public class DataInitializer implements CommandLineRunner {
 
                 System.out.println("   - 2 options payantes créées pour agentPro1");
 
-                // ========== Prestataires d'Entretien ==========
+                // Prestataires d'Entretien 
                 PrestataireEntretien p1 = new PrestataireEntretien("12345678900011", "CleanAuto",
                                 "Nettoyage intérieur/extérieur");
                 PrestataireEntretien p2 = new PrestataireEntretien("98765432100022", "FastRepair",

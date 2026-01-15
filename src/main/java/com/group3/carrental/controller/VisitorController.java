@@ -25,7 +25,7 @@ public class VisitorController {
     }
 
     /**
-     * Résultat du menu Visitor.
+     * Résultat du menu du Visiteur.
      */
     public static class VisitorResult {
         public Utilisateur user;
@@ -37,12 +37,8 @@ public class VisitorController {
         }
     }
 
-    /**
-     * Affiche le menu Visitor et gère les choix.
-     * 
-     * @return VisitorResult contenant l'utilisateur connecté (ou null) et si on
-     *         quitte l'app
-     */
+    /** Affiche le menu Visitor et gère les choix.
+    @return  */
     public VisitorResult displayMenuVisitor() {
         System.out.println("\nMenu de Visitor : ");
         System.out.println("1. Se connecter");
@@ -97,7 +93,7 @@ public class VisitorController {
                 newUser.setMotDePasse(userMotDePasse);
                 newUser.setRole(role);
 
-                // Parrainage (Referral)
+                // Parrainage 
                 System.out.println("Email du parrain (laisser vide si aucun) : ");
                 String emailParrain = sc.nextLine().trim();
                 if (!emailParrain.isEmpty()) {

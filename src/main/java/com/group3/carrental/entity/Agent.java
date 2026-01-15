@@ -16,7 +16,7 @@ public abstract class Agent extends Utilisateur {
     @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<OptionPayanteAgent> optionsSouscrites = new ArrayList<>();
 
-    // EAGER: charger immediatement pour eviter LazyInitializationException
+    
     @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<NoteAgent> notesRecues;
 
@@ -42,7 +42,7 @@ public abstract class Agent extends Utilisateur {
             LocalDate dateRecuFacture2, double latitudeHabitation, double longitudeHabitation) { // <--- Ajoute les deux
                                                                                                  // paramètres ici
 
-        // Maintenant on peut les passer au parent (Utilisateur)
+        
         super(id, nom, prenom, email, motDePasse, Role.Agent, latitudeHabitation, longitudeHabitation);
 
         this.notesRecues = notesRecues;
@@ -70,7 +70,7 @@ public abstract class Agent extends Utilisateur {
         note.setAgent(this);
     }
 
-    // Méthode pour activer l'option sur UN véhicule
+    // Méthode pour activer l'option sur un véhicule
     public void activerOptionParkingVehicule(Vehicule v) {
         if (v != null && v.getAgentProprietaire() != null && v.getAgentProprietaire().getId() == this.getId()) {
             // Accès via la classe Vehicule
@@ -81,14 +81,14 @@ public abstract class Agent extends Utilisateur {
         }
     }
 
-    // Méthode pour activer l'option sur PLUSIEURS véhicules (en masse)
+    
     public void activerOptionParkingEnMasse(List<Vehicule> vehiculesSelectionnes) {
         for (Vehicule v : vehiculesSelectionnes) {
             activerOptionParkingVehicule(v);
         }
     }
 
-    // Permet d'activer OU de désactiver selon le besoin
+    // Permet d'activer ou de désactiver l'option parking
     public void configurerOptionParking(Vehicule v, boolean activer) {
         if (v != null && v.getAgentProprietaire() != null && v.getAgentProprietaire().getId() == this.getId()) {
             if (activer) {

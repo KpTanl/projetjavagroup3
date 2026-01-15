@@ -10,8 +10,6 @@ import java.util.List;
 @Repository
 public interface ParkingRepository extends JpaRepository<Parking, Long> {
 
-    // On utilise @Query pour dire explicitement à Spring quelle colonne utiliser
-    // Attention : p.VilleP doit correspondre EXACTEMENT à l'orthographe dans ton entité
-    @Query("SELECT p FROM Parking p WHERE p.VilleP = :ville")
+    @Query("SELECT p FROM Parking p WHERE p.VilleP = :ville" )
     List<Parking> findByVilleP(@Param("ville") String ville);
 }

@@ -148,8 +148,7 @@ public class ContratService {
     }
 
     /**
-     * Récupérer les contrats à rendre pour un loueur (date de fin passée, statut !=
-     * Rendu)
+     * Récupérer les contrats à rendre pour un loueur
      */
     public List<Contrat> getContratsARendre(int loueurId) {
         Date maintenant = new Date();
