@@ -43,7 +43,7 @@ public class Vehicule {
     private EtatVehicule etat;
 
     public enum EtatVehicule {
-        Loué, Non_loué, En_Entretien
+        Loué, Non_loué,Indisponible, En_Entretien
     }
 
     @Enumerated(EnumType.STRING)
@@ -67,6 +67,7 @@ public class Vehicule {
 
     private LocalDate dateSuppressionPrevue;
 
+    
     public Vehicule(TypeVehicule type, String marque, String modele, String couleur, EtatVehicule etat,
             String rueLocalisation, String cPostalLocalisation, String villeLocalisation, double latitudeVehicule,
             double longitudeVehicule) {
