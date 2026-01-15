@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 @Table(name = "utilisateurs")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type")
-public class Utilisateur extends Compte {
+public abstract class Utilisateur extends Compte {
 
     private String nom;
     private String prenom;
@@ -66,6 +66,11 @@ public class Utilisateur extends Compte {
         if (motDePasse != null && !motDePasse.isEmpty()) {
             this.motDePasse = motDePasse;
         }
+    }
+
+    @Override
+    public boolean seConnecter(String motDePasseSaisi) {
+        return this.motDePasse != null && this.motDePasse.equals(motDePasseSaisi);
     }
 
 }
