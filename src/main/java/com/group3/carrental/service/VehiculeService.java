@@ -288,4 +288,8 @@ public class VehiculeService {
             });
         }
     }
+    public void saveVehicule(Vehicule v) {
+    // vehiculeRepository est normalement déjà injecté dans ton service
+    vehiculeRepository.save(v);
+}
 }

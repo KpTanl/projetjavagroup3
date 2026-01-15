@@ -25,6 +25,6 @@ public class ParkingService {
 
 public List<Parking> getParkingsParVille(String VilleP) {
     return parkingRepository.findByVilleP(VilleP); 
-    // Ou filtrez manuellement la liste si vous n'avez pas de repository
+
 }
 }
